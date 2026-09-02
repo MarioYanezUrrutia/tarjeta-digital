@@ -1,0 +1,43 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyc
+*.pyo
+*.pyd
+env/
+venv/
+.venv/
+ENV/
+env.bak/
+venv.bak/
+
+# Django
+db.sqlite3
+media/
+*.log
+
+# Node
+node_modules/
+dist/
+build/
+
+# Env files
+.env
+.env.local
+.env.*.local
+
+# IDEs
+.idea/
+.vscode/
+
+# Other
+.DS_Store
+.claude
+
+# Ignore local backend venv
+backend/.venv/
+
+# Ignore frontend node_modules and build
+frontend/node_modules/
+frontend/dist/
+

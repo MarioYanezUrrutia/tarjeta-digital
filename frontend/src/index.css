@@ -1,0 +1,9 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* @theme block placeholder for Banexa-style theme */
+/* @theme {
+  --color-primary: #0ea5a4;
+  --color-muted: #6b7280;
+} */

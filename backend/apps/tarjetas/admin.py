@@ -10,8 +10,8 @@ class ClienteAdmin(admin.ModelAdmin):
 
 @admin.register(Tarjeta)
 class TarjetaAdmin(admin.ModelAdmin):
-    list_display = ('id', 'slug', 'cliente', 'plan', 'estado', 'creado')
-    list_filter = ('plan', 'estado')
+    list_display = ('id', 'slug', 'cliente', 'plan', 'plantilla', 'estado', 'creado')
+    list_filter = ('plan', 'plantilla', 'estado')
     search_fields = ('slug', 'nombre_mostrado', 'empresa')
 
 

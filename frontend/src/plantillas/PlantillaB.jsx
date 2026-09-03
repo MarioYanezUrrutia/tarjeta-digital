@@ -8,9 +8,9 @@ function BotonAccion({ href, Icon, label }) {
       href={href}
       target={href.startsWith('http') ? '_blank' : undefined}
       rel="noreferrer"
-      className="flex items-center gap-3 w-full rounded-xl bg-[#21242e] px-4 py-3 text-white transition hover:bg-[#282c38] hover:ring-1 hover:ring-[#2dd4bf]"
+      className="flex w-full items-center gap-3 rounded-full bg-white/[.18] px-4 py-3 text-white backdrop-blur-sm transition hover:bg-white/[.28]"
     >
-      <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#2dd4bf1a] text-[#2dd4bf]">
+      <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-white/20 text-white">
         <Icon />
       </span>
       <span className="text-sm font-medium">{label}</span>
@@ -18,7 +18,7 @@ function BotonAccion({ href, Icon, label }) {
   )
 }
 
-export default function PlantillaC({ tarjeta }) {
+export default function PlantillaB({ tarjeta }) {
   const {
     imagen, nombre_mostrado, cargo_rubro, empresa, eslogan,
     sobre_texto, direccion, horario, mostrar_sobre,
@@ -28,27 +28,33 @@ export default function PlantillaC({ tarjeta }) {
   const { contactos, redes, mostrarUbicacionSeccion, mostrarProductosSeccion } = useDatosTarjeta(tarjeta)
 
   return (
-    <div className="min-h-screen bg-[#16181f] text-white">
+    <div
+      className="min-h-screen text-white"
+      style={{
+        background: 'linear-gradient(150deg, #6a5cff 0%, #9b4dff 42%, #ff5c8a 100%)',
+        fontFamily: "'Poppins', ui-sans-serif, system-ui, sans-serif",
+      }}
+    >
       <div className="mx-auto flex max-w-md flex-col gap-6 px-5 py-10">
         <header className="flex flex-col items-center text-center">
           {imagen ? (
             <img
               src={imagen}
               alt={nombre_mostrado || ''}
-              className="h-24 w-24 rounded-full border-2 border-[#2dd4bf] object-cover"
+              className="h-24 w-24 rounded-full border-[3px] border-white object-cover"
             />
           ) : (
-            <div className="flex h-24 w-24 items-center justify-center rounded-full border-2 border-[#2dd4bf] bg-[#21242e] text-2xl font-semibold text-[#2dd4bf]">
+            <div className="flex h-24 w-24 items-center justify-center rounded-full border-[3px] border-white bg-white/20 text-2xl font-semibold text-white">
               {iniciales(nombre_mostrado)}
             </div>
           )}
-          <h1 className="mt-4 text-xl font-semibold">{nombre_mostrado}</h1>
+          <h1 className="mt-4 text-[23px] font-semibold">{nombre_mostrado}</h1>
           {(cargo_rubro || empresa) && (
-            <p className="text-sm text-gray-300">
+            <p className="text-sm text-white/70">
               {[cargo_rubro, empresa].filter(Boolean).join(' · ')}
             </p>
           )}
-          {eslogan && <p className="mt-2 text-sm italic text-gray-400">{eslogan}</p>}
+          {eslogan && <p className="mt-2 text-sm text-white/70">{eslogan}</p>}
         </header>
 
         {contactos.length > 0 && (
@@ -70,34 +76,34 @@ export default function PlantillaC({ tarjeta }) {
         {/* TODO: generar y descargar archivo .vcf real con los datos de la tarjeta */}
         <button
           type="button"
-          className="flex items-center justify-center gap-2 rounded-xl border border-[#2dd4bf] px-4 py-3 text-sm font-medium text-[#2dd4bf] transition hover:bg-[#2dd4bf1a]"
+          className="flex items-center justify-center gap-2 rounded-full bg-white px-4 py-3 text-sm font-semibold text-[#7b3ff2] transition hover:bg-white/90"
         >
           <IconContactCard />
           Guardar contacto
         </button>
 
         {mostrar_sobre && sobre_texto && (
-          <section className="rounded-xl bg-[#21242e] p-4">
-            <h2 className="mb-2 flex items-center gap-2 text-sm font-semibold text-[#2dd4bf]">
+          <section className="rounded-2xl border border-white/20 bg-white/10 p-4 backdrop-blur-sm">
+            <h2 className="mb-2 flex items-center gap-2 text-sm font-semibold text-white">
               <IconUser /> Sobre {tarjeta.tipo === 'negocio' ? 'nosotros' : 'mí'}
             </h2>
-            <p className="text-sm leading-relaxed text-gray-300">{sobre_texto}</p>
+            <p className="text-sm leading-relaxed text-white/90">{sobre_texto}</p>
           </section>
         )}
 
         {mostrarUbicacionSeccion && (
-          <section className="rounded-xl bg-[#21242e] p-4">
-            <h2 className="mb-2 flex items-center gap-2 text-sm font-semibold text-[#2dd4bf]">
+          <section className="rounded-2xl border border-white/20 bg-white/10 p-4 backdrop-blur-sm">
+            <h2 className="mb-2 flex items-center gap-2 text-sm font-semibold text-white">
               <IconPin /> Ubicación
             </h2>
-            {direccion && <p className="text-sm text-gray-300">{direccion}</p>}
-            {horario && <p className="text-sm text-gray-400">{horario}</p>}
+            {direccion && <p className="text-sm text-white/90">{direccion}</p>}
+            {horario && <p className="text-sm text-white/70">{horario}</p>}
             {direccion && (
               <a
                 href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(direccion)}`}
                 target="_blank"
                 rel="noreferrer"
-                className="mt-3 flex items-center justify-center gap-2 rounded-lg bg-[#2dd4bf] px-4 py-2 text-sm font-medium text-[#16181f] transition hover:bg-[#25b8a5]"
+                className="mt-3 flex items-center justify-center gap-2 rounded-full bg-white px-4 py-2 text-sm font-semibold text-[#7b3ff2] transition hover:bg-white/90"
               >
                 <IconMap /> Cómo llegar
               </a>
@@ -107,19 +113,19 @@ export default function PlantillaC({ tarjeta }) {
 
         {mostrarProductosSeccion && (
           <section className="flex flex-col gap-3">
-            <h2 className="text-sm font-semibold text-[#2dd4bf]">Productos y servicios</h2>
+            <h2 className="text-sm font-semibold text-white">Productos y servicios</h2>
             {productos.map((p) => (
-              <div key={p.orden + p.nombre} className="flex gap-3 rounded-xl bg-[#21242e] p-3">
+              <div key={p.orden + p.nombre} className="flex gap-3 rounded-2xl border border-white/20 bg-white/10 p-3 backdrop-blur-sm">
                 {p.imagen && (
-                  <img src={p.imagen} alt={p.nombre} className="h-16 w-16 shrink-0 rounded-lg object-cover" />
+                  <img src={p.imagen} alt={p.nombre} className="h-16 w-16 shrink-0 rounded-xl object-cover" />
                 )}
                 <div className="min-w-0">
-                  <p className="truncate text-sm font-medium">{p.nombre}</p>
+                  <p className="truncate text-sm font-medium text-white">{p.nombre}</p>
                   {p.caracteristicas && (
-                    <p className="text-xs text-gray-400">{p.caracteristicas}</p>
+                    <p className="text-xs text-white/70">{p.caracteristicas}</p>
                   )}
                   {p.detalle && (
-                    <p className="mt-1 text-xs text-gray-300">{p.detalle}</p>
+                    <p className="mt-1 text-xs text-white/90">{p.detalle}</p>
                   )}
                 </div>
               </div>

@@ -38,11 +38,21 @@ class Tarjeta(models.Model):
         ('cortada', 'Cortada'),
     ]
 
+    # Valores válidos para la piel visual de la página pública (Fase A.3).
+    # 'default' se mantiene como alias histórico de 'C' para no romper
+    # tarjetas creadas antes de que este campo tuviera choices.
+    PLANTILLA_CHOICES = [
+        ('A', 'A — Elegante'),
+        ('B', 'B — Moderna'),
+        ('C', 'C — Link en bio'),
+        ('default', 'default (alias de C)'),
+    ]
+
     cliente = models.ForeignKey('Cliente', on_delete=models.CASCADE, related_name='tarjetas')
     tipo = models.CharField(max_length=32, choices=TIPO_CHOICES)
     plan = models.CharField(max_length=32, choices=PLAN_CHOICES)
     slug = models.SlugField(max_length=255, unique=True)
-    plantilla = models.CharField(max_length=128, default='default')
+    plantilla = models.CharField(max_length=32, choices=PLANTILLA_CHOICES, default='C')
     estado = models.CharField(max_length=32, choices=ESTADO_CHOICES, default='borrador')
     creado = models.DateTimeField(auto_now_add=True)
 

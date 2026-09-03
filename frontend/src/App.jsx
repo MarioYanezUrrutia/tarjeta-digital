@@ -1,21 +1,13 @@
-import React, {useEffect, useState} from 'react'
+import React from 'react'
+import { Route, Routes } from 'react-router-dom'
+import Home from './pages/Home'
+import TarjetaPublica from './pages/TarjetaPublica'
 
-export default function App(){
-  const [status, setStatus] = useState('loading')
-
-  useEffect(()=>{
-    fetch(import.meta.env.VITE_API_BASE + '/health/')
-      .then(r=>r.json())
-      .then(d=>setStatus(d.status))
-      .catch(()=>setStatus('error'))
-  },[])
-
+export default function App() {
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50">
-      <div className="p-6 bg-white rounded shadow">
-        <h1 className="text-xl font-semibold mb-2">Tarjeta Digital</h1>
-        <p>API health: {status}</p>
-      </div>
-    </div>
+    <Routes>
+      <Route path="/" element={<Home />} />
+      <Route path="/t/:slug" element={<TarjetaPublica />} />
+    </Routes>
   )
 }

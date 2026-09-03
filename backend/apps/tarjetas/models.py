@@ -38,7 +38,7 @@ class Tarjeta(models.Model):
         ('cortada', 'Cortada'),
     ]
 
-    cliente = models.ForeignKey('tarjetas.Cliente' if False else 'apps.tarjetas.Cliente', on_delete=models.CASCADE, related_name='tarjetas')
+    cliente = models.ForeignKey('Cliente', on_delete=models.CASCADE, related_name='tarjetas')
     tipo = models.CharField(max_length=32, choices=TIPO_CHOICES)
     plan = models.CharField(max_length=32, choices=PLAN_CHOICES)
     slug = models.SlugField(max_length=255, unique=True)
@@ -111,13 +111,15 @@ class Tarjeta(models.Model):
 
 
 class Producto(models.Model):
-    tarjeta = models.ForeignKey('apps.tarjetas.Tarjeta', on_delete=models.CASCADE, related_name='productos')
+    tarjeta = models.ForeignKey('Tarjeta', on_delete=models.CASCADE, related_name='productos')
+    imagen = models.ImageField(upload_to='productos/', null=True, blank=True)
     nombre = models.CharField(max_length=255)
-    descripcion = models.TextField(blank=True, null=True)
-    precio = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
-    imagen = models.ImageField(upload_to='productos/', blank=True, null=True)
-    url = models.CharField(max_length=500, blank=True, null=True)
-    creado = models.DateTimeField(auto_now_add=True)
+    caracteristicas = models.TextField(null=True, blank=True)
+    detalle = models.TextField(null=True, blank=True)
+    orden = models.PositiveIntegerField(default=0)
+
+    class Meta:
+        ordering = ['orden']
 
     def __str__(self):
         return self.nombre

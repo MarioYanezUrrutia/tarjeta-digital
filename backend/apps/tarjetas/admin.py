@@ -17,5 +17,5 @@ class TarjetaAdmin(admin.ModelAdmin):
 
 @admin.register(Producto)
 class ProductoAdmin(admin.ModelAdmin):
-    list_display = ('id', 'nombre', 'tarjeta', 'precio', 'creado')
+    list_display = ('id', 'nombre', 'tarjeta', 'orden')
     search_fields = ('nombre',)

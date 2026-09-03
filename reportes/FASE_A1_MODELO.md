@@ -44,3 +44,29 @@ Archivos creados/modificados:
 - `backend/apps/tarjetas/admin.py` (nuevo)
 - `backend/apps/tarjetas/migrations/0001_initial.py` (nuevo)
 - `reportes/FASE_A1_MODELO.md` (este archivo)
+
+## Verificación (2026-09-02)
+
+Se corrigieron las referencias de ForeignKey que usaban rutas incorrectas
+(`'apps.tarjetas.Tarjeta'` / `'tarjetas.Cliente'` con workaround `if False else`)
+y se dejaron como referencias relativas simples dentro de la misma app:
+
+- `Tarjeta.cliente` → `models.ForeignKey('Cliente', ...)`
+- `Producto.tarjeta` → `models.ForeignKey('Tarjeta', ...)`
+
+La migración `0001_initial.py` se regeneró para reflejar estas referencias
+(`to='tarjetas.cliente'` / `to='tarjetas.tarjeta'`) y los cambios de campos de
+`Producto` (se removieron `descripcion`, `precio`, `url`, `creado`; se
+agregaron `caracteristicas`, `detalle`, `orden`, con `ordering = ['orden']`).
+
+Se verificó el modelo aplicando las migraciones contra Postgres y ejecutando
+las pruebas del modelo (creación de Cliente y hasta 3 Tarjetas asociadas, y
+rechazo de una 4ª Tarjeta por `ValidationError` desde `Tarjeta.clean()`).
+
+El script de verificación ad-hoc se convirtió en un test permanente de Django:
+`backend/apps/tarjetas/tests.py` (`TarjetaLimiteTestCase`), con 2 casos:
+
+- `test_permite_hasta_tres_tarjetas_por_cliente`
+- `test_rechaza_cuarta_tarjeta_por_cliente`
+
+Resultado: `python manage.py test apps.tarjetas` → `Ran 2 tests ... OK`.

@@ -75,6 +75,57 @@ def login_view(request):
 
 @api_view(['POST'])
 @permission_classes([AllowAny])
+def registro_view(request):
+    """POST /api/auth/registro/ — Body: {username, email, password,
+    password_confirm, primer_nombre, apellido_paterno, cod_tel_pais_wp,
+    cod_tel_wp, whatsapp_persona}. Reenvía tal cual a
+    POST {BANEXA_API_URL}/auth/registro/ — Banexa valida todo (contraseñas
+    coinciden, username/email/whatsapp únicos, nombres válidos);
+    tarjeta-digital solo hace de puente, no repite esas validaciones.
+
+    NO hace login automático tras registrar: el usuario recién creado queda
+    en Banexa (todo el ecosistema Kabymur) y debe iniciar sesión después con
+    /api/auth/login/ — igual que el propio registro de Banexa hoy. Se eligió
+    así por ser lo más simple y no duplicar la lógica de login acá.
+
+    Si Banexa devuelve 201: {ok: true, message: '...'}. Si devuelve 400 con
+    errores de validación (formato DRF: {"campo": ["mensaje", ...]}), se
+    reenvían tal cual bajo {ok: false, errors: {...}} con el mismo status,
+    para que el formulario los muestre campo por campo.
+    """
+    campos = (
+        'username', 'email', 'password', 'password_confirm',
+        'primer_nombre', 'apellido_paterno',
+        'cod_tel_pais_wp', 'cod_tel_wp', 'whatsapp_persona',
+    )
+    payload = {campo: request.data.get(campo) for campo in campos if request.data.get(campo) is not None}
+
+    try:
+        resp = banexa_post_publico('/auth/registro/', payload)
+    except requests.RequestException:
+        return Response(
+            {'ok': False, 'error': MENSAJE_BANEXA_NO_DISPONIBLE}, status=status.HTTP_502_BAD_GATEWAY
+        )
+
+    if resp.status_code == 201:
+        data = resp.json()
+        return Response({'ok': True, 'message': data.get('message')}, status=status.HTTP_201_CREATED)
+
+    try:
+        errores = resp.json()
+    except ValueError:
+        errores = {}
+
+    if resp.status_code == 400 and errores:
+        return Response({'ok': False, 'errors': errores}, status=status.HTTP_400_BAD_REQUEST)
+
+    return Response(
+        {'ok': False, 'error': MENSAJE_BANEXA_NO_DISPONIBLE}, status=status.HTTP_502_BAD_GATEWAY
+    )
+
+
+@api_view(['POST'])
+@permission_classes([AllowAny])
 def google_login_view(request):
     """POST /api/auth/google/ — Body: {"token": "..."} (access token de
     Google). Mismo manejo que login_view, reenviando a

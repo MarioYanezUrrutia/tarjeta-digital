@@ -23,6 +23,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'corsheaders',
     'apps.tarjetas',
+    'apps.cuentas',
 ]
 
 MIDDLEWARE = [
@@ -74,5 +75,14 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 # CORS
 CORS_ALLOWED_ORIGINS = env.list('CORS_ALLOWED_ORIGINS', default=['http://localhost:5173'])
 CSRF_TRUSTED_ORIGINS = env.list('CSRF_TRUSTED_ORIGINS', default=['http://localhost:5173'])
+# El login intermediario (apps.cuentas) guarda el token de Banexa en una
+# cookie httpOnly: el navegador debe poder enviarla en cross-origin
+# (frontend en :5173, backend en :8010), lo que exige credentials.
+CORS_ALLOW_CREDENTIALS = True
+
+# --- Banexa (bot_ia): backend de autenticación y banco de Terras ---
+# dev: http://localhost:8000/api. Producción: https://api.kabymur.com/api
+# (se setea en el .env de cada entorno, nunca hardcodeado acá).
+BANEXA_API_URL = env('BANEXA_API_URL', default='http://localhost:8000/api')
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'

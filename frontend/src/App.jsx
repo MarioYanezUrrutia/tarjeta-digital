@@ -6,6 +6,7 @@ import Home from './pages/Home'
 import Login from './pages/Login'
 import Panel from './pages/Panel'
 import Registro from './pages/Registro'
+import TarjetaEditor from './pages/TarjetaEditor'
 import TarjetaPublica from './pages/TarjetaPublica'
 
 export default function App() {
@@ -21,6 +22,14 @@ export default function App() {
           element={
             <RutaProtegida>
               <Panel />
+            </RutaProtegida>
+          }
+        />
+        <Route
+          path="/panel/tarjeta/:id"
+          element={
+            <RutaProtegida>
+              <TarjetaEditor />
             </RutaProtegida>
           }
         />

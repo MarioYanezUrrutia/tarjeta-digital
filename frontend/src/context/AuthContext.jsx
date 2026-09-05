@@ -1,27 +1,7 @@
 import React, { createContext, useContext, useEffect, useState } from 'react'
+import { llamarApi } from '../api/cliente'
 
 const AuthContext = createContext(null)
-
-const API_BASE = import.meta.env.VITE_API_BASE
-
-// Todas las llamadas a /api/auth/* van con credentials:'include': la cookie
-// httpOnly con el token de Banexa vive en el backend de tarjeta-digital
-// (puerto 8010), en un origen distinto al del frontend (5173) — sin esto el
-// navegador ni la manda ni la guarda.
-async function llamarApi(path, options = {}) {
-  const respuesta = await fetch(`${API_BASE}${path}`, {
-    credentials: 'include',
-    headers: { 'Content-Type': 'application/json' },
-    ...options,
-  })
-  let datos = null
-  try {
-    datos = await respuesta.json()
-  } catch {
-    datos = null
-  }
-  return { status: respuesta.status, datos }
-}
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null)

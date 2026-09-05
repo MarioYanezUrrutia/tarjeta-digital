@@ -40,3 +40,31 @@ class TarjetaPublicaSerializer(serializers.ModelSerializer):
             return []
         productos = obj.productos.all()
         return ProductoPublicoSerializer(productos, many=True, context=self.context).data
+
+
+class MisTarjetasSerializer(serializers.ModelSerializer):
+    """GET /api/mis-tarjetas/ y respuesta de POST /api/tarjetas/ — lo mínimo
+    para la pantalla de inicio del panel (lista de tarjetas + botón crear)."""
+
+    class Meta:
+        model = Tarjeta
+        fields = ['id', 'slug', 'nombre_mostrado', 'plan', 'estado', 'plantilla']
+
+
+class TarjetaPanelSerializer(serializers.ModelSerializer):
+    """GET/PATCH /api/tarjetas/<id>/ — todos los campos que edita el
+    formulario del panel. NO incluye `imagen` (foto queda para Panel-2) ni
+    `productos` (Panel-3): esta fase es solo texto/flags/plantilla."""
+
+    class Meta:
+        model = Tarjeta
+        fields = [
+            'id', 'slug', 'plan', 'estado', 'tipo', 'plantilla',
+            'nombre_mostrado', 'cargo_rubro', 'empresa', 'eslogan',
+            'telefono', 'whatsapp', 'email_contacto', 'sitio_web',
+            'instagram', 'facebook', 'linkedin', 'tiktok', 'youtube', 'x_twitter',
+            'sobre_texto', 'direccion', 'horario',
+            'mostrar_contacto', 'mostrar_redes', 'mostrar_sobre',
+            'mostrar_ubicacion', 'mostrar_productos',
+        ]
+        read_only_fields = ['id', 'slug', 'plan', 'estado']

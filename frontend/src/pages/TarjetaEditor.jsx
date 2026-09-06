@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { actualizarTarjeta, obtenerTarjeta } from '../api/tarjetas'
 import { PLANTILLAS_DISPONIBLES } from '../constants/tarjetas'
+import MiniPreviewPlantilla from '../plantillas/MiniPreviewPlantilla'
 
 const CAMPOS_TEXTO_IDENTIDAD = [
   { campo: 'nombre_mostrado', label: 'Nombre a mostrar' },
@@ -271,27 +272,28 @@ export default function TarjetaEditor() {
         </Seccion>
 
         <Seccion titulo="Plantilla">
-          <div className="flex flex-col gap-2">
-            {PLANTILLAS_DISPONIBLES.map((p) => (
-              <label
-                key={p.valor}
-                className={`flex cursor-pointer items-start gap-3 rounded-md border px-3 py-3 text-sm transition ${
-                  campos.plantilla === p.valor ? 'border-gray-900 bg-gray-50' : 'border-gray-200'
-                }`}
-              >
-                <input
-                  type="radio"
-                  name="plantilla"
-                  checked={campos.plantilla === p.valor}
-                  onChange={() => actualizar('plantilla', p.valor)}
-                  className="mt-0.5"
-                />
-                <span>
-                  <span className="block font-medium text-gray-900">{p.nombre}</span>
-                  <span className="block text-gray-500">{p.descripcion}</span>
-                </span>
-              </label>
-            ))}
+          <div className="flex flex-wrap justify-center gap-4 sm:justify-start">
+            {PLANTILLAS_DISPONIBLES.map((p) => {
+              const seleccionada = campos.plantilla === p.valor
+              return (
+                <button
+                  key={p.valor}
+                  type="button"
+                  onClick={() => actualizar('plantilla', p.valor)}
+                  aria-pressed={seleccionada}
+                  className={`flex flex-col items-center gap-2 rounded-xl p-2 transition ${
+                    seleccionada
+                      ? 'ring-2 ring-gray-900 ring-offset-2'
+                      : 'ring-1 ring-transparent hover:ring-gray-200'
+                  }`}
+                >
+                  <MiniPreviewPlantilla plantilla={p.valor} />
+                  <span className={`text-xs font-medium ${seleccionada ? 'text-gray-900' : 'text-gray-500'}`}>
+                    {p.nombre}
+                  </span>
+                </button>
+              )
+            })}
           </div>
         </Seccion>
 

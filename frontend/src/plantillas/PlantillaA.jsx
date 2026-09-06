@@ -2,7 +2,7 @@ import React from 'react'
 import { IconPin, IconUser, IconMap, IconContactCard } from './icons'
 import { iniciales, useDatosTarjeta } from './useDatosTarjeta'
 
-function BotonAccion({ href, Icon, label }) {
+function BotonAccion({ href, Icon, label, valor }) {
   return (
     <a
       href={href}
@@ -13,14 +13,17 @@ function BotonAccion({ href, Icon, label }) {
       <span className="flex h-9 w-9 shrink-0 items-center justify-center text-[#9aa0a6]">
         <Icon />
       </span>
-      <span className="text-sm font-medium">{label}</span>
+      <span className="flex min-w-0 flex-1 flex-col items-start text-left">
+        <span className="text-sm font-medium">{label}</span>
+        {valor && <span className="w-full truncate text-xs text-[#8a9096]">{valor}</span>}
+      </span>
     </a>
   )
 }
 
 export default function PlantillaA({ tarjeta }) {
   const {
-    imagen, nombre_mostrado, cargo_rubro, empresa, eslogan,
+    imagen, nombre_mostrado, cargo_rubro, profesion, empresa, eslogan,
     sobre_texto, direccion, horario, mostrar_sobre,
     productos,
   } = tarjeta
@@ -35,17 +38,17 @@ export default function PlantillaA({ tarjeta }) {
             <img
               src={imagen}
               alt={nombre_mostrado || ''}
-              className="h-24 w-24 rounded-full border border-[#d7dade] object-cover"
+              className="h-32 w-32 rounded-full border border-[#d7dade] object-cover"
             />
           ) : (
-            <div className="flex h-24 w-24 items-center justify-center rounded-full border border-[#d7dade] bg-[#f6f7f8] text-2xl font-medium text-[#6b7177]">
+            <div className="flex h-32 w-32 items-center justify-center rounded-full border border-[#d7dade] bg-[#f6f7f8] text-3xl font-medium text-[#6b7177]">
               {iniciales(nombre_mostrado)}
             </div>
           )}
           <h1 className="mt-4 text-[22px] font-medium">{nombre_mostrado}</h1>
-          {(cargo_rubro || empresa) && (
+          {(profesion || cargo_rubro || empresa) && (
             <p className="text-sm text-[#6b7177]">
-              {[cargo_rubro, empresa].filter(Boolean).join(' · ')}
+              {[profesion, cargo_rubro, empresa].filter(Boolean).join(' · ')}
             </p>
           )}
           {eslogan && <p className="mt-2 text-sm text-[#8a9096]">{eslogan}</p>}
@@ -56,7 +59,7 @@ export default function PlantillaA({ tarjeta }) {
         {contactos.length > 0 && (
           <section className="flex flex-col gap-3">
             {contactos.map((c) => (
-              <BotonAccion key={c.key} href={c.href} Icon={c.Icon} label={c.label} />
+              <BotonAccion key={c.key} href={c.href} Icon={c.Icon} label={c.label} valor={c.valor} />
             ))}
           </section>
         )}

@@ -2,7 +2,7 @@ import React from 'react'
 import { IconPin, IconUser, IconMap, IconContactCard } from './icons'
 import { iniciales, useDatosTarjeta } from './useDatosTarjeta'
 
-function BotonAccion({ href, Icon, label }) {
+function BotonAccion({ href, Icon, label, valor }) {
   return (
     <a
       href={href}
@@ -13,14 +13,17 @@ function BotonAccion({ href, Icon, label }) {
       <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#2dd4bf1a] text-[#2dd4bf]">
         <Icon />
       </span>
-      <span className="text-sm font-medium">{label}</span>
+      <span className="flex min-w-0 flex-1 flex-col items-start text-left">
+        <span className="text-sm font-medium">{label}</span>
+        {valor && <span className="w-full truncate text-xs text-gray-400">{valor}</span>}
+      </span>
     </a>
   )
 }
 
 export default function PlantillaC({ tarjeta }) {
   const {
-    imagen, nombre_mostrado, cargo_rubro, empresa, eslogan,
+    imagen, nombre_mostrado, cargo_rubro, profesion, empresa, eslogan,
     sobre_texto, direccion, horario, mostrar_sobre,
     productos,
   } = tarjeta
@@ -35,17 +38,17 @@ export default function PlantillaC({ tarjeta }) {
             <img
               src={imagen}
               alt={nombre_mostrado || ''}
-              className="h-24 w-24 rounded-full border-2 border-[#2dd4bf] object-cover"
+              className="h-32 w-32 rounded-full border-2 border-[#2dd4bf] object-cover"
             />
           ) : (
-            <div className="flex h-24 w-24 items-center justify-center rounded-full border-2 border-[#2dd4bf] bg-[#21242e] text-2xl font-semibold text-[#2dd4bf]">
+            <div className="flex h-32 w-32 items-center justify-center rounded-full border-2 border-[#2dd4bf] bg-[#21242e] text-3xl font-semibold text-[#2dd4bf]">
               {iniciales(nombre_mostrado)}
             </div>
           )}
           <h1 className="mt-4 text-xl font-semibold">{nombre_mostrado}</h1>
-          {(cargo_rubro || empresa) && (
+          {(profesion || cargo_rubro || empresa) && (
             <p className="text-sm text-gray-300">
-              {[cargo_rubro, empresa].filter(Boolean).join(' · ')}
+              {[profesion, cargo_rubro, empresa].filter(Boolean).join(' · ')}
             </p>
           )}
           {eslogan && <p className="mt-2 text-sm italic text-gray-400">{eslogan}</p>}
@@ -54,7 +57,7 @@ export default function PlantillaC({ tarjeta }) {
         {contactos.length > 0 && (
           <section className="flex flex-col gap-3">
             {contactos.map((c) => (
-              <BotonAccion key={c.key} href={c.href} Icon={c.Icon} label={c.label} />
+              <BotonAccion key={c.key} href={c.href} Icon={c.Icon} label={c.label} valor={c.valor} />
             ))}
           </section>
         )}

@@ -18,7 +18,7 @@ class TarjetaPublicaSerializer(serializers.ModelSerializer):
         model = Tarjeta
         fields = [
             # Identidad
-            'imagen', 'nombre_mostrado', 'cargo_rubro', 'empresa', 'eslogan',
+            'imagen', 'nombre_mostrado', 'cargo_rubro', 'profesion', 'empresa', 'eslogan',
             'tipo', 'plantilla',
             # Contacto
             'telefono', 'whatsapp', 'email_contacto', 'sitio_web',
@@ -60,7 +60,7 @@ class TarjetaPanelSerializer(serializers.ModelSerializer):
         model = Tarjeta
         fields = [
             'id', 'slug', 'plan', 'estado', 'tipo', 'plantilla',
-            'nombre_mostrado', 'cargo_rubro', 'empresa', 'eslogan',
+            'nombre_mostrado', 'cargo_rubro', 'profesion', 'empresa', 'eslogan',
             'telefono', 'whatsapp', 'email_contacto', 'sitio_web',
             'instagram', 'facebook', 'linkedin', 'tiktok', 'youtube', 'x_twitter',
             'sobre_texto', 'direccion', 'horario',

@@ -7,6 +7,7 @@ import MiniPreviewPlantilla from '../plantillas/MiniPreviewPlantilla'
 const CAMPOS_TEXTO_IDENTIDAD = [
   { campo: 'nombre_mostrado', label: 'Nombre a mostrar' },
   { campo: 'cargo_rubro', label: 'Cargo o rubro' },
+  { campo: 'profesion', label: 'Profesión' },
   { campo: 'empresa', label: 'Empresa' },
   { campo: 'eslogan', label: 'Eslogan' },
 ]
@@ -28,7 +29,7 @@ const CAMPOS_REDES = [
 ]
 
 const VALORES_INICIALES = {
-  nombre_mostrado: '', cargo_rubro: '', empresa: '', eslogan: '', tipo: 'persona',
+  nombre_mostrado: '', cargo_rubro: '', profesion: '', empresa: '', eslogan: '', tipo: 'persona',
   telefono: '', whatsapp: '', email_contacto: '', sitio_web: '',
   instagram: '', facebook: '', linkedin: '', tiktok: '', youtube: '', x_twitter: '',
   sobre_texto: '', direccion: '', horario: '',

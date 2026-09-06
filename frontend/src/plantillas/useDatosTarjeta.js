@@ -13,6 +13,10 @@ export function iniciales(nombre) {
   return partes.map((p) => p[0]?.toUpperCase() ?? '').join('')
 }
 
+function formatearUrl(url) {
+  return url.replace(/^https?:\/\//i, '').replace(/\/+$/, '')
+}
+
 export function useDatosTarjeta(tarjeta) {
   const {
     whatsapp, telefono, email_contacto, sitio_web,
@@ -22,10 +26,10 @@ export function useDatosTarjeta(tarjeta) {
   } = tarjeta
 
   const contactos = mostrar_contacto ? [
-    whatsapp && { key: 'whatsapp', href: `https://wa.me/${whatsapp.replace(/\D/g, '')}`, Icon: IconWhatsapp, label: 'WhatsApp' },
-    telefono && { key: 'telefono', href: `tel:${telefono}`, Icon: IconPhone, label: 'Llamar' },
-    email_contacto && { key: 'email', href: `mailto:${email_contacto}`, Icon: IconMail, label: 'Correo' },
-    sitio_web && { key: 'web', href: sitio_web, Icon: IconGlobe, label: 'Sitio web' },
+    whatsapp && { key: 'whatsapp', href: `https://wa.me/${whatsapp.replace(/\D/g, '')}`, Icon: IconWhatsapp, label: 'WhatsApp', valor: whatsapp },
+    telefono && { key: 'telefono', href: `tel:${telefono}`, Icon: IconPhone, label: 'Llamar', valor: telefono },
+    email_contacto && { key: 'email', href: `mailto:${email_contacto}`, Icon: IconMail, label: 'Correo', valor: email_contacto },
+    sitio_web && { key: 'web', href: sitio_web, Icon: IconGlobe, label: 'Sitio web', valor: formatearUrl(sitio_web) },
   ].filter(Boolean) : []
 
   const redes = mostrar_redes ? [

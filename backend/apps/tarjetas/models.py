@@ -60,6 +60,7 @@ class Tarjeta(models.Model):
     imagen = models.ImageField(upload_to='tarjetas/', blank=True, null=True)
     nombre_mostrado = models.CharField(max_length=255, blank=True, null=True)
     cargo_rubro = models.CharField(max_length=255, blank=True, null=True)
+    profesion = models.CharField(max_length=120, null=True, blank=True)
     empresa = models.CharField(max_length=255, blank=True, null=True)
     eslogan = models.CharField(max_length=255, blank=True, null=True)
 

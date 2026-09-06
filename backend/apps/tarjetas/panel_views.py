@@ -27,7 +27,7 @@ from .serializers import MisTarjetasSerializer, TarjetaPanelSerializer
 # TODO: agregar `imagen` acá cuando exista subida de foto (Panel-2); los
 # productos se editan aparte (Panel-3), no por este endpoint.
 CAMPOS_EDITABLES = (
-    'nombre_mostrado', 'cargo_rubro', 'empresa', 'eslogan', 'tipo', 'plantilla',
+    'nombre_mostrado', 'cargo_rubro', 'profesion', 'empresa', 'eslogan', 'tipo', 'plantilla',
     'telefono', 'whatsapp', 'email_contacto', 'sitio_web',
     'instagram', 'facebook', 'linkedin', 'tiktok', 'youtube', 'x_twitter',
     'sobre_texto', 'direccion', 'horario',

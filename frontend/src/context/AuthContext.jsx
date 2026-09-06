@@ -51,11 +51,22 @@ export function AuthProvider({ children }) {
     setUser(null)
   }
 
-  // Login-2b (Google) se agrega acá después: una función del tipo
-  // loginConGoogle(tokenGoogle) que llame a POST /auth/google/ con el mismo
-  // patrón que login() — ya guarda `user` en el mismo estado.
+  // `tokenGoogle` es el ACCESS TOKEN que devuelve useGoogleLogin (flujo
+  // implícito) en el frontend — Banexa lo valida contra el userinfo de
+  // Google, no un id_token/credential (ver components/BotonGoogle.jsx).
+  async function loginConGoogle(tokenGoogle) {
+    const { datos } = await llamarApi('/auth/google/', {
+      method: 'POST',
+      body: JSON.stringify({ token: tokenGoogle }),
+    })
+    if (datos && datos.ok) {
+      setUser(datos.user)
+      return { ok: true }
+    }
+    return { ok: false, error: (datos && datos.error) || 'No se pudo iniciar sesión con Google.' }
+  }
 
-  const value = { user, cargando, login, registro, logout }
+  const value = { user, cargando, login, registro, logout, loginConGoogle }
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
 }
 

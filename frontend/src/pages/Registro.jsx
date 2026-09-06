@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
+import BotonGoogle from '../components/BotonGoogle'
 
 const CAMPOS_INICIALES = {
   username: '',
@@ -33,13 +34,23 @@ function Campo({ label, value, onChange, error, type = 'text', required = false 
 }
 
 export default function Registro() {
-  const { registro } = useAuth()
+  const { registro, loginConGoogle } = useAuth()
   const navigate = useNavigate()
   const [campos, setCampos] = useState(CAMPOS_INICIALES)
   const [errores, setErrores] = useState({})
   const [errorGeneral, setErrorGeneral] = useState('')
   const [enviando, setEnviando] = useState(false)
   const [exito, setExito] = useState('')
+
+  async function onGoogleExito(tokenGoogle) {
+    setErrorGeneral('')
+    const resultado = await loginConGoogle(tokenGoogle)
+    if (resultado.ok) {
+      navigate('/panel')
+    } else {
+      setErrorGeneral(resultado.error)
+    }
+  }
 
   function actualizar(campo, valor) {
     setCampos((prev) => ({ ...prev, [campo]: valor }))
@@ -168,6 +179,15 @@ export default function Registro() {
               {enviando ? 'Creando cuenta...' : 'Crear cuenta'}
             </button>
           </form>
+        )}
+
+        {!exito && (
+          <>
+            <div className="my-4 flex items-center gap-3 text-xs text-gray-400">
+              <hr className="flex-1 border-gray-200" /> o <hr className="flex-1 border-gray-200" />
+            </div>
+            <BotonGoogle etiqueta="Registrarse con Google" onExito={onGoogleExito} onError={setErrorGeneral} />
+          </>
         )}
 
         <p className="mt-4 text-center text-sm text-gray-600">

@@ -1,9 +1,10 @@
 import React, { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
+import BotonGoogle from '../components/BotonGoogle'
 
 export default function Login() {
-  const { login } = useAuth()
+  const { login, loginConGoogle } = useAuth()
   const navigate = useNavigate()
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
@@ -16,6 +17,16 @@ export default function Login() {
     setEnviando(true)
     const resultado = await login(username, password)
     setEnviando(false)
+    if (resultado.ok) {
+      navigate('/panel')
+    } else {
+      setError(resultado.error)
+    }
+  }
+
+  async function onGoogleExito(tokenGoogle) {
+    setError('')
+    const resultado = await loginConGoogle(tokenGoogle)
     if (resultado.ok) {
       navigate('/panel')
     } else {
@@ -61,6 +72,12 @@ export default function Login() {
             {enviando ? 'Ingresando...' : 'Iniciar sesión'}
           </button>
         </form>
+
+        <div className="my-4 flex items-center gap-3 text-xs text-gray-400">
+          <hr className="flex-1 border-gray-200" /> o <hr className="flex-1 border-gray-200" />
+        </div>
+
+        <BotonGoogle onExito={onGoogleExito} onError={setError} />
 
         <p className="mt-4 text-center text-sm text-gray-600">
           ¿No tienes cuenta?{' '}

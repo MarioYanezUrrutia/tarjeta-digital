@@ -42,6 +42,19 @@ class TarjetaPublicaSerializer(serializers.ModelSerializer):
         return ProductoPublicoSerializer(productos, many=True, context=self.context).data
 
 
+class ProductoSerializer(serializers.ModelSerializer):
+    """Panel: gestión de productos (GET/POST/PATCH/DELETE en
+    productos_views.py). `imagen` de solo lectura — se sube/reemplaza por
+    request.FILES, igual que la imagen de la tarjeta (Panel-2); `orden`
+    también de solo lectura acá — se fija solo (al crear) o vía POST
+    .../productos/reordenar/, nunca escribiendo este serializer directo."""
+
+    class Meta:
+        model = Producto
+        fields = ['id', 'imagen', 'nombre', 'caracteristicas', 'detalle', 'orden']
+        read_only_fields = ['id', 'imagen', 'orden']
+
+
 class MisTarjetasSerializer(serializers.ModelSerializer):
     """GET /api/mis-tarjetas/ y respuesta de POST /api/tarjetas/ — lo mínimo
     para la pantalla de inicio del panel (lista de tarjetas + botón crear)."""

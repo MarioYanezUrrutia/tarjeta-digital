@@ -4,6 +4,7 @@ import { actualizarTarjeta, obtenerTarjeta } from '../api/tarjetas'
 import { PLANTILLAS_DISPONIBLES } from '../constants/tarjetas'
 import MiniPreviewPlantilla from '../plantillas/MiniPreviewPlantilla'
 import { iniciales } from '../plantillas/useDatosTarjeta'
+import GestionProductos from '../components/GestionProductos'
 
 const TAMANO_MAXIMO_IMAGEN_BYTES = 5 * 1024 * 1024
 
@@ -326,10 +327,7 @@ export default function TarjetaEditor() {
             />
           }
         >
-          <div className="rounded-md border border-dashed border-gray-300 px-3 py-3 text-sm text-gray-400">
-            Catálogo de productos — próximamente
-            {/* TODO Panel-3: gestión de productos */}
-          </div>
+          <GestionProductos tarjetaId={id} />
         </Seccion>
 
         <Seccion titulo="Plantilla">

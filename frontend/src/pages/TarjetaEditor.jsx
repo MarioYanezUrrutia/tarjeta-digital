@@ -3,6 +3,9 @@ import { Link, useParams } from 'react-router-dom'
 import { actualizarTarjeta, obtenerTarjeta } from '../api/tarjetas'
 import { PLANTILLAS_DISPONIBLES } from '../constants/tarjetas'
 import MiniPreviewPlantilla from '../plantillas/MiniPreviewPlantilla'
+import { iniciales } from '../plantillas/useDatosTarjeta'
+
+const TAMANO_MAXIMO_IMAGEN_BYTES = 5 * 1024 * 1024
 
 const CAMPOS_TEXTO_IDENTIDAD = [
   { campo: 'nombre_mostrado', label: 'Nombre a mostrar' },
@@ -39,6 +42,16 @@ const VALORES_INICIALES = {
 }
 
 const CAMPOS_A_GUARDAR = Object.keys(VALORES_INICIALES)
+
+function construirFormData(campos, archivoImagen) {
+  const formData = new FormData()
+  CAMPOS_A_GUARDAR.forEach((campo) => {
+    const valor = campos[campo]
+    formData.append(campo, valor === null || valor === undefined ? '' : valor)
+  })
+  formData.append('imagen', archivoImagen)
+  return formData
+}
 
 function Campo({ label, value, onChange, placeholder, textarea = false }) {
   const Componente = textarea ? 'textarea' : 'input'
@@ -95,6 +108,10 @@ export default function TarjetaEditor() {
   const [guardando, setGuardando] = useState(false)
   const [mensaje, setMensaje] = useState(null)
   const [noEncontrada, setNoEncontrada] = useState(false)
+  const [imagenUrl, setImagenUrl] = useState(null)
+  const [imagenArchivo, setImagenArchivo] = useState(null)
+  const [imagenPreview, setImagenPreview] = useState(null)
+  const [errorImagen, setErrorImagen] = useState(null)
 
   useEffect(() => {
     let activo = true
@@ -106,6 +123,7 @@ export default function TarjetaEditor() {
         return
       }
       setSlug(datos.slug)
+      setImagenUrl(datos.imagen || null)
       setCampos((prev) => ({
         ...prev,
         ...Object.fromEntries(CAMPOS_A_GUARDAR.map((c) => [c, datos[c] ?? prev[c]])),
@@ -121,15 +139,40 @@ export default function TarjetaEditor() {
     setCampos((prev) => ({ ...prev, [campo]: valor }))
   }
 
+  function onElegirImagen(evento) {
+    const archivo = evento.target.files?.[0]
+    evento.target.value = '' // permite volver a elegir el mismo archivo despues
+    if (!archivo) return
+    if (!archivo.type.startsWith('image/')) {
+      setErrorImagen('El archivo debe ser una imagen.')
+      return
+    }
+    if (archivo.size > TAMANO_MAXIMO_IMAGEN_BYTES) {
+      setErrorImagen('La imagen no puede superar los 5 MB.')
+      return
+    }
+    setErrorImagen(null)
+    setImagenPreview((anterior) => {
+      if (anterior) URL.revokeObjectURL(anterior)
+      return URL.createObjectURL(archivo)
+    })
+    setImagenArchivo(archivo)
+  }
+
   async function onGuardar() {
     setMensaje(null)
     setGuardando(true)
-    const payload = Object.fromEntries(CAMPOS_A_GUARDAR.map((c) => [c, campos[c]]))
-    const { status, datos } = await actualizarTarjeta(id, payload)
+    const { status, datos } = imagenArchivo
+      ? await actualizarTarjeta(id, construirFormData(campos, imagenArchivo))
+      : await actualizarTarjeta(id, Object.fromEntries(CAMPOS_A_GUARDAR.map((c) => [c, campos[c]])))
     setGuardando(false)
     if (status === 200) {
       setMensaje({ tipo: 'ok', texto: 'Cambios guardados.' })
       if (datos?.slug) setSlug(datos.slug)
+      if (datos?.imagen !== undefined) setImagenUrl(datos.imagen)
+      if (imagenPreview) URL.revokeObjectURL(imagenPreview)
+      setImagenPreview(null)
+      setImagenArchivo(null)
     } else {
       setMensaje({ tipo: 'error', texto: datos?.error || 'No se pudo guardar.' })
     }
@@ -188,9 +231,26 @@ export default function TarjetaEditor() {
           {CAMPOS_TEXTO_IDENTIDAD.map(({ campo, label }) => (
             <Campo key={campo} label={label} value={campos[campo]} onChange={(v) => actualizar(campo, v)} />
           ))}
-          <div className="rounded-md border border-dashed border-gray-300 px-3 py-3 text-sm text-gray-400">
-            Foto de perfil — próximamente
-            {/* TODO Panel-2: subida de foto de la tarjeta */}
+          <div>
+            <label className="mb-1 block text-sm font-medium text-gray-700">
+              {campos.tipo === 'negocio' ? 'Logo' : 'Foto de perfil'}
+            </label>
+            <div className="flex items-center gap-4">
+              <div className="flex h-20 w-20 shrink-0 items-center justify-center overflow-hidden rounded-full border border-gray-300 bg-gray-100 text-lg font-medium text-gray-500">
+                {imagenPreview || imagenUrl ? (
+                  <img src={imagenPreview || imagenUrl} alt="" className="h-full w-full object-cover" />
+                ) : (
+                  iniciales(campos.nombre_mostrado)
+                )}
+              </div>
+              <div className="flex flex-col gap-1">
+                <label className="inline-flex w-fit cursor-pointer items-center rounded-md border border-gray-300 px-3 py-2 text-sm font-medium text-gray-700 transition hover:bg-gray-50">
+                  {campos.tipo === 'negocio' ? 'Elegir logo' : 'Elegir foto'}
+                  <input type="file" accept="image/*" className="hidden" onChange={onElegirImagen} />
+                </label>
+                {errorImagen && <p className="text-xs text-red-600">{errorImagen}</p>}
+              </div>
+            </div>
           </div>
         </Seccion>
 

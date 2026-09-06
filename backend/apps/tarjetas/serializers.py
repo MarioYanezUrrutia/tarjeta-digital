@@ -53,13 +53,14 @@ class MisTarjetasSerializer(serializers.ModelSerializer):
 
 class TarjetaPanelSerializer(serializers.ModelSerializer):
     """GET/PATCH /api/tarjetas/<id>/ — todos los campos que edita el
-    formulario del panel. NO incluye `imagen` (foto queda para Panel-2) ni
-    `productos` (Panel-3): esta fase es solo texto/flags/plantilla."""
+    formulario del panel, más `imagen` de solo lectura (se sube y procesa
+    aparte, por request.FILES — ver panel_views.tarjeta_detalle — nunca por
+    este serializer). NO incluye `productos` (Panel-3): fuera de alcance."""
 
     class Meta:
         model = Tarjeta
         fields = [
-            'id', 'slug', 'plan', 'estado', 'tipo', 'plantilla',
+            'id', 'slug', 'plan', 'estado', 'tipo', 'plantilla', 'imagen',
             'nombre_mostrado', 'cargo_rubro', 'profesion', 'empresa', 'eslogan',
             'telefono', 'whatsapp', 'email_contacto', 'sitio_web',
             'instagram', 'facebook', 'linkedin', 'tiktok', 'youtube', 'x_twitter',
@@ -67,4 +68,4 @@ class TarjetaPanelSerializer(serializers.ModelSerializer):
             'mostrar_contacto', 'mostrar_redes', 'mostrar_sobre',
             'mostrar_ubicacion', 'mostrar_productos',
         ]
-        read_only_fields = ['id', 'slug', 'plan', 'estado']
+        read_only_fields = ['id', 'slug', 'plan', 'estado', 'imagen']

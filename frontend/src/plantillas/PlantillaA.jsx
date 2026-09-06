@@ -38,10 +38,10 @@ export default function PlantillaA({ tarjeta }) {
             <img
               src={imagen}
               alt={nombre_mostrado || ''}
-              className="h-32 w-32 rounded-full border border-[#d7dade] object-cover"
+              className="h-40 w-40 rounded-full border border-[#d7dade] object-cover"
             />
           ) : (
-            <div className="flex h-32 w-32 items-center justify-center rounded-full border border-[#d7dade] bg-[#f6f7f8] text-3xl font-medium text-[#6b7177]">
+            <div className="flex h-40 w-40 items-center justify-center rounded-full border border-[#d7dade] bg-[#f6f7f8] text-4xl font-medium text-[#6b7177]">
               {iniciales(nombre_mostrado)}
             </div>
           )}

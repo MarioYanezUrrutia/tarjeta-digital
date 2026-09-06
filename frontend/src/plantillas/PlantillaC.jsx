@@ -38,10 +38,10 @@ export default function PlantillaC({ tarjeta }) {
             <img
               src={imagen}
               alt={nombre_mostrado || ''}
-              className="h-32 w-32 rounded-full border-2 border-[#2dd4bf] object-cover"
+              className="h-40 w-40 rounded-full border-2 border-[#2dd4bf] object-cover"
             />
           ) : (
-            <div className="flex h-32 w-32 items-center justify-center rounded-full border-2 border-[#2dd4bf] bg-[#21242e] text-3xl font-semibold text-[#2dd4bf]">
+            <div className="flex h-40 w-40 items-center justify-center rounded-full border-2 border-[#2dd4bf] bg-[#21242e] text-4xl font-semibold text-[#2dd4bf]">
               {iniciales(nombre_mostrado)}
             </div>
           )}

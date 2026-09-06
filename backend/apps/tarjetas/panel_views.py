@@ -12,6 +12,7 @@ directo del id de Banexa. Se recupera o crea perezosamente con
 sin pedirle nada, sin migración nueva.
 """
 from django.core.exceptions import ValidationError as DjangoValidationError
+from django.core.files.base import ContentFile
 from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny
@@ -19,13 +20,14 @@ from rest_framework.response import Response
 
 from apps.cuentas.auth import resolver_perfil_banexa
 
+from .imagenes import MAX_TAMANO_IMAGEN_BYTES, procesar_imagen_tarjeta
 from .models import Cliente, Tarjeta
 from .serializers import MisTarjetasSerializer, TarjetaPanelSerializer
 
-# Campos que PATCH /api/tarjetas/<id>/ puede tocar — todo lo demás del
-# request.data se ignora.
-# TODO: agregar `imagen` acá cuando exista subida de foto (Panel-2); los
-# productos se editan aparte (Panel-3), no por este endpoint.
+# Campos que PATCH /api/tarjetas/<id>/ puede tocar por request.data — todo lo
+# demás se ignora. `imagen` NO va acá: llega por request.FILES (multipart) y
+# se procesa aparte (ver tarjeta_detalle); los productos se editan aparte
+# (Panel-3), no por este endpoint.
 CAMPOS_EDITABLES = (
     'nombre_mostrado', 'cargo_rubro', 'profesion', 'empresa', 'eslogan', 'tipo', 'plantilla',
     'telefono', 'whatsapp', 'email_contacto', 'sitio_web',
@@ -33,6 +35,21 @@ CAMPOS_EDITABLES = (
     'sobre_texto', 'direccion', 'horario',
     'mostrar_contacto', 'mostrar_redes', 'mostrar_sobre', 'mostrar_ubicacion', 'mostrar_productos',
 )
+
+# Flags booleanos de CAMPOS_EDITABLES — se normalizan antes del setattr
+# porque un PATCH multipart/form-data (cuando viene con imagen) los manda
+# como string ('true'/'false' en minúscula, así los stringifica FormData del
+# navegador), y BooleanField.to_python de Django solo acepta 'True'/'1'/'t'
+# — sin esto, guardar flags junto con una imagen tiraría 400 por validación.
+CAMPOS_BOOLEANOS = {
+    'mostrar_contacto', 'mostrar_redes', 'mostrar_sobre', 'mostrar_ubicacion', 'mostrar_productos',
+}
+
+
+def _coerce_valor_campo(campo, valor):
+    if campo in CAMPOS_BOOLEANOS and isinstance(valor, str):
+        return valor.strip().lower() in ('true', '1', 't')
+    return valor
 
 
 def _obtener_o_crear_cliente(perfil_banexa):
@@ -123,14 +140,39 @@ def tarjeta_detalle(request, tarjeta_id):
         return Response({'ok': False, 'error': 'Tarjeta no encontrada'}, status=status.HTTP_404_NOT_FOUND)
 
     if request.method == 'GET':
-        return Response(TarjetaPanelSerializer(tarjeta).data)
+        return Response(TarjetaPanelSerializer(tarjeta, context={'request': request}).data)
 
     # PATCH.
     # TODO: si cambia nombre_mostrado, el slug NO se regenera (se mantiene
     # estable una vez creado) — editarlo a mano será otra feature.
+
+    # Imagen (foto/logo) — solo viene en request.FILES cuando el PATCH es
+    # multipart/form-data; un PATCH JSON de solo-texto no la toca para nada.
+    archivo_imagen = request.FILES.get('imagen')
+    if archivo_imagen is not None:
+        if archivo_imagen.size > MAX_TAMANO_IMAGEN_BYTES:
+            return Response(
+                {'ok': False, 'error': 'La imagen no puede superar los 5 MB.'},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        try:
+            contenido_jpg = procesar_imagen_tarjeta(archivo_imagen)
+        except Exception:
+            return Response(
+                {'ok': False, 'error': 'El archivo no es una imagen válida.'},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        # Reemplazo: se borra el archivo físico anterior ANTES de guardar el
+        # nuevo con el mismo nombre estable — si no, FileSystemStorage le
+        # agregaría un sufijo random para no chocar con el que ya existe, y
+        # las imágenes viejas quedarían acumuladas en disco para siempre.
+        if tarjeta.imagen:
+            tarjeta.imagen.delete(save=False)
+        tarjeta.imagen.save(f'tarjeta_{tarjeta.id}.jpg', ContentFile(contenido_jpg), save=False)
+
     for campo in CAMPOS_EDITABLES:
         if campo in request.data:
-            setattr(tarjeta, campo, request.data[campo])
+            setattr(tarjeta, campo, _coerce_valor_campo(campo, request.data[campo]))
 
     try:
         tarjeta.save()
@@ -139,4 +181,4 @@ def tarjeta_detalle(request, tarjeta_id):
             {'ok': False, 'error': _mensaje_validation_error(e)}, status=status.HTTP_400_BAD_REQUEST
         )
 
-    return Response(TarjetaPanelSerializer(tarjeta).data)
+    return Response(TarjetaPanelSerializer(tarjeta, context={'request': request}).data)

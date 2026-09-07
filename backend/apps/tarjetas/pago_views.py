@@ -24,6 +24,7 @@ from rest_framework.response import Response
 from apps.cuentas.auth import resolver_perfil_banexa
 from apps.cuentas.banexa import banexa_get, banexa_post
 
+from .correos import correo_pago_confirmado
 from .models import Cliente
 from .panel_views import _obtener_tarjeta_del_cliente
 
@@ -145,6 +146,7 @@ def pagar_tarjeta(request, tarjeta_id):
     tarjeta.fecha_ultimo_pago = ahora
     tarjeta.fecha_vencimiento = base + timedelta(days=settings.TARJETA_DIAS_SUSCRIPCION)
     tarjeta.save()
+    correo_pago_confirmado(tarjeta)
 
     return Response({
         'ok': True,

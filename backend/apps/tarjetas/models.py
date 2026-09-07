@@ -63,6 +63,11 @@ class Tarjeta(models.Model):
     # 'borrador' toda su vida hasta el primer pago).
     fecha_vencimiento = models.DateTimeField(null=True, blank=True)
     fecha_ultimo_pago = models.DateTimeField(null=True, blank=True)
+    # Cobro-3a: cuándo se mandó el último correo_aviso_vencimiento — evita
+    # reenviar el mismo aviso más de una vez por día si el management
+    # command `revisar_vencimientos` corre varias veces (cron cada hora,
+    # reintentos, etc.). No es un log completo, solo la última vez.
+    fecha_ultimo_aviso = models.DateTimeField(null=True, blank=True)
 
     # Bloque Identidad
     imagen = models.ImageField(upload_to='tarjetas/', blank=True, null=True)

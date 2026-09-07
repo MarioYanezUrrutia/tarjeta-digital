@@ -101,4 +101,24 @@ TARJETA_DIAS_AVISO_PREVIO = env.int('TARJETA_DIAS_AVISO_PREVIO', default=5)
 # DEBE quedar en False en producción — ahí sí se debe respetar el pago.
 TARJETA_MODO_DEV = env.bool('TARJETA_MODO_DEV', default=True)
 
+# --- Email (avisos de vencimiento, corte y pago — Cobro-3a) ---
+# Dev: backend de consola — send_mail() imprime el correo en la terminal,
+# no manda nada de verdad. Producción: se cambia por variable de entorno a
+# 'django.core.mail.backends.smtp.EmailBackend' + las credenciales SMTP de
+# abajo (ver .env.example) — nunca hardcodeadas acá.
+EMAIL_BACKEND = env('EMAIL_BACKEND', default='django.core.mail.backends.console.EmailBackend')
+EMAIL_HOST = env('EMAIL_HOST', default='')
+EMAIL_PORT = env.int('EMAIL_PORT', default=587)
+EMAIL_HOST_USER = env('EMAIL_HOST_USER', default='')
+EMAIL_HOST_PASSWORD = env('EMAIL_HOST_PASSWORD', default='')
+EMAIL_USE_TLS = env.bool('EMAIL_USE_TLS', default=True)
+DEFAULT_FROM_EMAIL = env('DEFAULT_FROM_EMAIL', default='Tarjeta Digital <no-reply@kabymur.com>')
+
+# URL pública del frontend — para armar el link de pago en los correos
+# (apps.tarjetas.correos._link_pago). Mismo propósito que
+# VITE_PUBLIC_BASE_URL del frontend, pero configurada aparte porque backend
+# y frontend son procesos (y .env) distintos. Nunca localhost hardcodeado
+# en el código: en producción esta variable apunta al dominio real.
+PUBLIC_BASE_URL = env('PUBLIC_BASE_URL', default='http://localhost:5173')
+
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'

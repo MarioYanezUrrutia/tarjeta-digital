@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { crearTarjeta, obtenerMisTarjetas } from '../api/tarjetas'
-import { ESTADO_LABEL, PLANTILLA_LABEL } from '../constants/tarjetas'
+import { PLANTILLA_LABEL, descripcionEstado } from '../constants/tarjetas'
 import { useAuth } from '../context/AuthContext'
 
 export default function Panel() {
@@ -92,7 +92,7 @@ export default function Panel() {
                     {t.nombre_mostrado || 'Tarjeta sin nombre'}
                   </p>
                   <p className="text-xs text-gray-500">
-                    {ESTADO_LABEL[t.estado] || t.estado} · Plantilla{' '}
+                    {descripcionEstado(t.estado, t.fecha_vencimiento)} · Plantilla{' '}
                     {PLANTILLA_LABEL[t.plantilla] || t.plantilla}
                   </p>
                 </div>

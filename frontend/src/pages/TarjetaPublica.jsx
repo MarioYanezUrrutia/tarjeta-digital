@@ -11,12 +11,16 @@ export default function TarjetaPublica() {
     setEstado('cargando')
     fetch(`${import.meta.env.VITE_API_BASE}/t/${slug}/`)
       .then(async (r) => {
-        if (!r.ok) {
+        if (r.status === 404) {
           throw new Error('not_found')
         }
         return r.json()
       })
       .then((data) => {
+        if (!data.disponible) {
+          setEstado('no_disponible')
+          return
+        }
         setTarjeta(data)
         setEstado('listo')
       })
@@ -31,10 +35,18 @@ export default function TarjetaPublica() {
     )
   }
 
+  if (estado === 'no_disponible') {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-[#16181f] px-6 text-center">
+        <p className="text-gray-300">Esta tarjeta no está disponible en este momento.</p>
+      </div>
+    )
+  }
+
   if (estado === 'error') {
     return (
       <div className="flex min-h-screen items-center justify-center bg-[#16181f] px-6 text-center">
-        <p className="text-gray-300">Esta tarjeta no existe o no está disponible.</p>
+        <p className="text-gray-300">Esta tarjeta no existe.</p>
       </div>
     )
   }

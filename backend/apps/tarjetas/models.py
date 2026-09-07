@@ -1,5 +1,6 @@
 from django.db import models
 from django.core.exceptions import ValidationError
+from django.utils import timezone
 from django.utils.text import slugify
 
 
@@ -55,6 +56,13 @@ class Tarjeta(models.Model):
     plantilla = models.CharField(max_length=32, choices=PLANTILLA_CHOICES, default='C')
     estado = models.CharField(max_length=32, choices=ESTADO_CHOICES, default='borrador')
     creado = models.DateTimeField(auto_now_add=True)
+
+    # Bloque Suscripción (Cobro-1) — el cobro real (Cobro-2) es quien setea
+    # estos dos campos; acá solo se agrega el modelo + los helpers que lo
+    # leen. `fecha_vencimiento` null == nunca se ha pagado (tarjeta en
+    # 'borrador' toda su vida hasta el primer pago).
+    fecha_vencimiento = models.DateTimeField(null=True, blank=True)
+    fecha_ultimo_pago = models.DateTimeField(null=True, blank=True)
 
     # Bloque Identidad
     imagen = models.ImageField(upload_to='tarjetas/', blank=True, null=True)
@@ -116,6 +124,25 @@ class Tarjeta(models.Model):
         # Validar límite antes de guardar
         self.full_clean()
         super().save(*args, **kwargs)
+
+    def esta_vigente(self):
+        """True si la suscripción está al día: estado 'activa' Y con
+        vencimiento futuro. Es lo que decide si la página pública se
+        muestra (ver TarjetaPublicaView) — no confundir con el propio
+        campo `estado`, que el cobro/corte todavía no actualizan solos en
+        esta fase (Cobro-1 es solo el modelo; Cobro-2 hace el cobro real y
+        quien de verdad mueve `estado` a 'vencida'/'cortada')."""
+        if self.estado != 'activa' or not self.fecha_vencimiento:
+            return False
+        return self.fecha_vencimiento > timezone.now()
+
+    def dias_para_vencer(self):
+        """Días que faltan para el vencimiento (negativo si ya venció), o
+        None si la tarjeta no tiene `fecha_vencimiento` (nunca se pagó).
+        Lo usarán el aviso previo (Cobro-3) y el corte (Cobro-2)."""
+        if not self.fecha_vencimiento:
+            return None
+        return (self.fecha_vencimiento - timezone.now()).days
 
     def __str__(self):
         return f"{self.nombre_mostrado or self.slug} ({self.cliente})"

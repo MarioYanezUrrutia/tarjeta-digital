@@ -61,7 +61,7 @@ class MisTarjetasSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Tarjeta
-        fields = ['id', 'slug', 'nombre_mostrado', 'plan', 'estado', 'plantilla']
+        fields = ['id', 'slug', 'nombre_mostrado', 'plan', 'estado', 'plantilla', 'fecha_vencimiento']
 
 
 class TarjetaPanelSerializer(serializers.ModelSerializer):
@@ -74,6 +74,7 @@ class TarjetaPanelSerializer(serializers.ModelSerializer):
         model = Tarjeta
         fields = [
             'id', 'slug', 'plan', 'estado', 'tipo', 'plantilla', 'imagen',
+            'fecha_vencimiento', 'fecha_ultimo_pago',
             'nombre_mostrado', 'cargo_rubro', 'profesion', 'empresa', 'eslogan',
             'telefono', 'whatsapp', 'email_contacto', 'sitio_web',
             'instagram', 'facebook', 'linkedin', 'tiktok', 'youtube', 'x_twitter',
@@ -81,4 +82,6 @@ class TarjetaPanelSerializer(serializers.ModelSerializer):
             'mostrar_contacto', 'mostrar_redes', 'mostrar_sobre',
             'mostrar_ubicacion', 'mostrar_productos',
         ]
-        read_only_fields = ['id', 'slug', 'plan', 'estado', 'imagen']
+        read_only_fields = [
+            'id', 'slug', 'plan', 'estado', 'imagen', 'fecha_vencimiento', 'fecha_ultimo_pago',
+        ]

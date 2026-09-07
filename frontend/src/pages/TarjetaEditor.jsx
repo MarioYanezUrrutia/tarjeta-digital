@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { actualizarTarjeta, obtenerTarjeta } from '../api/tarjetas'
-import { PLANTILLAS_DISPONIBLES } from '../constants/tarjetas'
+import { PLANTILLAS_DISPONIBLES, descripcionEstado } from '../constants/tarjetas'
 import MiniPreviewPlantilla from '../plantillas/MiniPreviewPlantilla'
 import { iniciales } from '../plantillas/useDatosTarjeta'
 import GestionProductos from '../components/GestionProductos'
@@ -113,6 +113,8 @@ export default function TarjetaEditor() {
   const [imagenArchivo, setImagenArchivo] = useState(null)
   const [imagenPreview, setImagenPreview] = useState(null)
   const [errorImagen, setErrorImagen] = useState(null)
+  const [estado, setEstado] = useState('borrador')
+  const [fechaVencimiento, setFechaVencimiento] = useState(null)
 
   useEffect(() => {
     let activo = true
@@ -125,6 +127,8 @@ export default function TarjetaEditor() {
       }
       setSlug(datos.slug)
       setImagenUrl(datos.imagen || null)
+      setEstado(datos.estado || 'borrador')
+      setFechaVencimiento(datos.fecha_vencimiento || null)
       setCampos((prev) => ({
         ...prev,
         ...Object.fromEntries(CAMPOS_A_GUARDAR.map((c) => [c, datos[c] ?? prev[c]])),
@@ -216,6 +220,28 @@ export default function TarjetaEditor() {
             </a>
           )}
         </header>
+
+        <p className="text-sm text-gray-500">
+          Estado: <span className="font-medium text-gray-700">{descripcionEstado(estado, fechaVencimiento)}</span>
+        </p>
+
+        {estado === 'borrador' && (
+          <div className="rounded-lg border border-amber-200 bg-amber-50 p-4">
+            <p className="text-sm font-medium text-amber-800">Tu tarjeta aún no está publicada.</p>
+            <p className="mt-1 text-sm text-amber-700">
+              Actívala pagando tu suscripción para que tu página pública se muestre.
+            </p>
+            <button
+              type="button"
+              disabled
+              title="Disponible próximamente"
+              className="mt-3 rounded-md bg-amber-600 px-4 py-2 text-sm font-medium text-white opacity-50 cursor-not-allowed"
+            >
+              {/* TODO Cobro-2: cobro real de la suscripción (Terras vía Banexa) */}
+              Activar / Pagar — próximamente
+            </button>
+          </div>
+        )}
 
         <Seccion titulo="Identidad">
           <div>

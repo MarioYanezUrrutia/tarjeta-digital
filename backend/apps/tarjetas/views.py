@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.http import JsonResponse
 from rest_framework import status
 from rest_framework.permissions import AllowAny
@@ -24,6 +25,16 @@ class TarjetaPublicaView(APIView):
                 status=status.HTTP_404_NOT_FOUND,
             )
 
-        # TODO: validar estado activo/no vencida cuando exista suscripción
+        # Cobro-1: la tarjeta solo se muestra si su suscripción está vigente
+        # (estado 'activa' con vencimiento futuro) — una en 'borrador'
+        # (nunca pagada), 'vencida' o 'cortada' recibe el mismo trato: 200
+        # con `disponible: false`, no un 404, para que el frontend muestre
+        # un mensaje amable en vez de una página de error. TARJETA_MODO_DEV
+        # (ver settings) salta este chequeo mientras no exista el cobro
+        # real (Cobro-2) — si no, ninguna tarjeta (todas nacen en borrador)
+        # se podría ver en desarrollo.
+        if not settings.TARJETA_MODO_DEV and not tarjeta.esta_vigente():
+            return Response({'disponible': False})
+
         serializer = TarjetaPublicaSerializer(tarjeta, context={'request': request})
-        return Response(serializer.data)
+        return Response({'disponible': True, **serializer.data})

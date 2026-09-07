@@ -85,4 +85,20 @@ CORS_ALLOW_CREDENTIALS = True
 # (se setea en el .env de cada entorno, nunca hardcodeado acá).
 BANEXA_API_URL = env('BANEXA_API_URL', default='http://localhost:8000/api')
 
+# --- Suscripción de tarjetas (Cobro) ---
+# El cobro real es Cobro-2; acá solo viven las constantes que va a usar (el
+# modelo Tarjeta.esta_vigente()/dias_para_vencer(), la vista pública, y
+# después el cobro y el aviso previo).
+TARJETA_PRECIO_TERRAS = env.int('TARJETA_PRECIO_TERRAS', default=5)
+TARJETA_DIAS_SUSCRIPCION = env.int('TARJETA_DIAS_SUSCRIPCION', default=30)
+TARJETA_DIAS_AVISO_PREVIO = env.int('TARJETA_DIAS_AVISO_PREVIO', default=5)
+
+# Bypass de desarrollo: todavía no existe el cobro real (Cobro-2), así que
+# TODAS las tarjetas nacen en 'borrador' y se quedan ahí para siempre — sin
+# este flag, la regla "solo se muestra la tarjeta vigente" (Parte 2) dejaría
+# de poder verse cualquier tarjeta en desarrollo. Con TARJETA_MODO_DEV=True,
+# TarjetaPublicaView.get() se salta el chequeo de vigencia por completo.
+# DEBE quedar en False en producción — ahí sí se debe respetar el pago.
+TARJETA_MODO_DEV = env.bool('TARJETA_MODO_DEV', default=True)
+
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'

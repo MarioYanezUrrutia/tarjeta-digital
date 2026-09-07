@@ -5,6 +5,7 @@ import { PLANTILLAS_DISPONIBLES, descripcionEstado } from '../constants/tarjetas
 import MiniPreviewPlantilla from '../plantillas/MiniPreviewPlantilla'
 import { iniciales } from '../plantillas/useDatosTarjeta'
 import GestionProductos from '../components/GestionProductos'
+import ModalPago from '../components/ModalPago'
 
 const TAMANO_MAXIMO_IMAGEN_BYTES = 5 * 1024 * 1024
 
@@ -115,6 +116,7 @@ export default function TarjetaEditor() {
   const [errorImagen, setErrorImagen] = useState(null)
   const [estado, setEstado] = useState('borrador')
   const [fechaVencimiento, setFechaVencimiento] = useState(null)
+  const [mostrarModalPago, setMostrarModalPago] = useState(false)
 
   useEffect(() => {
     let activo = true
@@ -142,6 +144,11 @@ export default function TarjetaEditor() {
 
   function actualizar(campo, valor) {
     setCampos((prev) => ({ ...prev, [campo]: valor }))
+  }
+
+  function onPagoExitoso(datos) {
+    setEstado(datos.estado)
+    setFechaVencimiento(datos.fecha_vencimiento)
   }
 
   function onElegirImagen(evento) {
@@ -221,26 +228,45 @@ export default function TarjetaEditor() {
           )}
         </header>
 
-        <p className="text-sm text-gray-500">
-          Estado: <span className="font-medium text-gray-700">{descripcionEstado(estado, fechaVencimiento)}</span>
-        </p>
+        <div className="flex items-center justify-between">
+          <p className="text-sm text-gray-500">
+            Estado: <span className="font-medium text-gray-700">{descripcionEstado(estado, fechaVencimiento)}</span>
+          </p>
+          <button
+            type="button"
+            onClick={() => setMostrarModalPago(true)}
+            className="text-sm font-medium text-gray-900 underline"
+          >
+            {estado === 'activa' ? 'Renovar' : 'Activar / Pagar'}
+          </button>
+        </div>
 
-        {estado === 'borrador' && (
+        {(estado === 'borrador' || estado === 'vencida' || estado === 'cortada') && (
           <div className="rounded-lg border border-amber-200 bg-amber-50 p-4">
-            <p className="text-sm font-medium text-amber-800">Tu tarjeta aún no está publicada.</p>
+            <p className="text-sm font-medium text-amber-800">
+              {estado === 'borrador' ? 'Tu tarjeta aún no está publicada.' : 'Tu tarjeta está vencida.'}
+            </p>
             <p className="mt-1 text-sm text-amber-700">
-              Actívala pagando tu suscripción para que tu página pública se muestre.
+              {estado === 'borrador'
+                ? 'Actívala pagando tu suscripción para que tu página pública se muestre.'
+                : 'Renueva tu suscripción para que vuelva a mostrarse.'}
             </p>
             <button
               type="button"
-              disabled
-              title="Disponible próximamente"
-              className="mt-3 rounded-md bg-amber-600 px-4 py-2 text-sm font-medium text-white opacity-50 cursor-not-allowed"
+              onClick={() => setMostrarModalPago(true)}
+              className="mt-3 rounded-md bg-amber-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-amber-700"
             >
-              {/* TODO Cobro-2: cobro real de la suscripción (Terras vía Banexa) */}
-              Activar / Pagar — próximamente
+              Activar / Pagar
             </button>
           </div>
+        )}
+
+        {mostrarModalPago && (
+          <ModalPago
+            tarjetaId={id}
+            onCerrar={() => setMostrarModalPago(false)}
+            onPagoExitoso={onPagoExitoso}
+          />
         )}
 
         <Seccion titulo="Identidad">

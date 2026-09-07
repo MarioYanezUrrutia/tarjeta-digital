@@ -3,6 +3,7 @@ from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import include, path
 
+from apps.tarjetas.pago_views import estado_pago, pagar_tarjeta
 from apps.tarjetas.panel_views import crear_tarjeta, mis_tarjetas, tarjeta_detalle
 from apps.tarjetas.productos_views import producto_detalle, productos_lista, productos_reordenar
 from apps.tarjetas.views import TarjetaPublicaView, health
@@ -18,6 +19,8 @@ urlpatterns = [
     path('api/tarjetas/<int:tarjeta_id>/productos/reordenar/', productos_reordenar, name='productos-reordenar'),
     path('api/tarjetas/<int:tarjeta_id>/productos/', productos_lista, name='productos-lista'),
     path('api/productos/<int:producto_id>/', producto_detalle, name='producto-detalle'),
+    path('api/tarjetas/<int:tarjeta_id>/estado-pago/', estado_pago, name='tarjeta-estado-pago'),
+    path('api/tarjetas/<int:tarjeta_id>/pagar/', pagar_tarjeta, name='tarjeta-pagar'),
 ]
 
 if settings.DEBUG:

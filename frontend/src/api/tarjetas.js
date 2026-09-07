@@ -14,3 +14,13 @@ export const actualizarTarjeta = (id, campos) =>
     method: 'PATCH',
     body: campos instanceof FormData ? campos : JSON.stringify(campos),
   })
+
+export const obtenerEstadoPago = (id) => llamarApi(`/tarjetas/${id}/estado-pago/`)
+
+// `clavePrivada` viaja solo en este body, nunca se loguea ni se guarda en
+// estado más de lo necesario (ver ModalPago.jsx).
+export const pagarTarjeta = (id, clavePrivada) =>
+  llamarApi(`/tarjetas/${id}/pagar/`, {
+    method: 'POST',
+    body: JSON.stringify({ clave_privada: clavePrivada }),
+  })

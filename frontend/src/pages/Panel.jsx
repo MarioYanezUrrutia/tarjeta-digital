@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { crearTarjeta, obtenerMisTarjetas } from '../api/tarjetas'
 import { PLANTILLA_LABEL, descripcionEstado } from '../constants/tarjetas'
 import { useAuth } from '../context/AuthContext'
+import PromosEcosistema from '../components/PromosEcosistema'
 
 export default function Panel() {
   const { user, logout } = useAuth()
@@ -121,7 +122,7 @@ export default function Panel() {
           </div>
         )}
 
-        {/* TODO: promos del ecosistema Kabymur — se agrega después */}
+        <PromosEcosistema />
       </div>
     </div>
   )

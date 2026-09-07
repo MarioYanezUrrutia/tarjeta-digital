@@ -6,6 +6,7 @@ import MiniPreviewPlantilla from '../plantillas/MiniPreviewPlantilla'
 import { iniciales } from '../plantillas/useDatosTarjeta'
 import GestionProductos from '../components/GestionProductos'
 import ModalPago from '../components/ModalPago'
+import CompartirTarjeta from '../components/CompartirTarjeta'
 
 const TAMANO_MAXIMO_IMAGEN_BYTES = 5 * 1024 * 1024
 
@@ -269,6 +270,24 @@ export default function TarjetaEditor() {
           />
         )}
 
+        <section className="flex flex-col items-center gap-3 rounded-lg bg-white p-6 shadow">
+          <p className="text-sm font-medium text-gray-700">
+            {campos.tipo === 'negocio' ? 'Logo' : 'Foto de perfil'}
+          </p>
+          <div className="flex h-28 w-28 shrink-0 items-center justify-center overflow-hidden rounded-full border border-gray-300 bg-gray-100 text-2xl font-medium text-gray-500">
+            {imagenPreview || imagenUrl ? (
+              <img src={imagenPreview || imagenUrl} alt="" className="h-full w-full object-cover" />
+            ) : (
+              iniciales(campos.nombre_mostrado)
+            )}
+          </div>
+          <label className="inline-flex w-fit cursor-pointer items-center rounded-md border border-gray-300 px-3 py-2 text-sm font-medium text-gray-700 transition hover:bg-gray-50">
+            {campos.tipo === 'negocio' ? 'Elegir logo' : 'Elegir foto'}
+            <input type="file" accept="image/*" className="hidden" onChange={onElegirImagen} />
+          </label>
+          {errorImagen && <p className="text-xs text-red-600">{errorImagen}</p>}
+        </section>
+
         <Seccion titulo="Identidad">
           <div>
             <label className="mb-1 block text-sm font-medium text-gray-700">Tipo</label>
@@ -284,27 +303,6 @@ export default function TarjetaEditor() {
           {CAMPOS_TEXTO_IDENTIDAD.map(({ campo, label }) => (
             <Campo key={campo} label={label} value={campos[campo]} onChange={(v) => actualizar(campo, v)} />
           ))}
-          <div>
-            <label className="mb-1 block text-sm font-medium text-gray-700">
-              {campos.tipo === 'negocio' ? 'Logo' : 'Foto de perfil'}
-            </label>
-            <div className="flex items-center gap-4">
-              <div className="flex h-20 w-20 shrink-0 items-center justify-center overflow-hidden rounded-full border border-gray-300 bg-gray-100 text-lg font-medium text-gray-500">
-                {imagenPreview || imagenUrl ? (
-                  <img src={imagenPreview || imagenUrl} alt="" className="h-full w-full object-cover" />
-                ) : (
-                  iniciales(campos.nombre_mostrado)
-                )}
-              </div>
-              <div className="flex flex-col gap-1">
-                <label className="inline-flex w-fit cursor-pointer items-center rounded-md border border-gray-300 px-3 py-2 text-sm font-medium text-gray-700 transition hover:bg-gray-50">
-                  {campos.tipo === 'negocio' ? 'Elegir logo' : 'Elegir foto'}
-                  <input type="file" accept="image/*" className="hidden" onChange={onElegirImagen} />
-                </label>
-                {errorImagen && <p className="text-xs text-red-600">{errorImagen}</p>}
-              </div>
-            </div>
-          </div>
         </Seccion>
 
         <Seccion
@@ -406,6 +404,10 @@ export default function TarjetaEditor() {
               )
             })}
           </div>
+        </Seccion>
+
+        <Seccion titulo="Comparte tu tarjeta">
+          <CompartirTarjeta slug={slug} estado={estado} />
         </Seccion>
 
         {mensaje && (

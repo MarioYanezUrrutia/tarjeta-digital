@@ -43,4 +43,4 @@ inyectada, sin tocar contraseñas) contra el frontend real en
 
 ## Commit
 
-Hash: `1f8ec9b`
+Hash: `37ae218`

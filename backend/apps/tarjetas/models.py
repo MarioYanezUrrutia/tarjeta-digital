@@ -153,6 +153,83 @@ class Tarjeta(models.Model):
         return f"{self.nombre_mostrado or self.slug} ({self.cliente})"
 
 
+class ConfiguracionTarjetas(models.Model):
+    """Configuración global del negocio de tarjetas — precio de la
+    suscripción, duración y días de aviso previo. Antes vivían como
+    constantes de solo lectura en `settings.py`/`.env`
+    (`TARJETA_PRECIO_TERRAS` y compañía); ahora el admin las edita en
+    caliente, sin tocar `.env` ni reiniciar el servidor.
+
+    Singleton simple: siempre existe una única fila con `pk=1`.
+    `save()` fuerza esa pk (así que no importa cómo se cree la instancia,
+    nunca hay una segunda fila) y `delete()` no hace nada (la configuración
+    del negocio no debería poder quedar sin existir). `obtener()` es el
+    único punto de lectura que debe usar el resto del código — crea la fila
+    la primera vez, sembrada con los valores que ya hubiera en `settings`
+    (el `.env`) para no resetear silenciosamente un despliegue existente.
+    """
+    precio_terras = models.PositiveIntegerField(default=5)
+    dias_suscripcion = models.PositiveIntegerField(default=30)
+    dias_aviso_previo = models.PositiveIntegerField(default=5)
+
+    class Meta:
+        verbose_name = 'Configuración'
+        verbose_name_plural = 'Configuración'
+
+    def save(self, *args, **kwargs):
+        self.pk = 1
+        super().save(*args, **kwargs)
+
+    def delete(self, *args, **kwargs):
+        pass
+
+    @classmethod
+    def obtener(cls):
+        from django.conf import settings
+        defaults = {
+            'precio_terras': getattr(settings, 'TARJETA_PRECIO_TERRAS', 5),
+            'dias_suscripcion': getattr(settings, 'TARJETA_DIAS_SUSCRIPCION', 30),
+            'dias_aviso_previo': getattr(settings, 'TARJETA_DIAS_AVISO_PREVIO', 5),
+        }
+        config, _creada = cls.objects.get_or_create(pk=1, defaults=defaults)
+        return config
+
+    def __str__(self):
+        return 'Configuración de tarjetas'
+
+
+class PagoTarjeta(models.Model):
+    """Registro de cada pago exitoso de una tarjeta (Cobro-2), creado desde
+    `pago_views.pagar_tarjeta` solo cuando Banexa confirma el cobro. Antes
+    de esto, lo único que quedaba de un pago era `Tarjeta.fecha_ultimo_pago`
+    (se pisa en cada pago, no permite reconstruir historial ni sumar por
+    período) — este modelo es la fuente de verdad para las estadísticas de
+    ingresos del admin."""
+    tarjeta = models.ForeignKey('Tarjeta', on_delete=models.CASCADE, related_name='pagos')
+    monto_terras = models.PositiveIntegerField()
+    fecha = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-fecha']
+        verbose_name = 'Pago'
+        verbose_name_plural = 'Pagos'
+
+    def __str__(self):
+        return f"{self.monto_terras} Terras — {self.tarjeta} ({self.fecha:%d-%m-%Y})"
+
+
+class Estadisticas(Tarjeta):
+    """Proxy sin tabla propia — existe solo para aparecer como una entrada
+    de menú clickeable ("Estadísticas") en el índice del admin, cuya
+    `changelist_view` (ver admin.py) se reemplaza por una página de
+    reportes en vez de la lista de tarjetas de la que hereda."""
+
+    class Meta:
+        proxy = True
+        verbose_name = 'Estadísticas'
+        verbose_name_plural = 'Estadísticas'
+
+
 class Producto(models.Model):
     tarjeta = models.ForeignKey('Tarjeta', on_delete=models.CASCADE, related_name='productos')
     imagen = models.ImageField(upload_to='productos/', null=True, blank=True)

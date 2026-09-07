@@ -14,7 +14,6 @@ activar sin haber cobrado, nunca cobrar sin activar.
 from datetime import timedelta
 
 import requests
-from django.conf import settings
 from django.utils import timezone
 from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
@@ -25,7 +24,7 @@ from apps.cuentas.auth import resolver_perfil_banexa
 from apps.cuentas.banexa import banexa_get, banexa_post
 
 from .correos import correo_pago_confirmado
-from .models import Cliente
+from .models import Cliente, ConfiguracionTarjetas, PagoTarjeta
 from .panel_views import _obtener_tarjeta_del_cliente
 
 MENSAJE_BANEXA_NO_DISPONIBLE = (
@@ -74,7 +73,7 @@ def estado_pago(request, tarjeta_id):
         except (TypeError, ValueError):
             saldo_disponible = False
 
-    precio = settings.TARJETA_PRECIO_TERRAS
+    precio = ConfiguracionTarjetas.obtener().precio_terras
     alcanza = bool(saldo_disponible and saldo is not None and saldo >= precio)
 
     return Response({
@@ -92,13 +91,13 @@ def estado_pago(request, tarjeta_id):
 @permission_classes([AllowAny])
 def pagar_tarjeta(request, tarjeta_id):
     """POST /api/tarjetas/<tarjeta_id>/pagar/ — Body: {"clave_privada": "..."}.
-    Cobra TARJETA_PRECIO_TERRAS Terras reales vía Banexa
-    (POST /terras/cobrar-servicio/) y SOLO si Banexa confirma con 200 activa
-    o renueva la tarjeta:
-    - Si ya estaba vigente (activa, vencimiento futuro): los
-      TARJETA_DIAS_SUSCRIPCION nuevos se suman desde el vencimiento actual,
-      no desde ahora — para no perderle días a quien renueva antes de
-      vencer.
+    Cobra el precio configurado (`ConfiguracionTarjetas.obtener().
+    precio_terras` — editable desde el admin, ya no una constante fija)
+    en Terras reales vía Banexa (POST /terras/cobrar-servicio/) y SOLO si
+    Banexa confirma con 200 activa o renueva la tarjeta:
+    - Si ya estaba vigente (activa, vencimiento futuro): los días de
+      suscripción configurados se suman desde el vencimiento actual, no
+      desde ahora — para no perderle días a quien renueva antes de vencer.
     - Si estaba vencida/cortada/en borrador: se suman desde ahora.
     Cualquier error de Banexa (clave incorrecta/bloqueada/no configurada,
     saldo insuficiente, lo que sea) se reenvía tal cual al frontend y la
@@ -114,9 +113,11 @@ def pagar_tarjeta(request, tarjeta_id):
             {'ok': False, 'error': 'Debes ingresar tu clave privada.'}, status=status.HTTP_400_BAD_REQUEST
         )
 
+    config = ConfiguracionTarjetas.obtener()
+
     try:
         resp = banexa_post(request, '/terras/cobrar-servicio/', {
-            'cantidad': settings.TARJETA_PRECIO_TERRAS,
+            'cantidad': config.precio_terras,
             'clave_privada': clave_privada,
             'detalle': f'Tarjeta digital - {tarjeta.slug}',
         })
@@ -138,14 +139,16 @@ def pagar_tarjeta(request, tarjeta_id):
         status_code = resp.status_code if resp.status_code in (400, 403, 404) else status.HTTP_502_BAD_GATEWAY
         return Response({'ok': False, 'error': mensaje}, status=status_code)
 
-    # Banexa confirmó el cobro (200) — recién acá se activa/renueva.
+    # Banexa confirmó el cobro (200) — recién acá se activa/renueva y se
+    # registra el pago (fuente de verdad de las estadísticas de ingresos).
     ahora = timezone.now()
     sigue_vigente = tarjeta.fecha_vencimiento and tarjeta.fecha_vencimiento > ahora
     base = tarjeta.fecha_vencimiento if sigue_vigente else ahora
     tarjeta.estado = 'activa'
     tarjeta.fecha_ultimo_pago = ahora
-    tarjeta.fecha_vencimiento = base + timedelta(days=settings.TARJETA_DIAS_SUSCRIPCION)
+    tarjeta.fecha_vencimiento = base + timedelta(days=config.dias_suscripcion)
     tarjeta.save()
+    PagoTarjeta.objects.create(tarjeta=tarjeta, monto_terras=config.precio_terras)
     correo_pago_confirmado(tarjeta)
 
     return Response({

@@ -47,8 +47,9 @@ def _texto_dias(dias):
 
 def correo_aviso_vencimiento(tarjeta):
     """Aviso de que la tarjeta está por vencer — se manda cuando faltan
-    TARJETA_DIAS_AVISO_PREVIO días o menos (ver el management command
-    `revisar_vencimientos`). No hace nada si el cliente no tiene email."""
+    `ConfiguracionTarjetas.obtener().dias_aviso_previo` días o menos (ver el
+    management command `revisar_vencimientos`). No hace nada si el cliente
+    no tiene email."""
     destinatarios = _destinatarios(tarjeta)
     if not destinatarios:
         return

@@ -4,8 +4,9 @@ periódicamente (cron/tarea programada, ej. una vez al día). Hace dos cosas,
 ninguna irreversible ni de cobro:
 
 1. Avisa por correo a las tarjetas 'activa' cuyo vencimiento está a
-   TARJETA_DIAS_AVISO_PREVIO días o menos (`correo_aviso_vencimiento`), sin
-   reenviar el mismo aviso más de una vez por día (usa `fecha_ultimo_aviso`).
+   `ConfiguracionTarjetas.obtener().dias_aviso_previo` días o menos
+   (`correo_aviso_vencimiento`), sin reenviar el mismo aviso más de una vez
+   por día (usa `fecha_ultimo_aviso`).
 2. Corta (pasa a 'vencida') las tarjetas 'activa' cuyo vencimiento ya pasó,
    y les avisa por correo (`correo_tarjeta_cortada`). El efecto de "ya no se
    muestra públicamente" es automático vía `Tarjeta.esta_vigente()` — este
@@ -18,12 +19,11 @@ segunda vez.
 """
 from datetime import timedelta
 
-from django.conf import settings
 from django.core.management.base import BaseCommand
 from django.utils import timezone
 
 from apps.tarjetas.correos import correo_aviso_vencimiento, correo_tarjeta_cortada
-from apps.tarjetas.models import Tarjeta
+from apps.tarjetas.models import ConfiguracionTarjetas, Tarjeta
 
 
 class Command(BaseCommand):
@@ -38,7 +38,8 @@ class Command(BaseCommand):
 
         # 1) Aviso previo: activas, con vencimiento futuro dentro de la
         # ventana de aviso, que no hayan recibido el aviso hoy todavía.
-        limite_aviso = ahora + timedelta(days=settings.TARJETA_DIAS_AVISO_PREVIO)
+        dias_aviso_previo = ConfiguracionTarjetas.obtener().dias_aviso_previo
+        limite_aviso = ahora + timedelta(days=dias_aviso_previo)
         candidatas_aviso = Tarjeta.objects.filter(
             estado='activa',
             fecha_vencimiento__gt=ahora,

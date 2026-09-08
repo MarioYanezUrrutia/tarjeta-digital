@@ -13,6 +13,14 @@ SECRET_KEY = env('SECRET_KEY', default='replace-this-with-secure-key')
 DEBUG = env('DEBUG')
 ALLOWED_HOSTS = env.list('ALLOWED_HOSTS', default=['localhost', '127.0.0.1'])
 
+# En dev el backend corre solo (localhost:8010) y el frontend pega a
+# localhost:8010/api/, por lo que las rutas necesitan el prefijo 'api/'.
+# En producción (cPanel/Passenger) la app ya queda montada bajo /api por
+# fuera, así que dejar el prefijo interno también lo duplicaría
+# (/api/api/health/) — ahí el .env de producción debe poner URL_PREFIX=
+# (vacío).
+URL_PREFIX = env('URL_PREFIX', default='api/')
+
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',

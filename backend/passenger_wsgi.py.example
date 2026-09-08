@@ -1,0 +1,26 @@
+# Plantilla de passenger_wsgi.py para tarjeta-digital en cPanel.
+#
+# Este archivo NO se commitea como `passenger_wsgi.py` real (mismo criterio
+# que Banexa/bot_ia: el suyo vive únicamente en el servidor, nunca en git).
+# Se deja acá como plantilla lista para copiar a mano al servidor.
+#
+# Basado en el patrón documentado de Banexa
+# (bot_ia/docs/ROSITA_runbook_deploy_31_julio.md, sección 2.7) — PENDIENTE
+# de confirmar contra el archivo REAL de Banexa en el servidor
+# (`cat ~/public_html/api.kabymur.com/backend/passenger_wsgi.py`), que
+# cPanel pudo haber generado distinto a este template a mano.
+#
+# Va en la raíz de la app de Passenger (el "Application root" que se
+# configure en cPanel > Setup Python App). Si esa raíz es la carpeta que
+# contiene a `backend/` (el repo completo), este archivo asume esa
+# ubicación un nivel arriba de `backend/manage.py`.
+
+import os
+import sys
+
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'backend'))
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'config.settings')
+
+from django.core.wsgi import get_wsgi_application
+
+application = get_wsgi_application()

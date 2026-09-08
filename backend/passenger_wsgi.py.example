@@ -4,21 +4,34 @@
 # que Banexa/bot_ia: el suyo vive únicamente en el servidor, nunca en git).
 # Se deja acá como plantilla lista para copiar a mano al servidor.
 #
-# Basado en el patrón documentado de Banexa
-# (bot_ia/docs/ROSITA_runbook_deploy_31_julio.md, sección 2.7) — PENDIENTE
-# de confirmar contra el archivo REAL de Banexa en el servidor
-# (`cat ~/public_html/api.kabymur.com/backend/passenger_wsgi.py`), que
-# cPanel pudo haber generado distinto a este template a mano.
-#
-# Va en la raíz de la app de Passenger (el "Application root" que se
-# configure en cPanel > Setup Python App). Si esa raíz es la carpeta que
-# contiene a `backend/` (el repo completo), este archivo asume esa
-# ubicación un nivel arriba de `backend/manage.py`.
+# Patrón REAL confirmado del passenger_wsgi.py de Banexa en este mismo
+# cPanel (no un template genérico) -- ver reportes/DEPLOY_PREP.md. Las dos
+# rutas de abajo son las que hay que ajustar a los valores reales que
+# cPanel asigne a tarjeta.kabymur.com (Mario: reemplázalas cuando se cree
+# la app Python en "Setup Python App").
 
 import os
 import sys
 
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'backend'))
+# Ruta absoluta a la carpeta `backend/` de tarjeta-digital en el servidor
+# (equivalente a lo que Banexa tiene en
+# /home/kabymur1/public_html/api.kabymur.com/backend) -- AJUSTAR a la ruta
+# real una vez definido dónde vive tarjeta-digital dentro de
+# /home/kabymur1/public_html/tarjeta.kabymur.com/.
+backend_path = '/home/kabymur1/public_html/tarjeta.kabymur.com/backend'
+sys.path.insert(0, backend_path)
+
+# Ruta al virtualenv que cPanel cree para la app de tarjeta.kabymur.com
+# (equivalente al de Banexa:
+# /home/kabymur1/virtualenv/public_html/api.kabymur.com/backend/3.12/lib/python3.12/site-packages)
+# -- AJUSTAR al valor real que muestre cPanel > Setup Python App al crear
+# la app (el path exacto depende del "Application root" que se elija ahí).
+virtualenv_path = '/home/kabymur1/virtualenv/public_html/tarjeta.kabymur.com/backend/3.12/lib/python3.12/site-packages'
+sys.path.insert(0, virtualenv_path)
+
+from dotenv import load_dotenv
+load_dotenv(os.path.join(backend_path, '.env'))
+
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'config.settings')
 
 from django.core.wsgi import get_wsgi_application

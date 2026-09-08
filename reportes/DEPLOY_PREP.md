@@ -1,5 +1,101 @@
 # Bloque 2 — Paso 1: investigación de Banexa en cPanel + preparación de tarjeta-digital
 
+## Addendum — Postgres 13 + passenger_wsgi.py real (con datos confirmados del servidor)
+
+Con la confirmación del servidor (PostgreSQL 13.23, y el `passenger_wsgi.py`
+real de Banexa), se resolvieron dos de los cuatro puntos pendientes que
+había dejado abiertos este mismo reporte.
+
+### Workaround de Postgres 13 portado
+
+- **`backend/config/pg_backend/__init__.py`** (vacío) y **`backend/config/
+  pg_backend/base.py`** (nuevo): portado tal cual desde
+  `bot_ia/backend/config/pg_backend/base.py` — un `DatabaseWrapper` que
+  hereda el backend real de `django.db.backends.postgresql` y solo
+  neutraliza `check_database_version_supported()` (Django 6 exige
+  Postgres 14+ por política de soporte, no por una dependencia técnica
+  real — el motivo completo, con la cita de la nota de Django 5.2, quedó
+  en el docstring del archivo). Es un paquete (con `base.py` adentro), no
+  un módulo suelto, porque Django exige que `ENGINE` apunte a un paquete
+  (`django.db.utils.load_backend` siempre importa `"<ENGINE>.base"`).
+- **`backend/config/settings.py`**: después de armar `DATABASES` con
+  `env.db('DATABASE_URL', ...)`, se agregó:
+  ```python
+  if DATABASES['default']['ENGINE'] == 'django.db.backends.postgresql':
+      DATABASES['default']['ENGINE'] = 'config.pg_backend'
+  ```
+  **Ajuste respecto al patrón de bot_ia** (la tarea pedía confirmar que la
+  lógica calzara con cómo tarjeta-digital arma `DATABASES`): a diferencia
+  de bot_ia (que exige `DATABASE_URL` sin default, siempre Postgres),
+  tarjeta-digital tiene un **fallback a sqlite** cuando `DATABASE_URL` no
+  está seteada (`default=f'sqlite:///...'`, para poder levantar el
+  proyecto sin Postgres instalado). Reemplazar el `ENGINE` sin condición
+  habría roto ese fallback (sqlite no puede usar un wrapper que hereda de
+  `django.db.backends.postgresql`). Por eso el reemplazo quedó
+  **condicionado** a que el engine resuelto sea realmente Postgres — con
+  sqlite, `DATABASES` queda intacto; con Postgres (dev local o
+  producción), se activa el wrapper igual que en bot_ia.
+
+### `requirements.txt` — versiones fijadas
+
+Fijadas con `==` a lo que hay instalado en el venv de desarrollo
+(`pip freeze`), agregando `python-dotenv` (lo usa el `passenger_wsgi.py`
+real de Banexa vía `load_dotenv`, confirmado necesario para replicar el
+mismo patrón):
+
+```
+Django==6.1.1
+djangorestframework==3.18.0
+django-cors-headers==4.9.0
+django-environ==0.14.0
+psycopg2-binary==2.9.12
+Pillow==12.3.0
+requests==2.34.2
+python-dotenv==1.2.3
+```
+
+`django-environ` ya cubre `DATABASE_URL` (vía `env.db()`) — no hizo falta
+agregar `dj-database-url`, tarjeta-digital nunca lo usó.
+
+### `passenger_wsgi.py.example` — actualizado al patrón REAL de Banexa
+
+Reemplazado el template genérico anterior por el patrón **real** que
+confirmaste del servidor (`load_dotenv` + dos `sys.path.insert` — uno al
+`backend/` del proyecto, otro al `site-packages` del virtualenv que crea
+cPanel — antes de `get_wsgi_application()`), con las dos rutas
+(`backend_path`, `virtualenv_path`) dejadas como placeholders comentados
+para que las ajustes con los valores reales una vez creada la app Python
+de `tarjeta.kabymur.com` en cPanel (dependen del "Application root" que
+elijas ahí, todavía no creado).
+
+### Verificación
+
+- `python manage.py check` → limpio, sin issues.
+- `DATABASES['default']['ENGINE']` confirmado en `'config.pg_backend'` en
+  tiempo de ejecución (el Postgres local es 13 o superior, así que el
+  bypass se activa igual).
+- `python manage.py migrate` corrió limpio sobre el Postgres local
+  (18.3 — por arriba del piso de Django, así que el chequeo que se está
+  neutralizando ni siquiera se dispararía sin el workaround; igual sirve
+  para confirmar que el wrapper no rompe nada real: migraciones,
+  conexión, cursor, todo igual que con el backend original).
+- Consulta ORM real de prueba (`Tarjeta.objects.count()`) contra la base
+  de desarrollo → responde normal (13 tarjetas), confirmando que el
+  `DatabaseWrapper` heredado funciona para lectura/escritura real, no
+  solo para `migrate`.
+
+### Pendientes que siguen abiertos (sin cambios en esta tarea)
+
+De los 4 puntos que había dejado pendientes en la entrega anterior, quedan
+todavía sin confirmar:
+2. Cómo sirve Banexa `/static/` y `/media/` en producción (Static Files
+   Mappings de cPanel u otro mecanismo).
+3. Si cPanel permite montar la app Python de tarjeta-digital en una
+   subruta (`tarjeta.kabymur.com/api`) en vez del dominio completo.
+
+(Los puntos 1 y 4 — `passenger_wsgi.py` real y versión de Postgres — ya
+quedaron resueltos con esta entrega.)
+
 ## Parte 1 — Cómo corre Banexa (bot_ia), investigado en el repo local
 
 ### Hallazgo previo importante: el repo tiene DOS narrativas de hosting distintas

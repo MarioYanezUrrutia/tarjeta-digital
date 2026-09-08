@@ -1,7 +1,8 @@
-Django
-djangorestframework
-django-cors-headers
-django-environ
-psycopg2-binary
-Pillow
-requests
+Django==6.1.1
+djangorestframework==3.18.0
+django-cors-headers==4.9.0
+django-environ==0.14.0
+psycopg2-binary==2.9.12
+Pillow==12.3.0
+requests==2.34.2
+python-dotenv==1.2.3

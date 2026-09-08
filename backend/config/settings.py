@@ -60,6 +60,15 @@ WSGI_APPLICATION = 'config.wsgi.application'
 DATABASES = {
     'default': env.db('DATABASE_URL', default=f'sqlite:///{os.path.join(BASE_DIR, "db.sqlite3")}')
 }
+# Producción (cPanel) corre PostgreSQL 13.23; Django 6 exige 14+ por
+# defecto. ENGINE apunta a nuestro wrapper propio, que hereda TODO del
+# backend real de Django y solo neutraliza el chequeo de versión mínima --
+# ver config/pg_backend/base.py y reportes/DEPLOY_PREP.md para el motivo y
+# el riesgo aceptado. Solo se reemplaza el ENGINE si la base es Postgres:
+# el fallback a sqlite (sin DATABASE_URL, ej. dev sin Postgres instalado)
+# debe seguir siendo sqlite de verdad.
+if DATABASES['default']['ENGINE'] == 'django.db.backends.postgresql':
+    DATABASES['default']['ENGINE'] = 'config.pg_backend'
 
 AUTH_PASSWORD_VALIDATORS = []
 

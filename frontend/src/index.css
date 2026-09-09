@@ -5,3 +5,11 @@
   --color-primary: #0ea5a4;
   --color-muted: #6b7280;
 } */
+
+/* Tailwind v4 preflight ya no pone cursor:pointer en <button> (a diferencia
+   de v1/v2) — sin esto, todo boton nativo muestra la flecha en vez de la
+   manito. */
+button:not(:disabled),
+[role='button']:not(:disabled) {
+  cursor: pointer;
+}

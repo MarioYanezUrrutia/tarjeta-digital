@@ -17,6 +17,72 @@ function formatearUrl(url) {
   return url.replace(/^https?:\/\//i, '').replace(/\/+$/, '')
 }
 
+// Los valores de un vCard usan ; , \ y saltos de linea como separadores del
+// formato — hay que escaparlos si vienen dentro de un dato (ver RFC 6350).
+function escaparVCard(valor) {
+  return String(valor)
+    .replace(/\\/g, '\\\\')
+    .replace(/;/g, '\\;')
+    .replace(/,/g, '\\,')
+    .replace(/\r?\n/g, '\\n')
+}
+
+/** Arma el contenido de un archivo vCard 3.0 (el mas compatible con
+ * agendas de iOS/Android) con los datos publicos de una tarjeta —
+ * solo incluye los campos que tengan valor. */
+export function generarVCard(tarjeta) {
+  const {
+    nombre_mostrado, empresa, cargo_rubro, profesion,
+    telefono, whatsapp, email_contacto, sitio_web,
+    instagram, facebook, linkedin, tiktok, youtube, x_twitter,
+  } = tarjeta
+
+  const nombre = (nombre_mostrado || '').trim() || 'Contacto'
+  const titulo = cargo_rubro || profesion
+
+  const lineas = ['BEGIN:VCARD', 'VERSION:3.0', `FN:${escaparVCard(nombre)}`, `N:${escaparVCard(nombre)};;;;`]
+
+  if (empresa) lineas.push(`ORG:${escaparVCard(empresa)}`)
+  if (titulo) lineas.push(`TITLE:${escaparVCard(titulo)}`)
+  if (telefono) lineas.push(`TEL;TYPE=WORK,VOICE:${escaparVCard(telefono)}`)
+  if (whatsapp && whatsapp !== telefono) lineas.push(`TEL;TYPE=CELL:${escaparVCard(whatsapp)}`)
+  if (email_contacto) lineas.push(`EMAIL;TYPE=INTERNET:${escaparVCard(email_contacto)}`)
+  if (sitio_web) lineas.push(`URL:${escaparVCard(sitio_web)}`)
+  ;[instagram, facebook, linkedin, tiktok, youtube, x_twitter]
+    .filter(Boolean)
+    .forEach((url) => lineas.push(`URL:${escaparVCard(url)}`))
+
+  lineas.push('END:VCARD')
+  return lineas.join('\r\n')
+}
+
+// Tras normalize('NFD') los acentos quedan como caracteres combinantes
+// aparte (ej. "a" + U+0301) — hay que quitarlos antes de filtrar a
+// alfanumerico o "María" quedaria "Mari_a" en vez de "Maria".
+function limpiarNombreArchivo(nombre) {
+  const limpio = (nombre || '')
+    .normalize('NFD')
+    .replace(/[̀-ͯ]/g, '')
+    .replace(/[^a-zA-Z0-9]+/g, '_')
+    .replace(/^_+|_+$/g, '')
+  return limpio || 'contacto'
+}
+
+/** Dispara la descarga del .vcf de una tarjeta (Blob + <a download>) —
+ * al abrirlo en un celular, el sistema ofrece agregarlo a los contactos. */
+export function descargarVCard(tarjeta) {
+  const contenido = generarVCard(tarjeta)
+  const blob = new Blob([contenido], { type: 'text/vcard;charset=utf-8' })
+  const url = URL.createObjectURL(blob)
+  const enlace = document.createElement('a')
+  enlace.href = url
+  enlace.download = `${limpiarNombreArchivo(tarjeta.nombre_mostrado)}.vcf`
+  document.body.appendChild(enlace)
+  enlace.click()
+  document.body.removeChild(enlace)
+  URL.revokeObjectURL(url)
+}
+
 export function useDatosTarjeta(tarjeta) {
   const {
     whatsapp, telefono, email_contacto, sitio_web,

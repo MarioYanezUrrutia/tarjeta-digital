@@ -1,6 +1,6 @@
 import React from 'react'
 import { IconPin, IconUser, IconMap, IconContactCard } from './icons'
-import { iniciales, useDatosTarjeta } from './useDatosTarjeta'
+import { descargarVCard, iniciales, useDatosTarjeta } from './useDatosTarjeta'
 
 function BotonAccion({ href, Icon, label, valor }) {
   return (
@@ -72,9 +72,9 @@ export default function PlantillaA({ tarjeta }) {
           </section>
         )}
 
-        {/* TODO: generar y descargar archivo .vcf real con los datos de la tarjeta */}
         <button
           type="button"
+          onClick={() => descargarVCard(tarjeta)}
           className="flex items-center justify-center gap-2 rounded-[9px] bg-[#1a1d21] px-4 py-3 text-sm font-medium text-white transition hover:bg-[#2a2e33]"
         >
           <IconContactCard />

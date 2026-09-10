@@ -1,6 +1,7 @@
 import PlantillaA from './PlantillaA'
 import PlantillaB from './PlantillaB'
 import PlantillaC from './PlantillaC'
+import PlantillaPro from './PlantillaPro'
 
 // Mapa de plantillas disponibles por el campo `plantilla` que envía el
 // backend. Valores válidos: 'A' (elegante), 'B' (moderna), 'C' (link en
@@ -17,4 +18,9 @@ const PLANTILLAS = {
 
 export function getPlantilla(nombre) {
   return PLANTILLAS[nombre] || PlantillaC
+}
+
+export function getPlantillaParaTarjeta(tarjeta) {
+  if (tarjeta && tarjeta.es_pro) return PlantillaPro
+  return getPlantilla(tarjeta && tarjeta.plantilla)
 }

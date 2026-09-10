@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
-import { getPlantilla } from '../plantillas'
+import { getPlantillaParaTarjeta } from '../plantillas'
 
 export default function TarjetaPublica() {
   const { slug } = useParams()
@@ -51,6 +51,6 @@ export default function TarjetaPublica() {
     )
   }
 
-  const Plantilla = getPlantilla(tarjeta.plantilla)
+  const Plantilla = getPlantillaParaTarjeta(tarjeta)
   return <Plantilla tarjeta={tarjeta} />
 }

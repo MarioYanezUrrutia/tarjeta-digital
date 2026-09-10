@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from .models import Producto, Tarjeta
+from .models import Noticia, PreguntaFrecuente, Producto, Tarjeta, Testimonio
 
 
 class ProductoPublicoSerializer(serializers.ModelSerializer):
@@ -11,15 +11,37 @@ class ProductoPublicoSerializer(serializers.ModelSerializer):
         fields = ['nombre', 'imagen', 'caracteristicas', 'detalle', 'orden']
 
 
+class NoticiaPublicaSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Noticia
+        fields = ['imagen', 'titulo', 'resumen', 'fecha', 'enlace', 'orden']
+
+
+class TestimonioPublicoSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Testimonio
+        fields = ['avatar', 'autor', 'relacion', 'texto', 'calificacion', 'orden']
+
+
+class FaqPublicaSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = PreguntaFrecuente
+        fields = ['pregunta', 'respuesta', 'orden']
+
+
 class TarjetaPublicaSerializer(serializers.ModelSerializer):
     productos = serializers.SerializerMethodField()
+    es_pro = serializers.SerializerMethodField()
+    noticias = serializers.SerializerMethodField()
+    testimonios = serializers.SerializerMethodField()
+    faqs = serializers.SerializerMethodField()
 
     class Meta:
         model = Tarjeta
         fields = [
             # Identidad
             'imagen', 'nombre_mostrado', 'cargo_rubro', 'profesion', 'empresa', 'eslogan',
-            'tipo', 'plantilla',
+            'tipo', 'plantilla', 'plan', 'es_pro',
             # Contacto
             'telefono', 'whatsapp', 'email_contacto', 'sitio_web',
             # Redes
@@ -31,8 +53,11 @@ class TarjetaPublicaSerializer(serializers.ModelSerializer):
             # Flags de visibilidad
             'mostrar_contacto', 'mostrar_redes', 'mostrar_sobre',
             'mostrar_ubicacion', 'mostrar_productos',
+            'mostrar_noticias', 'mostrar_testimonios', 'mostrar_faq',
             # Productos
             'productos',
+            # Noticias / Testimonios / FAQ (Pro)
+            'noticias', 'testimonios', 'faqs',
         ]
 
     def get_productos(self, obj):
@@ -40,6 +65,24 @@ class TarjetaPublicaSerializer(serializers.ModelSerializer):
             return []
         productos = obj.productos.all()
         return ProductoPublicoSerializer(productos, many=True, context=self.context).data
+
+    def get_es_pro(self, obj):
+        return obj.es_pro()
+
+    def get_noticias(self, obj):
+        if not obj.mostrar_noticias:
+            return []
+        return NoticiaPublicaSerializer(obj.noticias.all(), many=True, context=self.context).data
+
+    def get_testimonios(self, obj):
+        if not obj.mostrar_testimonios:
+            return []
+        return TestimonioPublicoSerializer(obj.testimonios.all(), many=True, context=self.context).data
+
+    def get_faqs(self, obj):
+        if not obj.mostrar_faq:
+            return []
+        return FaqPublicaSerializer(obj.faqs.all(), many=True, context=self.context).data
 
 
 class ProductoSerializer(serializers.ModelSerializer):

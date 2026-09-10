@@ -104,6 +104,9 @@ class Tarjeta(models.Model):
     mostrar_sobre = models.BooleanField(default=True)
     mostrar_ubicacion = models.BooleanField(default=True)
     mostrar_productos = models.BooleanField(default=True)
+    mostrar_noticias = models.BooleanField(default=True)
+    mostrar_testimonios = models.BooleanField(default=True)
+    mostrar_faq = models.BooleanField(default=True)
 
     def clean(self):
         # Límite de 3 tarjetas por cliente
@@ -140,6 +143,10 @@ class Tarjeta(models.Model):
         if self.estado != 'activa' or not self.fecha_vencimiento:
             return False
         return self.fecha_vencimiento > timezone.now()
+
+    def es_pro(self):
+        """True si la tarjeta es del plan Pro (landing dinámica)."""
+        return self.plan == 'kabymur_pro'
 
     def dias_para_vencer(self):
         """Días que faltan para el vencimiento (negativo si ya venció), o
@@ -243,3 +250,92 @@ class Producto(models.Model):
 
     def __str__(self):
         return self.nombre
+
+
+class Noticia(models.Model):
+    tarjeta = models.ForeignKey('Tarjeta', on_delete=models.CASCADE, related_name='noticias')
+    imagen = models.ImageField(upload_to='noticias/', null=True, blank=True)
+    titulo = models.CharField(max_length=255)
+    resumen = models.TextField(null=True, blank=True)
+    fecha = models.DateField(null=True, blank=True)
+    enlace = models.CharField(max_length=255, null=True, blank=True)
+    orden = models.PositiveIntegerField(default=0)
+
+    class Meta:
+        ordering = ['orden']
+        verbose_name = 'Noticia'
+        verbose_name_plural = 'Noticias'
+
+    def clean(self):
+        if self.tarjeta_id:
+            qs = Noticia.objects.filter(tarjeta_id=self.tarjeta_id)
+            if self.pk:
+                qs = qs.exclude(pk=self.pk)
+            if qs.count() >= 6:
+                raise ValidationError('Una tarjeta puede tener como máximo 6 noticias.')
+
+    def save(self, *args, **kwargs):
+        self.full_clean()
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return f"{self.titulo} ({self.tarjeta})"
+
+
+class Testimonio(models.Model):
+    tarjeta = models.ForeignKey('Tarjeta', on_delete=models.CASCADE, related_name='testimonios')
+    avatar = models.ImageField(upload_to='testimonios/', null=True, blank=True)
+    autor = models.CharField(max_length=255)
+    relacion = models.CharField(max_length=255, null=True, blank=True)
+    texto = models.TextField()
+    calificacion = models.PositiveSmallIntegerField(null=True, blank=True)
+    orden = models.PositiveIntegerField(default=0)
+
+    class Meta:
+        ordering = ['orden']
+        verbose_name = 'Testimonio'
+        verbose_name_plural = 'Testimonios'
+
+    def clean(self):
+        if self.tarjeta_id:
+            qs = Testimonio.objects.filter(tarjeta_id=self.tarjeta_id)
+            if self.pk:
+                qs = qs.exclude(pk=self.pk)
+            if qs.count() >= 6:
+                raise ValidationError('Una tarjeta puede tener como máximo 6 testimonios.')
+        if self.calificacion is not None and not (1 <= self.calificacion <= 5):
+            raise ValidationError('La calificación debe estar entre 1 y 5.')
+
+    def save(self, *args, **kwargs):
+        self.full_clean()
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return f"Testimonio de {self.autor} ({self.tarjeta})"
+
+
+class PreguntaFrecuente(models.Model):
+    tarjeta = models.ForeignKey('Tarjeta', on_delete=models.CASCADE, related_name='faqs')
+    pregunta = models.CharField(max_length=255)
+    respuesta = models.TextField()
+    orden = models.PositiveIntegerField(default=0)
+
+    class Meta:
+        ordering = ['orden']
+        verbose_name = 'Pregunta frecuente'
+        verbose_name_plural = 'Preguntas frecuentes'
+
+    def clean(self):
+        if self.tarjeta_id:
+            qs = PreguntaFrecuente.objects.filter(tarjeta_id=self.tarjeta_id)
+            if self.pk:
+                qs = qs.exclude(pk=self.pk)
+            if qs.count() >= 6:
+                raise ValidationError('Una tarjeta puede tener como máximo 6 preguntas frecuentes.')
+
+    def save(self, *args, **kwargs):
+        self.full_clean()
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return f"{self.pregunta} ({self.tarjeta})"

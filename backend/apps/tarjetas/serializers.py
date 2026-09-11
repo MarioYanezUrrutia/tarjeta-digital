@@ -126,6 +126,8 @@ class TarjetaPanelSerializer(serializers.ModelSerializer):
     aparte, por request.FILES — ver panel_views.tarjeta_detalle — nunca por
     este serializer). NO incluye `productos` (Panel-3): fuera de alcance."""
 
+    es_pro = serializers.SerializerMethodField()
+
     class Meta:
         model = Tarjeta
         fields = [
@@ -137,7 +139,11 @@ class TarjetaPanelSerializer(serializers.ModelSerializer):
             'sobre_texto', 'direccion', 'horario',
             'mostrar_contacto', 'mostrar_redes', 'mostrar_sobre',
             'mostrar_ubicacion', 'mostrar_productos',
+            'es_pro',
         ]
         read_only_fields = [
             'id', 'slug', 'plan', 'estado', 'imagen', 'fecha_vencimiento', 'fecha_ultimo_pago',
         ]
+
+    def get_es_pro(self, obj):
+        return obj.es_pro()

@@ -5,6 +5,7 @@ import { PLANTILLAS_DISPONIBLES, descripcionEstado } from '../constants/tarjetas
 import MiniPreviewPlantilla from '../plantillas/MiniPreviewPlantilla'
 import { iniciales } from '../plantillas/useDatosTarjeta'
 import GestionProductos from '../components/GestionProductos'
+import GestionNoticias from '../components/GestionNoticias'
 import ModalPago from '../components/ModalPago'
 import CompartirTarjeta from '../components/CompartirTarjeta'
 
@@ -118,6 +119,7 @@ export default function TarjetaEditor() {
   const [estado, setEstado] = useState('borrador')
   const [fechaVencimiento, setFechaVencimiento] = useState(null)
   const [mostrarModalPago, setMostrarModalPago] = useState(false)
+  const [esPro, setEsPro] = useState(false)
 
   useEffect(() => {
     let activo = true
@@ -132,6 +134,7 @@ export default function TarjetaEditor() {
       setImagenUrl(datos.imagen || null)
       setEstado(datos.estado || 'borrador')
       setFechaVencimiento(datos.fecha_vencimiento || null)
+      setEsPro(!!datos.es_pro)
       setCampos((prev) => ({
         ...prev,
         ...Object.fromEntries(CAMPOS_A_GUARDAR.map((c) => [c, datos[c] ?? prev[c]])),
@@ -379,6 +382,12 @@ export default function TarjetaEditor() {
         >
           <GestionProductos tarjetaId={id} />
         </Seccion>
+
+        {esPro && (
+          <Seccion titulo="Noticias (Pro)">
+            <GestionNoticias tarjetaId={id} />
+          </Seccion>
+        )}
 
         <Seccion titulo="Plantilla">
           <div className="flex flex-wrap justify-center gap-4 sm:justify-start">

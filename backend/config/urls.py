@@ -3,6 +3,7 @@ from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import include, path
 
+from apps.tarjetas.faq_views import faq_detalle, faqs_lista, faqs_reordenar
 from apps.tarjetas.noticias_views import noticia_detalle, noticias_lista, noticias_reordenar
 from apps.tarjetas.pago_views import estado_pago, pagar_tarjeta
 from apps.tarjetas.panel_views import crear_tarjeta, mis_tarjetas, tarjeta_detalle
@@ -33,6 +34,9 @@ urlpatterns = [
     ),
     path(f'{prefix}tarjetas/<int:tarjeta_id>/testimonios/', testimonios_lista, name='testimonios-lista'),
     path(f'{prefix}testimonios/<int:testimonio_id>/', testimonio_detalle, name='testimonio-detalle'),
+    path(f'{prefix}tarjetas/<int:tarjeta_id>/faqs/reordenar/', faqs_reordenar, name='faqs-reordenar'),
+    path(f'{prefix}tarjetas/<int:tarjeta_id>/faqs/', faqs_lista, name='faqs-lista'),
+    path(f'{prefix}faqs/<int:faq_id>/', faq_detalle, name='faq-detalle'),
     path(f'{prefix}tarjetas/<int:tarjeta_id>/estado-pago/', estado_pago, name='tarjeta-estado-pago'),
     path(f'{prefix}tarjetas/<int:tarjeta_id>/pagar/', pagar_tarjeta, name='tarjeta-pagar'),
 ]

@@ -7,6 +7,7 @@ import { iniciales } from '../plantillas/useDatosTarjeta'
 import GestionProductos from '../components/GestionProductos'
 import GestionNoticias from '../components/GestionNoticias'
 import GestionTestimonios from '../components/GestionTestimonios'
+import GestionFaqs from '../components/GestionFaqs'
 import ModalPago from '../components/ModalPago'
 import CompartirTarjeta from '../components/CompartirTarjeta'
 
@@ -393,6 +394,12 @@ export default function TarjetaEditor() {
         {esPro && (
           <Seccion titulo="Testimonios (Pro)">
             <GestionTestimonios tarjetaId={id} />
+          </Seccion>
+        )}
+
+        {esPro && (
+          <Seccion titulo="Preguntas frecuentes (Pro)">
+            <GestionFaqs tarjetaId={id} />
           </Seccion>
         )}
 

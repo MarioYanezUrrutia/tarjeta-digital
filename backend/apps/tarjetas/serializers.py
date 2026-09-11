@@ -124,6 +124,18 @@ class TestimonioSerializer(serializers.ModelSerializer):
         read_only_fields = ['id', 'avatar', 'orden']
 
 
+class FaqSerializer(serializers.ModelSerializer):
+    """Panel: gestión de preguntas frecuentes (GET/POST/PATCH/DELETE en
+    faq_views.py). `orden` de solo lectura — se fija solo (al crear) o vía
+    POST .../faqs/reordenar/, nunca escribiendo este serializer directo.
+    Sin campo de imagen (a diferencia de Producto/Noticia/Testimonio)."""
+
+    class Meta:
+        model = PreguntaFrecuente
+        fields = ['id', 'pregunta', 'respuesta', 'orden']
+        read_only_fields = ['id', 'orden']
+
+
 class MisTarjetasSerializer(serializers.ModelSerializer):
     """GET /api/mis-tarjetas/ y respuesta de POST /api/tarjetas/ — lo mínimo
     para la pantalla de inicio del panel (lista de tarjetas + botón crear)."""

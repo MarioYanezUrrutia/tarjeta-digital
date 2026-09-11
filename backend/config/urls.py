@@ -5,7 +5,7 @@ from django.urls import include, path
 
 from apps.tarjetas.faq_views import faq_detalle, faqs_lista, faqs_reordenar
 from apps.tarjetas.noticias_views import noticia_detalle, noticias_lista, noticias_reordenar
-from apps.tarjetas.pago_views import estado_pago, pagar_tarjeta
+from apps.tarjetas.pago_views import crear_pago_flow, estado_pago, pagar_tarjeta
 from apps.tarjetas.panel_views import crear_tarjeta, mis_tarjetas, tarjeta_detalle
 from apps.tarjetas.productos_views import producto_detalle, productos_lista, productos_reordenar
 from apps.tarjetas.testimonios_views import testimonio_detalle, testimonios_lista, testimonios_reordenar
@@ -40,6 +40,7 @@ urlpatterns = [
     path(f'{prefix}faqs/<int:faq_id>/', faq_detalle, name='faq-detalle'),
     path(f'{prefix}tarjetas/<int:tarjeta_id>/estado-pago/', estado_pago, name='tarjeta-estado-pago'),
     path(f'{prefix}tarjetas/<int:tarjeta_id>/pagar/', pagar_tarjeta, name='tarjeta-pagar'),
+    path(f'{prefix}tarjetas/<int:tarjeta_id>/pagar-flow/', crear_pago_flow, name='tarjeta-pagar-flow'),
 ]
 
 if settings.DEBUG:

@@ -11,6 +11,7 @@ cualquier motivo (clave, saldo, lo que sea), la tarjeta NO se toca. El dinero
 (Terras) y el estado de la tarjeta nunca deben quedar desincronizados: nunca
 activar sin haber cobrado, nunca cobrar sin activar.
 """
+import time
 from datetime import timedelta
 
 import requests
@@ -23,6 +24,7 @@ from rest_framework.response import Response
 from apps.cuentas.auth import resolver_perfil_banexa
 from apps.cuentas.banexa import banexa_get, banexa_post
 
+from . import flow
 from .correos import correo_pago_confirmado
 from .models import Cliente, ConfiguracionTarjetas, PagoTarjeta
 from .panel_views import _obtener_tarjeta_del_cliente
@@ -157,3 +159,54 @@ def pagar_tarjeta(request, tarjeta_id):
         'fecha_vencimiento': tarjeta.fecha_vencimiento,
         'nuevo_saldo': resp.json().get('nuevo_saldo'),
     })
+
+
+@api_view(['POST'])
+@permission_classes([AllowAny])
+def crear_pago_flow(request, tarjeta_id):
+    """POST /api/tarjetas/<tarjeta_id>/pagar-flow/ — crea una orden de pago
+    en Flow (Cobro-4) por el precio del plan Pro en CLP, y devuelve la URL
+    a la que el frontend debe redirigir al usuario para pagar. No activa
+    ni toca la tarjeta acá: eso lo hace el webhook `flow-confirmar` (paso
+    siguiente) cuando Flow confirme el pago de verdad."""
+    tarjeta, error = _obtener_tarjeta_o_404(request, tarjeta_id)
+    if error is not None:
+        return error
+
+    if not tarjeta.es_pro():
+        return Response({'ok': False, 'error': 'Esta tarjeta no es Pro.'}, status=status.HTTP_400_BAD_REQUEST)
+
+    config = ConfiguracionTarjetas.obtener()
+    precio = config.precio_pro_clp
+    if precio <= 0:
+        return Response(
+            {'ok': False, 'error': 'El precio del plan Pro no está configurado.'},
+            status=status.HTTP_400_BAD_REQUEST,
+        )
+
+    commerce_order = f'pro-{tarjeta.id}-{int(time.time())}'
+
+    # Webhook de confirmación (backend) — ruta literal en vez de reverse()
+    # porque 'flow-confirmar' todavía no existe (se crea en el paso
+    # siguiente); mismo URL_PREFIX que el resto de las rutas.
+    from django.conf import settings as dj
+    conf_path = f"/{dj.URL_PREFIX}pagos/flow/confirmar/"
+    url_confirmation = request.build_absolute_uri(conf_path)
+    url_return = f"{dj.PUBLIC_BASE_URL}/pago/flow/retorno?order={commerce_order}"
+
+    email = (tarjeta.email_contacto or '').strip() or 'sin-correo@kabymur.com'
+    subject = f'Plan Pro - {tarjeta.nombre_mostrado or tarjeta.slug}'
+
+    try:
+        datos = flow.crear_pago(
+            commerce_order=commerce_order,
+            subject=subject,
+            amount=precio,
+            email=email,
+            url_confirmation=url_confirmation,
+            url_return=url_return,
+        )
+    except flow.FlowError as e:
+        return Response({'ok': False, 'error': str(e)}, status=status.HTTP_502_BAD_GATEWAY)
+
+    return Response({'ok': True, 'url': f"{datos['url']}?token={datos['token']}"})

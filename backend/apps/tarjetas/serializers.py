@@ -98,6 +98,19 @@ class ProductoSerializer(serializers.ModelSerializer):
         read_only_fields = ['id', 'imagen', 'orden']
 
 
+class NoticiaSerializer(serializers.ModelSerializer):
+    """Panel: gestión de noticias (GET/POST/PATCH/DELETE en
+    noticias_views.py). `imagen` de solo lectura — se sube/reemplaza por
+    request.FILES, igual que la imagen de producto (Panel-3); `orden`
+    también de solo lectura acá — se fija solo (al crear) o vía POST
+    .../noticias/reordenar/, nunca escribiendo este serializer directo."""
+
+    class Meta:
+        model = Noticia
+        fields = ['id', 'imagen', 'titulo', 'resumen', 'fecha', 'enlace', 'orden']
+        read_only_fields = ['id', 'imagen', 'orden']
+
+
 class MisTarjetasSerializer(serializers.ModelSerializer):
     """GET /api/mis-tarjetas/ y respuesta de POST /api/tarjetas/ — lo mínimo
     para la pantalla de inicio del panel (lista de tarjetas + botón crear)."""

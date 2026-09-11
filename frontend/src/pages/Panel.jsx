@@ -25,11 +25,12 @@ export default function Panel() {
   }, [])
 
   async function onCrear() {
+    if (creando) return
     setError('')
     setCreando(true)
     const { datos, status } = await crearTarjeta()
     setCreando(false)
-    if (status === 201 && datos?.id) {
+    if ((status === 201 || status === 200) && datos?.id) {
       navigate(`/panel/tarjeta/${datos.id}`)
     } else {
       setError(datos?.error || 'No se pudo crear la tarjeta.')

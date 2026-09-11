@@ -11,8 +11,11 @@ directo del id de Banexa. Se recupera o crea perezosamente con
 `_obtener_o_crear_cliente` la primera vez que el usuario toca el panel —
 sin pedirle nada, sin migración nueva.
 """
+from datetime import timedelta
+
 from django.core.exceptions import ValidationError as DjangoValidationError
 from django.core.files.base import ContentFile
+from django.utils import timezone
 from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny
@@ -113,6 +116,19 @@ def crear_tarjeta(request):
         return error
 
     cliente = _obtener_o_crear_cliente(perfil)
+
+    # Anti-duplicado: si el cliente ya tiene una tarjeta 'borrador' creada
+    # hace menos de 10 segundos, es casi seguro un doble-envío del mismo
+    # click (doble-click, red lenta reintentando) — se reusa esa en vez de
+    # crear otra, con 200 en vez de 201 (no se creó nada nuevo).
+    reciente = (
+        Tarjeta.objects
+        .filter(cliente=cliente, estado='borrador', creado__gte=timezone.now() - timedelta(seconds=10))
+        .order_by('-creado')
+        .first()
+    )
+    if reciente is not None:
+        return Response(MisTarjetasSerializer(reciente).data, status=status.HTTP_200_OK)
 
     tarjeta = Tarjeta(cliente=cliente, tipo='persona', plan='kabymur_basico')
     try:

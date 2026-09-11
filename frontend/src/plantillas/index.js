@@ -1,7 +1,7 @@
 import PlantillaA from './PlantillaA'
 import PlantillaB from './PlantillaB'
 import PlantillaC from './PlantillaC'
-import PlantillaPro from './PlantillaPro'
+import PlantillaProSelector from './pro/PlantillaProSelector'
 
 // Mapa de plantillas disponibles por el campo `plantilla` que envía el
 // backend. Valores válidos: 'A' (elegante), 'B' (moderna), 'C' (link en
@@ -21,6 +21,6 @@ export function getPlantilla(nombre) {
 }
 
 export function getPlantillaParaTarjeta(tarjeta) {
-  if (tarjeta && tarjeta.es_pro) return PlantillaPro
+  if (tarjeta && tarjeta.es_pro) return PlantillaProSelector
   return getPlantilla(tarjeta && tarjeta.plantilla)
 }

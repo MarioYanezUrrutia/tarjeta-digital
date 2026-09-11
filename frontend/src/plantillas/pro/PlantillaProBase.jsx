@@ -1,9 +1,6 @@
 import React, { useEffect } from 'react'
-import { IconPin, IconUser, IconMap, IconContactCard } from './icons'
-import { descargarVCard, iniciales, useDatosTarjeta } from './useDatosTarjeta'
-
-const ACCENT = '#0d9488'
-const ACCENT_SOFT = 'rgba(13,148,136,0.10)'
+import { IconPin, IconUser, IconMap, IconContactCard } from '../icons'
+import { descargarVCard, iniciales, useDatosTarjeta } from '../useDatosTarjeta'
 
 function IconWhatsApp({ className }) {
   return (
@@ -13,17 +10,25 @@ function IconWhatsApp({ className }) {
   )
 }
 
-function Estrellas({ n }) {
+function Estrellas({ n, accent }) {
   const total = 5
   const llenas = Math.max(0, Math.min(total, n || 0))
   return (
-    <span aria-label={`${llenas} de 5`} style={{ color: ACCENT }} className="text-sm">
+    <span aria-label={`${llenas} de 5`} style={{ color: accent }} className="text-sm">
       {'★'.repeat(llenas)}<span className="text-gray-300">{'★'.repeat(total - llenas)}</span>
     </span>
   )
 }
 
-export default function PlantillaPro({ tarjeta }) {
+/** Componente base de la landing Pro (Fase 6): misma estructura, misma
+ * lógica (nav, hamburguesa móvil, formulario de contacto, flags de
+ * visibilidad) que la PlantillaPro original — la única diferencia entre
+ * las 6 pieles seleccionables es el objeto `tema` que se le pasa (ver
+ * temas.js). No hardcodear acá ningún color/fondo/tipografía: todo lo
+ * visual sale de `tema`. */
+export default function PlantillaProBase({ tarjeta, tema }) {
+  const { accent, accentSoft, bgClass, fontFamily, heroClass, cardClass } = tema
+
   const {
     imagen, nombre_mostrado, cargo_rubro, profesion, empresa, eslogan,
     sobre_texto, direccion, horario, whatsapp, tipo,
@@ -90,7 +95,7 @@ export default function PlantillaPro({ tarjeta }) {
   const waHref = whatsapp ? `https://wa.me/${whatsapp.replace(/[^0-9]/g, '')}` : null
 
   return (
-    <div className="min-h-screen bg-white text-[#1a1d21]" style={{ fontFamily: "'Manrope', ui-sans-serif, system-ui, sans-serif" }}>
+    <div className={`min-h-screen ${bgClass}`} style={{ fontFamily }}>
 
       <nav className="sticky top-0 z-40 border-b border-black/5 bg-white/85 backdrop-blur">
         <div className="mx-auto flex max-w-5xl items-center justify-between px-5 py-3">
@@ -104,7 +109,7 @@ export default function PlantillaPro({ tarjeta }) {
             {waHref && (
               <a href={waHref} target="_blank" rel="noreferrer"
                  className="rounded-full px-4 py-1.5 text-sm font-medium text-white transition"
-                 style={{ backgroundColor: ACCENT }}>Contáctame</a>
+                 style={{ backgroundColor: accent }}>Contáctame</a>
             )}
             <button
               type="button"
@@ -140,13 +145,13 @@ export default function PlantillaPro({ tarjeta }) {
         )}
       </nav>
 
-      <header className="relative overflow-hidden">
-        <div aria-hidden="true" className="absolute inset-0" style={{ background: `linear-gradient(160deg, ${ACCENT_SOFT} 0%, rgba(255,255,255,0) 55%)` }} />
+      <header className={`relative overflow-hidden ${heroClass}`}>
+        <div aria-hidden="true" className="absolute inset-0" style={{ background: `linear-gradient(160deg, ${accentSoft} 0%, rgba(255,255,255,0) 55%)` }} />
         <div className="relative mx-auto flex max-w-5xl flex-col items-center gap-5 px-5 py-16 text-center">
           {imagen ? (
             <img src={imagen} alt={nombre_mostrado || ''} className="h-36 w-36 rounded-full object-cover shadow-md ring-4 ring-white" />
           ) : (
-            <div className="flex h-36 w-36 items-center justify-center rounded-full text-4xl font-semibold text-white shadow-md" style={{ backgroundColor: ACCENT }}>
+            <div className="flex h-36 w-36 items-center justify-center rounded-full text-4xl font-semibold text-white shadow-md" style={{ backgroundColor: accent }}>
               {iniciales(nombre_mostrado)}
             </div>
           )}
@@ -161,7 +166,7 @@ export default function PlantillaPro({ tarjeta }) {
             {waHref && (
               <a href={waHref} target="_blank" rel="noreferrer"
                  className="flex items-center gap-2 rounded-full px-6 py-3 text-sm font-medium text-white transition"
-                 style={{ backgroundColor: ACCENT }}>
+                 style={{ backgroundColor: accent }}>
                 <IconWhatsApp className="h-5 w-5" /> Escríbeme por WhatsApp
               </a>
             )}
@@ -189,11 +194,11 @@ export default function PlantillaPro({ tarjeta }) {
             <h2 className="mb-6 text-2xl font-semibold">Servicios y productos</h2>
             <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
               {productos.map((p) => (
-                <article key={p.orden + p.nombre} className="overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm transition hover:shadow-md">
+                <article key={p.orden + p.nombre} className={`overflow-hidden transition hover:shadow-md ${cardClass}`}>
                   {p.imagen ? (
                     <img src={p.imagen} alt={p.nombre} className="h-40 w-full object-cover" />
                   ) : (
-                    <div className="h-40 w-full" style={{ backgroundColor: ACCENT_SOFT }} />
+                    <div className="h-40 w-full" style={{ backgroundColor: accentSoft }} />
                   )}
                   <div className="p-5">
                     <h3 className="font-semibold">{p.nombre}</h3>
@@ -211,18 +216,18 @@ export default function PlantillaPro({ tarjeta }) {
             <h2 className="mb-6 text-2xl font-semibold">Noticias y novedades</h2>
             <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
               {noticias.map((n, i) => (
-                <article key={i} className="overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm transition-transform duration-200 hover:scale-[1.03] hover:shadow-lg">
+                <article key={i} className={`overflow-hidden transition-transform duration-200 hover:scale-[1.03] hover:shadow-lg ${cardClass}`}>
                   {n.imagen ? (
                     <img src={n.imagen} alt={n.titulo} className="h-36 w-full object-cover" />
                   ) : (
-                    <div className="h-36 w-full" style={{ backgroundColor: ACCENT_SOFT }} />
+                    <div className="h-36 w-full" style={{ backgroundColor: accentSoft }} />
                   )}
                   <div className="p-5">
                     {n.fecha && <p className="mb-1 text-xs uppercase tracking-wide text-gray-400">{n.fecha}</p>}
                     <h3 className="font-semibold">{n.titulo}</h3>
                     {n.resumen && <p className="mt-1 text-sm text-gray-500">{n.resumen}</p>}
                     {n.enlace && (
-                      <a href={n.enlace} target="_blank" rel="noreferrer" className="mt-3 inline-block text-sm font-medium" style={{ color: ACCENT }}>Ver más →</a>
+                      <a href={n.enlace} target="_blank" rel="noreferrer" className="mt-3 inline-block text-sm font-medium" style={{ color: accent }}>Ver más →</a>
                     )}
                   </div>
                 </article>
@@ -236,14 +241,14 @@ export default function PlantillaPro({ tarjeta }) {
             <h2 className="mb-6 text-2xl font-semibold">Lo que dicen</h2>
             <div className="grid gap-6 sm:grid-cols-2">
               {testimonios.map((t, i) => (
-                <figure key={i} className="rounded-2xl border border-gray-100 bg-white p-6 shadow-sm">
-                  {t.calificacion ? <Estrellas n={t.calificacion} /> : null}
+                <figure key={i} className={`p-6 ${cardClass}`}>
+                  {t.calificacion ? <Estrellas n={t.calificacion} accent={accent} /> : null}
                   <blockquote className="mt-3 text-gray-700">“{t.texto}”</blockquote>
                   <figcaption className="mt-4 flex items-center gap-3">
                     {t.avatar ? (
                       <img src={t.avatar} alt={t.autor} className="h-10 w-10 rounded-full object-cover" />
                     ) : (
-                      <span className="flex h-10 w-10 items-center justify-center rounded-full text-sm font-semibold text-white" style={{ backgroundColor: ACCENT }}>{iniciales(t.autor)}</span>
+                      <span className="flex h-10 w-10 items-center justify-center rounded-full text-sm font-semibold text-white" style={{ backgroundColor: accent }}>{iniciales(t.autor)}</span>
                     )}
                     <span>
                       <span className="block text-sm font-medium">{t.autor}</span>
@@ -281,7 +286,7 @@ export default function PlantillaPro({ tarjeta }) {
                 {contactos.map((c) => (
                   <a key={c.key} href={c.href} target={c.href.startsWith('http') ? '_blank' : undefined} rel="noreferrer"
                      className="flex items-center gap-3 rounded-xl border border-gray-200 px-4 py-3 transition hover:bg-gray-50">
-                    <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full" style={{ backgroundColor: ACCENT_SOFT, color: ACCENT }}><c.Icon /></span>
+                    <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full" style={{ backgroundColor: accentSoft, color: accent }}><c.Icon /></span>
                     <span className="flex min-w-0 flex-col text-left">
                       <span className="text-sm font-medium">{c.label}</span>
                       {c.valor && <span className="truncate text-xs text-gray-400">{c.valor}</span>}
@@ -291,7 +296,7 @@ export default function PlantillaPro({ tarjeta }) {
                 {redes.map((r) => (
                   <a key={r.key} href={r.href} target="_blank" rel="noreferrer"
                      className="flex items-center gap-3 rounded-xl border border-gray-200 px-4 py-3 transition hover:bg-gray-50">
-                    <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full" style={{ backgroundColor: ACCENT_SOFT, color: ACCENT }}><r.Icon /></span>
+                    <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full" style={{ backgroundColor: accentSoft, color: accent }}><r.Icon /></span>
                     <span className="text-sm font-medium">{r.label}</span>
                   </a>
                 ))}
@@ -304,7 +309,7 @@ export default function PlantillaPro({ tarjeta }) {
                 {horario && <p className="text-sm text-gray-400">{horario}</p>}
                 {direccion && (
                   <a href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(direccion)}`} target="_blank" rel="noreferrer"
-                     className="mt-4 inline-flex items-center gap-2 rounded-full px-5 py-2 text-sm font-medium text-white transition" style={{ backgroundColor: ACCENT }}>
+                     className="mt-4 inline-flex items-center gap-2 rounded-full px-5 py-2 text-sm font-medium text-white transition" style={{ backgroundColor: accent }}>
                     <IconMap /> Cómo llegar
                   </a>
                 )}
@@ -342,7 +347,7 @@ export default function PlantillaPro({ tarjeta }) {
                     type="button" onClick={enviarContacto}
                     disabled={envio.estado === 'enviando'}
                     className="rounded-full px-5 py-2.5 text-sm font-medium text-white transition disabled:opacity-60"
-                    style={{ backgroundColor: ACCENT }}
+                    style={{ backgroundColor: accent }}
                   >
                     {envio.estado === 'enviando' ? 'Enviando...' : 'Enviar mensaje'}
                   </button>

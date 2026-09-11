@@ -47,6 +47,14 @@ class Tarjeta(models.Model):
         ('B', 'B — Moderna'),
         ('C', 'C — Link en bio'),
         ('default', 'default (alias de C)'),
+        # Landing dinámica del plan Pro (Fase 6) — 6 pieles seleccionables,
+        # todas sobre el mismo componente base (PlantillaProBase).
+        ('pro_min', 'Pro — Minimalista'),
+        ('pro_mod', 'Pro — Moderna'),
+        ('pro_corp', 'Pro — Corporativa'),
+        ('pro_calido', 'Pro — Cálida'),
+        ('pro_dark', 'Pro — Oscura Premium'),
+        ('pro_editorial', 'Pro — Editorial'),
     ]
 
     cliente = models.ForeignKey('Cliente', on_delete=models.CASCADE, related_name='tarjetas')

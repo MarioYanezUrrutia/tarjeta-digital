@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { actualizarTarjeta, obtenerTarjeta } from '../api/tarjetas'
-import { PLANTILLAS_DISPONIBLES, descripcionEstado } from '../constants/tarjetas'
+import { PLANTILLAS_DISPONIBLES, PLANTILLAS_PRO_DISPONIBLES, descripcionEstado } from '../constants/tarjetas'
 import MiniPreviewPlantilla from '../plantillas/MiniPreviewPlantilla'
 import { iniciales } from '../plantillas/useDatosTarjeta'
 import GestionProductos from '../components/GestionProductos'
@@ -433,36 +433,29 @@ export default function TarjetaEditor() {
         )}
 
         <Seccion titulo="Plantilla">
-          {esPro ? (
-            <p className="text-sm text-gray-500">
-              Tu plan Pro usa la plantilla de landing dinámica, con secciones de
-              servicios, noticias, testimonios y más. El diseño se adapta solo.
-            </p>
-          ) : (
-            <div className="flex flex-wrap justify-center gap-4 sm:justify-start">
-              {PLANTILLAS_DISPONIBLES.map((p) => {
-                const seleccionada = campos.plantilla === p.valor
-                return (
-                  <button
-                    key={p.valor}
-                    type="button"
-                    onClick={() => actualizar('plantilla', p.valor)}
-                    aria-pressed={seleccionada}
-                    className={`flex flex-col items-center gap-2 rounded-xl p-2 transition ${
-                      seleccionada
-                        ? 'ring-2 ring-gray-900 ring-offset-2'
-                        : 'ring-1 ring-transparent hover:ring-gray-200'
-                    }`}
-                  >
-                    <MiniPreviewPlantilla plantilla={p.valor} />
-                    <span className={`text-xs font-medium ${seleccionada ? 'text-gray-900' : 'text-gray-500'}`}>
-                      {p.nombre}
-                    </span>
-                  </button>
-                )
-              })}
-            </div>
-          )}
+          <div className="flex flex-wrap justify-center gap-4 sm:justify-start">
+            {(esPro ? PLANTILLAS_PRO_DISPONIBLES : PLANTILLAS_DISPONIBLES).map((p) => {
+              const seleccionada = campos.plantilla === p.valor
+              return (
+                <button
+                  key={p.valor}
+                  type="button"
+                  onClick={() => actualizar('plantilla', p.valor)}
+                  aria-pressed={seleccionada}
+                  className={`flex flex-col items-center gap-2 rounded-xl p-2 transition ${
+                    seleccionada
+                      ? 'ring-2 ring-gray-900 ring-offset-2'
+                      : 'ring-1 ring-transparent hover:ring-gray-200'
+                  }`}
+                >
+                  <MiniPreviewPlantilla plantilla={p.valor} />
+                  <span className={`text-xs font-medium ${seleccionada ? 'text-gray-900' : 'text-gray-500'}`}>
+                    {p.nombre}
+                  </span>
+                </button>
+              )
+            })}
+          </div>
         </Seccion>
 
         <Seccion titulo="Comparte tu tarjeta">

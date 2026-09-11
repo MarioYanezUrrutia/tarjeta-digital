@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { crearTarjeta, obtenerMisTarjetas } from '../api/tarjetas'
+import { borrarTarjeta, crearTarjeta, obtenerMisTarjetas } from '../api/tarjetas'
 import { PLANTILLA_LABEL, descripcionEstado } from '../constants/tarjetas'
 import { useAuth } from '../context/AuthContext'
 import PromosEcosistema from '../components/PromosEcosistema'
@@ -11,6 +11,7 @@ export default function Panel() {
   const [tarjetas, setTarjetas] = useState(null)
   const [creando, setCreando] = useState(false)
   const [error, setError] = useState('')
+  const [borrandoId, setBorrandoId] = useState(null)
 
   useEffect(() => {
     let activo = true
@@ -32,6 +33,22 @@ export default function Panel() {
       navigate(`/panel/tarjeta/${datos.id}`)
     } else {
       setError(datos?.error || 'No se pudo crear la tarjeta.')
+    }
+  }
+
+  async function onEliminar(t) {
+    const activa = t.estado === 'activa'
+    const aviso = activa
+      ? `"${t.nombre_mostrado || t.slug}" está ACTIVA y pagada. Si la eliminas perderás su suscripción. Esta acción no se puede deshacer. ¿Eliminar de todas formas?`
+      : `¿Eliminar "${t.nombre_mostrado || t.slug}"? Se borrará junto con sus productos, noticias, testimonios y preguntas. Esta acción no se puede deshacer.`
+    if (!window.confirm(aviso)) return
+    setBorrandoId(t.id)
+    const { status } = await borrarTarjeta(t.id)
+    setBorrandoId(null)
+    if (status === 204) {
+      setTarjetas((prev) => prev.filter((x) => x.id !== t.id))
+    } else {
+      alert('No se pudo eliminar la tarjeta.')
     }
   }
 
@@ -97,13 +114,23 @@ export default function Panel() {
                     {PLANTILLA_LABEL[t.plantilla] || t.plantilla}
                   </p>
                 </div>
-                <button
-                  type="button"
-                  onClick={() => navigate(`/panel/tarjeta/${t.id}`)}
-                  className="ml-3 shrink-0 rounded-md border border-gray-300 px-3 py-1.5 text-sm font-medium text-gray-700 transition hover:bg-gray-100"
-                >
-                  Editar
-                </button>
+                <div className="ml-3 flex shrink-0 items-center gap-4">
+                  <button
+                    type="button"
+                    onClick={() => navigate(`/panel/tarjeta/${t.id}`)}
+                    className="rounded-md border border-gray-300 px-3 py-1.5 text-sm font-medium text-gray-700 transition hover:bg-gray-100"
+                  >
+                    Editar
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => onEliminar(t)}
+                    disabled={borrandoId === t.id}
+                    className="text-sm font-medium text-red-600 transition hover:text-red-700 disabled:opacity-50"
+                  >
+                    {borrandoId === t.id ? 'Eliminando...' : 'Eliminar'}
+                  </button>
+                </div>
               </div>
             ))}
 

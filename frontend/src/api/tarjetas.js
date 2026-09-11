@@ -26,3 +26,5 @@ export const pagarTarjeta = (id, clavePrivada) =>
   })
 
 export const crearPagoFlow = (id) => llamarApi(`/tarjetas/${id}/pagar-flow/`, { method: 'POST' })
+
+export const borrarTarjeta = (id) => llamarApi(`/tarjetas/${id}/`, { method: 'DELETE' })

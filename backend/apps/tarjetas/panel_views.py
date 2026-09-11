@@ -125,13 +125,15 @@ def crear_tarjeta(request):
     return Response(MisTarjetasSerializer(tarjeta).data, status=status.HTTP_201_CREATED)
 
 
-@api_view(['GET', 'PATCH'])
+@api_view(['GET', 'PATCH', 'DELETE'])
 @permission_classes([AllowAny])
 def tarjeta_detalle(request, tarjeta_id):
     """GET /api/tarjetas/<id>/ — todos los datos de una tarjeta propia, para
     precargar el formulario de edición. PATCH — edición parcial, solo los
-    campos de CAMPOS_EDITABLES que vengan en el body. En ambos casos, si la
-    tarjeta no es del usuario autenticado (o no existe), 404."""
+    campos de CAMPOS_EDITABLES que vengan en el body. DELETE — borra la
+    tarjeta (y en cascada productos/noticias/testimonios/faqs). En todos
+    los casos, si la tarjeta no es del usuario autenticado (o no existe),
+    404."""
     perfil, error = resolver_perfil_banexa(request)
     if error is not None:
         return error
@@ -140,6 +142,14 @@ def tarjeta_detalle(request, tarjeta_id):
     tarjeta = _obtener_tarjeta_del_cliente(cliente, tarjeta_id) if cliente else None
     if tarjeta is None:
         return Response({'ok': False, 'error': 'Tarjeta no encontrada'}, status=status.HTTP_404_NOT_FOUND)
+
+    if request.method == 'DELETE':
+        # Borra la tarjeta y en cascada sus productos/noticias/testimonios/
+        # faqs (on_delete=CASCADE). Borra también su imagen del disco.
+        if tarjeta.imagen:
+            tarjeta.imagen.delete(save=False)
+        tarjeta.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
     if request.method == 'GET':
         return Response(TarjetaPanelSerializer(tarjeta, context={'request': request}).data)

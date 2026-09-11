@@ -164,6 +164,7 @@ class TarjetaPanelSerializer(serializers.ModelSerializer):
             'sobre_texto', 'direccion', 'horario',
             'mostrar_contacto', 'mostrar_redes', 'mostrar_sobre',
             'mostrar_ubicacion', 'mostrar_productos',
+            'mostrar_noticias', 'mostrar_testimonios', 'mostrar_faq',
             'es_pro',
         ]
         read_only_fields = [

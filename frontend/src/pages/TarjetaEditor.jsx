@@ -44,6 +44,7 @@ const VALORES_INICIALES = {
   sobre_texto: '', direccion: '', horario: '',
   mostrar_contacto: true, mostrar_redes: true, mostrar_sobre: true,
   mostrar_ubicacion: true, mostrar_productos: true,
+  mostrar_noticias: true, mostrar_testimonios: true, mostrar_faq: true,
   plantilla: 'C',
 }
 
@@ -386,19 +387,46 @@ export default function TarjetaEditor() {
         </Seccion>
 
         {esPro && (
-          <Seccion titulo="Noticias (Pro)">
+          <Seccion
+            titulo="Noticias (Pro)"
+            extra={
+              <Interruptor
+                label="Mostrar"
+                checked={campos.mostrar_noticias}
+                onChange={(v) => actualizar('mostrar_noticias', v)}
+              />
+            }
+          >
             <GestionNoticias tarjetaId={id} />
           </Seccion>
         )}
 
         {esPro && (
-          <Seccion titulo="Testimonios (Pro)">
+          <Seccion
+            titulo="Testimonios (Pro)"
+            extra={
+              <Interruptor
+                label="Mostrar"
+                checked={campos.mostrar_testimonios}
+                onChange={(v) => actualizar('mostrar_testimonios', v)}
+              />
+            }
+          >
             <GestionTestimonios tarjetaId={id} />
           </Seccion>
         )}
 
         {esPro && (
-          <Seccion titulo="Preguntas frecuentes (Pro)">
+          <Seccion
+            titulo="Preguntas frecuentes (Pro)"
+            extra={
+              <Interruptor
+                label="Mostrar"
+                checked={campos.mostrar_faq}
+                onChange={(v) => actualizar('mostrar_faq', v)}
+              />
+            }
+          >
             <GestionFaqs tarjetaId={id} />
           </Seccion>
         )}

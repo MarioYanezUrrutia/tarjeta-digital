@@ -34,6 +34,7 @@ CAMPOS_EDITABLES = (
     'instagram', 'facebook', 'linkedin', 'tiktok', 'youtube', 'x_twitter',
     'sobre_texto', 'direccion', 'horario',
     'mostrar_contacto', 'mostrar_redes', 'mostrar_sobre', 'mostrar_ubicacion', 'mostrar_productos',
+    'mostrar_noticias', 'mostrar_testimonios', 'mostrar_faq',
 )
 
 # Flags booleanos de CAMPOS_EDITABLES — se normalizan antes del setattr
@@ -43,6 +44,7 @@ CAMPOS_EDITABLES = (
 # — sin esto, guardar flags junto con una imagen tiraría 400 por validación.
 CAMPOS_BOOLEANOS = {
     'mostrar_contacto', 'mostrar_redes', 'mostrar_sobre', 'mostrar_ubicacion', 'mostrar_productos',
+    'mostrar_noticias', 'mostrar_testimonios', 'mostrar_faq',
 }
 
 

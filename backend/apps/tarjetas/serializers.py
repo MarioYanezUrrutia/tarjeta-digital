@@ -39,6 +39,7 @@ class TarjetaPublicaSerializer(serializers.ModelSerializer):
     class Meta:
         model = Tarjeta
         fields = [
+            'slug',
             # Identidad
             'imagen', 'nombre_mostrado', 'cargo_rubro', 'profesion', 'empresa', 'eslogan',
             'tipo', 'plantilla', 'plan', 'es_pro',

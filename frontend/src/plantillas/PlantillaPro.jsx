@@ -34,20 +34,39 @@ export default function PlantillaPro({ tarjeta }) {
   const { contactos, redes, mostrarUbicacionSeccion, mostrarProductosSeccion } = useDatosTarjeta(tarjeta)
   const productos = tarjeta.productos || []
 
-  const [form, setForm] = React.useState({ nombre: '', email: '', mensaje: '' })
-  const [errorForm, setErrorForm] = React.useState('')
+  const [form, setForm] = React.useState({ nombre: '', email: '', mensaje: '', website: '' })
+  const [envio, setEnvio] = React.useState({ estado: 'idle', error: '' })
+  // estado: 'idle' | 'enviando' | 'ok' | 'error'
 
-  const enviarContacto = () => {
+  const enviarContacto = async () => {
     if (!form.nombre.trim() || !form.mensaje.trim()) {
-      setErrorForm('Escribe tu nombre y un mensaje.')
+      setEnvio({ estado: 'error', error: 'Escribe tu nombre y un mensaje.' })
       return
     }
-    setErrorForm('')
-    const asunto = encodeURIComponent(`Contacto desde tu tarjeta — ${form.nombre}`)
-    const cuerpo = encodeURIComponent(
-      `Nombre: ${form.nombre}\nCorreo: ${form.email}\n\n${form.mensaje}`
-    )
-    window.location.href = `mailto:${tarjeta.email_contacto}?subject=${asunto}&body=${cuerpo}`
+    setEnvio({ estado: 'enviando', error: '' })
+    try {
+      const resp = await fetch(`${import.meta.env.VITE_API_BASE}/t/${tarjeta.slug}/contacto/`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          nombre: form.nombre,
+          email: form.email,
+          mensaje: form.mensaje,
+          website: form.website, // honeypot
+        }),
+      })
+      const datos = await resp.json().catch(() => ({}))
+      if (resp.ok && datos.ok) {
+        setEnvio({ estado: 'ok', error: '' })
+        setForm({ nombre: '', email: '', mensaje: '', website: '' })
+      } else if (resp.status === 429) {
+        setEnvio({ estado: 'error', error: 'Demasiados envíos. Intenta más tarde.' })
+      } else {
+        setEnvio({ estado: 'error', error: datos.error || 'No se pudo enviar el mensaje.' })
+      }
+    } catch {
+      setEnvio({ estado: 'error', error: 'No se pudo enviar el mensaje.' })
+    }
   }
 
   const hayNoticias = mostrar_noticias && noticias.length > 0
@@ -265,6 +284,13 @@ export default function PlantillaPro({ tarjeta }) {
                 <h3 className="mb-3 font-medium">Envíame un mensaje</h3>
                 <div className="flex flex-col gap-3">
                   <input
+                    type="text" tabIndex={-1} autoComplete="off"
+                    value={form.website}
+                    onChange={(e) => setForm({ ...form, website: e.target.value })}
+                    style={{ position: 'absolute', left: '-9999px', width: '1px', height: '1px' }}
+                    aria-hidden="true"
+                  />
+                  <input
                     type="text" placeholder="Tu nombre" value={form.nombre}
                     onChange={(e) => setForm({ ...form, nombre: e.target.value })}
                     className="rounded-lg border border-gray-200 px-3 py-2 text-sm outline-none focus:border-gray-400"
@@ -279,13 +305,15 @@ export default function PlantillaPro({ tarjeta }) {
                     onChange={(e) => setForm({ ...form, mensaje: e.target.value })}
                     className="resize-none rounded-lg border border-gray-200 px-3 py-2 text-sm outline-none focus:border-gray-400"
                   />
-                  {errorForm && <p className="text-xs text-red-500">{errorForm}</p>}
+                  {envio.estado === 'error' && <p className="text-xs text-red-500">{envio.error}</p>}
+                  {envio.estado === 'ok' && <p className="text-xs text-green-600">¡Mensaje enviado! Te responderán pronto.</p>}
                   <button
                     type="button" onClick={enviarContacto}
-                    className="rounded-full px-5 py-2.5 text-sm font-medium text-white transition"
+                    disabled={envio.estado === 'enviando'}
+                    className="rounded-full px-5 py-2.5 text-sm font-medium text-white transition disabled:opacity-60"
                     style={{ backgroundColor: ACCENT }}
                   >
-                    Enviar mensaje
+                    {envio.estado === 'enviando' ? 'Enviando...' : 'Enviar mensaje'}
                   </button>
                 </div>
               </div>

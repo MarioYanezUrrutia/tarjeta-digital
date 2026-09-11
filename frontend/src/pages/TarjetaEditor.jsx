@@ -6,6 +6,7 @@ import MiniPreviewPlantilla from '../plantillas/MiniPreviewPlantilla'
 import { iniciales } from '../plantillas/useDatosTarjeta'
 import GestionProductos from '../components/GestionProductos'
 import GestionNoticias from '../components/GestionNoticias'
+import GestionTestimonios from '../components/GestionTestimonios'
 import ModalPago from '../components/ModalPago'
 import CompartirTarjeta from '../components/CompartirTarjeta'
 
@@ -386,6 +387,12 @@ export default function TarjetaEditor() {
         {esPro && (
           <Seccion titulo="Noticias (Pro)">
             <GestionNoticias tarjetaId={id} />
+          </Seccion>
+        )}
+
+        {esPro && (
+          <Seccion titulo="Testimonios (Pro)">
+            <GestionTestimonios tarjetaId={id} />
           </Seccion>
         )}
 

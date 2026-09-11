@@ -111,6 +111,19 @@ class NoticiaSerializer(serializers.ModelSerializer):
         read_only_fields = ['id', 'imagen', 'orden']
 
 
+class TestimonioSerializer(serializers.ModelSerializer):
+    """Panel: gestión de testimonios (GET/POST/PATCH/DELETE en
+    testimonios_views.py). `avatar` de solo lectura — se sube/reemplaza por
+    request.FILES, igual que la imagen de noticia (Panel-3); `orden`
+    también de solo lectura acá — se fija solo (al crear) o vía POST
+    .../testimonios/reordenar/, nunca escribiendo este serializer directo."""
+
+    class Meta:
+        model = Testimonio
+        fields = ['id', 'avatar', 'autor', 'relacion', 'texto', 'calificacion', 'orden']
+        read_only_fields = ['id', 'avatar', 'orden']
+
+
 class MisTarjetasSerializer(serializers.ModelSerializer):
     """GET /api/mis-tarjetas/ y respuesta de POST /api/tarjetas/ — lo mínimo
     para la pantalla de inicio del panel (lista de tarjetas + botón crear)."""

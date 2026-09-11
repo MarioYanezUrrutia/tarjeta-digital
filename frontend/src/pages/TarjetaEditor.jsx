@@ -433,29 +433,36 @@ export default function TarjetaEditor() {
         )}
 
         <Seccion titulo="Plantilla">
-          <div className="flex flex-wrap justify-center gap-4 sm:justify-start">
-            {PLANTILLAS_DISPONIBLES.map((p) => {
-              const seleccionada = campos.plantilla === p.valor
-              return (
-                <button
-                  key={p.valor}
-                  type="button"
-                  onClick={() => actualizar('plantilla', p.valor)}
-                  aria-pressed={seleccionada}
-                  className={`flex flex-col items-center gap-2 rounded-xl p-2 transition ${
-                    seleccionada
-                      ? 'ring-2 ring-gray-900 ring-offset-2'
-                      : 'ring-1 ring-transparent hover:ring-gray-200'
-                  }`}
-                >
-                  <MiniPreviewPlantilla plantilla={p.valor} />
-                  <span className={`text-xs font-medium ${seleccionada ? 'text-gray-900' : 'text-gray-500'}`}>
-                    {p.nombre}
-                  </span>
-                </button>
-              )
-            })}
-          </div>
+          {esPro ? (
+            <p className="text-sm text-gray-500">
+              Tu plan Pro usa la plantilla de landing dinámica, con secciones de
+              servicios, noticias, testimonios y más. El diseño se adapta solo.
+            </p>
+          ) : (
+            <div className="flex flex-wrap justify-center gap-4 sm:justify-start">
+              {PLANTILLAS_DISPONIBLES.map((p) => {
+                const seleccionada = campos.plantilla === p.valor
+                return (
+                  <button
+                    key={p.valor}
+                    type="button"
+                    onClick={() => actualizar('plantilla', p.valor)}
+                    aria-pressed={seleccionada}
+                    className={`flex flex-col items-center gap-2 rounded-xl p-2 transition ${
+                      seleccionada
+                        ? 'ring-2 ring-gray-900 ring-offset-2'
+                        : 'ring-1 ring-transparent hover:ring-gray-200'
+                    }`}
+                  >
+                    <MiniPreviewPlantilla plantilla={p.valor} />
+                    <span className={`text-xs font-medium ${seleccionada ? 'text-gray-900' : 'text-gray-500'}`}>
+                      {p.nombre}
+                    </span>
+                  </button>
+                )
+              })}
+            </div>
+          )}
         </Seccion>
 
         <Seccion titulo="Comparte tu tarjeta">

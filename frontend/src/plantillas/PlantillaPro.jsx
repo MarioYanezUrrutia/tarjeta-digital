@@ -37,6 +37,7 @@ export default function PlantillaPro({ tarjeta }) {
   const [form, setForm] = React.useState({ nombre: '', email: '', mensaje: '', website: '' })
   const [envio, setEnvio] = React.useState({ estado: 'idle', error: '' })
   // estado: 'idle' | 'enviando' | 'ok' | 'error'
+  const [menuAbierto, setMenuAbierto] = React.useState(false)
 
   const enviarContacto = async () => {
     if (!form.nombre.trim() || !form.mensaje.trim()) {
@@ -105,8 +106,38 @@ export default function PlantillaPro({ tarjeta }) {
                  className="rounded-full px-4 py-1.5 text-sm font-medium text-white transition"
                  style={{ backgroundColor: ACCENT }}>Contáctame</a>
             )}
+            <button
+              type="button"
+              onClick={() => setMenuAbierto((v) => !v)}
+              className="sm:hidden flex h-9 w-9 items-center justify-center rounded-md text-gray-600"
+              aria-label="Abrir menú"
+              aria-expanded={menuAbierto}
+            >
+              <svg viewBox="0 0 24 24" className="h-6 w-6" fill="none" stroke="currentColor" strokeWidth="2">
+                {menuAbierto
+                  ? <path d="M6 6l12 12M6 18L18 6" />
+                  : <path d="M4 7h16M4 12h16M4 17h16" />}
+              </svg>
+            </button>
           </div>
         </div>
+
+        {menuAbierto && (
+          <div className="sm:hidden border-b border-black/5 bg-white/95 backdrop-blur">
+            <div className="mx-auto flex max-w-5xl flex-col px-5 py-2">
+              {nav.map((n) => (
+                <a
+                  key={n.id}
+                  href={`#${n.id}`}
+                  onClick={() => setMenuAbierto(false)}
+                  className="py-2 text-sm text-gray-600 transition hover:text-[#1a1d21]"
+                >
+                  {n.label}
+                </a>
+              ))}
+            </div>
+          </div>
+        )}
       </nav>
 
       <header className="relative overflow-hidden">

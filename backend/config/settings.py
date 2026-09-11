@@ -110,6 +110,9 @@ BANEXA_API_URL = env('BANEXA_API_URL', default='http://localhost:8000/api')
 TARJETA_PRECIO_TERRAS = env.int('TARJETA_PRECIO_TERRAS', default=5)
 TARJETA_DIAS_SUSCRIPCION = env.int('TARJETA_DIAS_SUSCRIPCION', default=30)
 TARJETA_DIAS_AVISO_PREVIO = env.int('TARJETA_DIAS_AVISO_PREVIO', default=5)
+# Precio del plan Pro en CLP, cobrado vía Flow (Cobro-4) — separado de
+# TARJETA_PRECIO_TERRAS porque son dos medios de pago distintos.
+TARJETA_PRECIO_PRO_CLP = env.int('TARJETA_PRECIO_PRO_CLP', default=0)
 
 # Bypass de desarrollo: todavía no existe el cobro real (Cobro-2), así que
 # TODAS las tarjetas nacen en 'borrador' y se quedan ahí para siempre — sin
@@ -138,6 +141,14 @@ DEFAULT_FROM_EMAIL = env('DEFAULT_FROM_EMAIL', default='Tarjeta Digital <no-repl
 # y frontend son procesos (y .env) distintos. Nunca localhost hardcodeado
 # en el código: en producción esta variable apunta al dominio real.
 PUBLIC_BASE_URL = env('PUBLIC_BASE_URL', default='http://localhost:5173')
+
+# --- Flow (Cobro-4) ---
+# Cobro en dinero (CLP) del plan Pro, vía Flow — dev usa el sandbox de
+# Flow por defecto; producción setea las credenciales reales vía .env
+# (nunca hardcodeadas acá), mismo patrón que BANEXA_API_URL.
+FLOW_API_URL = env('FLOW_API_URL', default='https://sandbox.flow.cl/api')
+FLOW_API_KEY = env('FLOW_API_KEY', default='')
+FLOW_SECRET_KEY = env('FLOW_SECRET_KEY', default='')
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 

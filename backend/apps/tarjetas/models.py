@@ -176,6 +176,7 @@ class ConfiguracionTarjetas(models.Model):
     (el `.env`) para no resetear silenciosamente un despliegue existente.
     """
     precio_terras = models.PositiveIntegerField(default=5)
+    precio_pro_clp = models.PositiveIntegerField(default=0)
     dias_suscripcion = models.PositiveIntegerField(default=30)
     dias_aviso_previo = models.PositiveIntegerField(default=5)
 
@@ -195,6 +196,7 @@ class ConfiguracionTarjetas(models.Model):
         from django.conf import settings
         defaults = {
             'precio_terras': getattr(settings, 'TARJETA_PRECIO_TERRAS', 5),
+            'precio_pro_clp': getattr(settings, 'TARJETA_PRECIO_PRO_CLP', 0),
             'dias_suscripcion': getattr(settings, 'TARJETA_DIAS_SUSCRIPCION', 30),
             'dias_aviso_previo': getattr(settings, 'TARJETA_DIAS_AVISO_PREVIO', 5),
         }
@@ -213,7 +215,10 @@ class PagoTarjeta(models.Model):
     período) — este modelo es la fuente de verdad para las estadísticas de
     ingresos del admin."""
     tarjeta = models.ForeignKey('Tarjeta', on_delete=models.CASCADE, related_name='pagos')
-    monto_terras = models.PositiveIntegerField()
+    monto_terras = models.PositiveIntegerField(null=True, blank=True)
+    monto_clp = models.PositiveIntegerField(null=True, blank=True)
+    medio = models.CharField(max_length=16, default='terras')
+    flow_order = models.CharField(max_length=64, null=True, blank=True)
     fecha = models.DateTimeField(auto_now_add=True)
 
     class Meta:
@@ -222,6 +227,8 @@ class PagoTarjeta(models.Model):
         verbose_name_plural = 'Pagos'
 
     def __str__(self):
+        if self.medio == 'flow':
+            return f"${self.monto_clp} CLP — {self.tarjeta} ({self.fecha:%d-%m-%Y})"
         return f"{self.monto_terras} Terras — {self.tarjeta} ({self.fecha:%d-%m-%Y})"
 
 

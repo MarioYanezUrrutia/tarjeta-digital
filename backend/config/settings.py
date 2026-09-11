@@ -140,3 +140,13 @@ DEFAULT_FROM_EMAIL = env('DEFAULT_FROM_EMAIL', default='Tarjeta Digital <no-repl
 PUBLIC_BASE_URL = env('PUBLIC_BASE_URL', default='http://localhost:5173')
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# Sin throttle global (DEFAULT_THROTTLE_CLASSES vacío) — solo se aplica
+# por-vista con ScopedRateThrottle donde hace falta (ej. el formulario de
+# contacto público de la landing Pro, Fase 3 bloque 5).
+REST_FRAMEWORK = {
+    'DEFAULT_THROTTLE_CLASSES': [],
+    'DEFAULT_THROTTLE_RATES': {
+        'contacto_publico': '5/hour',
+    },
+}

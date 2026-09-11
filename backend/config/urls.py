@@ -9,7 +9,7 @@ from apps.tarjetas.pago_views import estado_pago, pagar_tarjeta
 from apps.tarjetas.panel_views import crear_tarjeta, mis_tarjetas, tarjeta_detalle
 from apps.tarjetas.productos_views import producto_detalle, productos_lista, productos_reordenar
 from apps.tarjetas.testimonios_views import testimonio_detalle, testimonios_lista, testimonios_reordenar
-from apps.tarjetas.views import TarjetaPublicaView, health
+from apps.tarjetas.views import ContactoPublicoView, TarjetaPublicaView, health
 
 prefix = settings.URL_PREFIX
 
@@ -17,6 +17,7 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path(f'{prefix}health/', health),
     path(f'{prefix}t/<slug:slug>/', TarjetaPublicaView.as_view(), name='tarjeta-publica'),
+    path(f'{prefix}t/<slug:slug>/contacto/', ContactoPublicoView.as_view(), name='contacto-publico'),
     path(f'{prefix}auth/', include('apps.cuentas.urls')),
     path(f'{prefix}mis-tarjetas/', mis_tarjetas, name='mis-tarjetas'),
     path(f'{prefix}tarjetas/', crear_tarjeta, name='crear-tarjeta'),

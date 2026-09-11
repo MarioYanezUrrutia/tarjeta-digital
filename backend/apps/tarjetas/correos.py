@@ -112,3 +112,26 @@ def correo_pago_confirmado(tarjeta):
         from_email=settings.DEFAULT_FROM_EMAIL,
         recipient_list=destinatarios,
     )
+
+
+def correo_mensaje_contacto(tarjeta, nombre_visitante, email_visitante, mensaje):
+    """Envía al dueño de la tarjeta (su email_contacto) un mensaje escrito
+    por un visitante desde el formulario público de la landing Pro."""
+    destino = (tarjeta.email_contacto or '').strip()
+    if not destino:
+        return False
+    cuerpo = (
+        f"Recibiste un mensaje desde tu tarjeta \"{tarjeta.nombre_mostrado or tarjeta.slug}\".\n\n"
+        f"Nombre: {nombre_visitante}\n"
+        f"Correo: {email_visitante or '(no indicado)'}\n\n"
+        f"Mensaje:\n{mensaje}\n"
+    )
+    send_mail(
+        subject=f'Nuevo mensaje desde tu tarjeta ({nombre_visitante})',
+        message=cuerpo,
+        from_email=settings.DEFAULT_FROM_EMAIL,
+        recipient_list=[destino],
+        # reply_to no está en send_mail; si el visitante puso correo, se
+        # ve en el cuerpo. (Mejora futura: EmailMessage con reply_to.)
+    )
+    return True

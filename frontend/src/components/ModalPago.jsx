@@ -1,18 +1,20 @@
 import React, { useEffect, useState } from 'react'
-import { obtenerEstadoPago, pagarTarjeta } from '../api/tarjetas'
+import { crearPagoFlow, obtenerEstadoPago, pagarTarjeta } from '../api/tarjetas'
 import { formatearFecha } from '../constants/tarjetas'
 
 // Pago real de la suscripción (Cobro-2): consulta precio/saldo, cobra Terras
 // vía el backend (que a su vez cobra en Banexa) y, solo si Banexa confirma,
 // la tarjeta pasa a activa. La clave privada vive en un input type="password"
 // y en un solo estado local que se limpia apenas se usa — nunca se loguea.
-export default function ModalPago({ tarjetaId, onCerrar, onPagoExitoso }) {
+export default function ModalPago({ tarjetaId, esPro, onCerrar, onPagoExitoso }) {
   const [cargando, setCargando] = useState(true)
   const [estadoPago, setEstadoPago] = useState(null)
   const [clavePrivada, setClavePrivada] = useState('')
   const [pagando, setPagando] = useState(false)
   const [error, setError] = useState(null)
   const [exito, setExito] = useState(null)
+  const [flowCargando, setFlowCargando] = useState(false)
+  const [flowError, setFlowError] = useState('')
 
   useEffect(() => {
     let activo = true
@@ -45,6 +47,18 @@ export default function ModalPago({ tarjetaId, onCerrar, onPagoExitoso }) {
     } else {
       setError(datos?.error || 'No se pudo procesar el pago.')
     }
+  }
+
+  async function onPagarFlow() {
+    setFlowError('')
+    setFlowCargando(true)
+    const { status, datos } = await crearPagoFlow(tarjetaId)
+    if (status === 200 && datos?.ok && datos.url) {
+      window.location.href = datos.url // redirige a Flow
+      return
+    }
+    setFlowCargando(false)
+    setFlowError(datos?.error || 'No se pudo iniciar el pago con Flow.')
   }
 
   return (
@@ -131,6 +145,21 @@ export default function ModalPago({ tarjetaId, onCerrar, onPagoExitoso }) {
 
         {!cargando && !exito && !estadoPago && (
           <p className="text-sm text-red-600">{error || 'No se pudo cargar la información de pago.'}</p>
+        )}
+
+        {esPro && (
+          <div className="mt-4 border-t border-gray-200 pt-4">
+            <p className="mb-2 text-sm text-gray-600">Plan Pro — pago en dinero</p>
+            <button
+              type="button"
+              onClick={onPagarFlow}
+              disabled={flowCargando}
+              className="w-full rounded-md bg-gray-900 px-4 py-2 text-sm font-medium text-white transition hover:bg-gray-800 disabled:opacity-50"
+            >
+              {flowCargando ? 'Redirigiendo a Flow...' : 'Pagar Pro con Flow'}
+            </button>
+            {flowError && <p className="mt-2 text-xs text-red-600">{flowError}</p>}
+          </div>
         )}
       </div>
     </div>

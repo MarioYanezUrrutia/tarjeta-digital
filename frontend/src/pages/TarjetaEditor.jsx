@@ -271,6 +271,7 @@ export default function TarjetaEditor() {
         {mostrarModalPago && (
           <ModalPago
             tarjetaId={id}
+            esPro={esPro}
             onCerrar={() => setMostrarModalPago(false)}
             onPagoExitoso={onPagoExitoso}
           />

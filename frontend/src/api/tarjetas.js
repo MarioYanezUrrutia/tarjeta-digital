@@ -24,3 +24,5 @@ export const pagarTarjeta = (id, clavePrivada) =>
     method: 'POST',
     body: JSON.stringify({ clave_privada: clavePrivada }),
   })
+
+export const crearPagoFlow = (id) => llamarApi(`/tarjetas/${id}/pagar-flow/`, { method: 'POST' })

@@ -4,6 +4,7 @@ import RutaProtegida from './components/RutaProtegida'
 import { AuthProvider, useAuth } from './context/AuthContext'
 import Login from './pages/Login'
 import Panel from './pages/Panel'
+import PagoFlowRetorno from './pages/PagoFlowRetorno'
 import Registro from './pages/Registro'
 import TarjetaEditor from './pages/TarjetaEditor'
 import TarjetaPublica from './pages/TarjetaPublica'
@@ -28,6 +29,7 @@ export default function App() {
       <Routes>
         <Route path="/" element={<RedireccionRaiz />} />
         <Route path="/t/:slug" element={<TarjetaPublica />} />
+        <Route path="/pago/flow/retorno" element={<PagoFlowRetorno />} />
         <Route path="/login" element={<Login />} />
         <Route path="/registro" element={<Registro />} />
         <Route

@@ -26,7 +26,7 @@ from apps.cuentas.banexa import banexa_get, banexa_post
 
 from . import flow
 from .correos import correo_pago_confirmado
-from .models import Cliente, ConfiguracionTarjetas, PagoTarjeta
+from .models import Cliente, ConfiguracionTarjetas, PagoTarjeta, Tarjeta
 from .panel_views import _obtener_tarjeta_del_cliente
 
 MENSAJE_BANEXA_NO_DISPONIBLE = (
@@ -210,3 +210,78 @@ def crear_pago_flow(request, tarjeta_id):
         return Response({'ok': False, 'error': str(e)}, status=status.HTTP_502_BAD_GATEWAY)
 
     return Response({'ok': True, 'url': f"{datos['url']}?token={datos['token']}"})
+
+
+@api_view(['POST'])
+@permission_classes([AllowAny])
+def confirmar_pago_flow(request):
+    """Webhook público que Flow invoca (POST, x-www-form-urlencoded) tras un
+    pago, enviando 'token'. Regla de oro: NO confiar en el aviso; se
+    re-consulta el estado real a Flow (getStatus) y solo si status==1
+    (pagada) se activa la suscripción. Idempotente: si ya existe un
+    PagoTarjeta con ese flow_order, no duplica ni reactiva.
+
+    Devuelve 200 siempre que el procesamiento sea correcto (Flow reintenta
+    ante no-200), incluido el caso 'ya procesado'. Devuelve 400 solo si
+    falta el token, y deja propagar errores realmente inesperados."""
+    token = (request.data.get('token') or '').strip()
+    if not token:
+        return Response({'ok': False, 'error': 'Falta token'}, status=status.HTTP_400_BAD_REQUEST)
+
+    # 1) Re-verificar el estado real contra Flow — nunca confiar en el
+    # aviso mismo (podría venir falsificado).
+    try:
+        estado = flow.consultar_estado(token)
+    except flow.FlowError as e:
+        # Si no pudimos verificar, 502 para que Flow reintente el webhook.
+        return Response({'ok': False, 'error': str(e)}, status=status.HTTP_502_BAD_GATEWAY)
+
+    if estado.get('status') != flow.ESTADO_PAGADA:
+        # No pagada (rechazada/pendiente): 200 sin activar nada.
+        return Response({'ok': True, 'pagada': False})
+
+    commerce_order = estado.get('commerceOrder') or ''
+    amount = estado.get('amount')
+
+    # 2) Idempotencia: si ya registramos este flow_order, no repetir (Flow
+    # puede reintentar el mismo webhook varias veces).
+    if PagoTarjeta.objects.filter(flow_order=commerce_order).exists():
+        return Response({'ok': True, 'duplicado': True})
+
+    # 3) Parsear tarjeta_id del commerceOrder 'pro-<id>-<timestamp>' (ver
+    # crear_pago_flow, que lo arma así).
+    try:
+        tarjeta_id = int(commerce_order.split('-')[1])
+    except (IndexError, ValueError):
+        return Response({'ok': False, 'error': 'commerceOrder inválido'}, status=status.HTTP_400_BAD_REQUEST)
+
+    tarjeta = Tarjeta.objects.filter(pk=tarjeta_id).first()
+    if tarjeta is None:
+        return Response({'ok': False, 'error': 'Tarjeta no encontrada'}, status=status.HTTP_404_NOT_FOUND)
+
+    # 4) Activar/renovar la suscripción — misma lógica que pagar_tarjeta
+    # (Terras): si sigue vigente, los días se suman desde el vencimiento
+    # actual; si no, desde ahora.
+    config = ConfiguracionTarjetas.obtener()
+    ahora = timezone.now()
+    sigue_vigente = tarjeta.fecha_vencimiento and tarjeta.fecha_vencimiento > ahora
+    base = tarjeta.fecha_vencimiento if sigue_vigente else ahora
+    tarjeta.estado = 'activa'
+    tarjeta.fecha_ultimo_pago = ahora
+    tarjeta.fecha_vencimiento = base + timedelta(days=config.dias_suscripcion)
+    tarjeta.save()
+
+    PagoTarjeta.objects.create(
+        tarjeta=tarjeta,
+        monto_terras=None,
+        monto_clp=int(amount) if amount is not None else config.precio_pro_clp,
+        medio='flow',
+        flow_order=commerce_order,
+    )
+
+    try:
+        correo_pago_confirmado(tarjeta)
+    except Exception:
+        pass  # el correo no debe tumbar la confirmación del pago
+
+    return Response({'ok': True, 'pagada': True})

@@ -22,12 +22,20 @@ function Estrellas({ n, accent }) {
 
 /** Componente base de la landing Pro (Fase 6): misma estructura, misma
  * lógica (nav, hamburguesa móvil, formulario de contacto, flags de
- * visibilidad) que la PlantillaPro original — la única diferencia entre
- * las 6 pieles seleccionables es el objeto `tema` que se le pasa (ver
- * temas.js). No hardcodear acá ningún color/fondo/tipografía: todo lo
- * visual sale de `tema`. */
+ * visibilidad) para las 6 pieles seleccionables — lo único que cambia
+ * entre ellas es el objeto `tema` (ver temas.js). Nada de color/tipografía
+ * se hardcodea acá: todo sale de `tema`, incluidos los tokens de texto
+ * secundario/borde/superficie para que un tema oscuro no herede clases
+ * `text-gray-*`/`border-gray-*` pensadas para fondo claro. */
 export default function PlantillaProBase({ tarjeta, tema }) {
-  const { accent, accentSoft, bgClass, fontFamily, heroClass, cardClass } = tema
+  const {
+    accent, accentSoft, bgClass, fontFamily, headingFontFamily,
+    navClass, mobileMenuClass, navLinkClass,
+    heroClass, heroOverlayBg, heroTextClass, heroMutedClass, heroSecondaryBtnClass,
+    cardClass, borderClass, dividerClass, hoverClass,
+    textBodyClass, textMutedClass, accentTextClass,
+    h1Class, h2Class, sectionClass,
+  } = tema
 
   const {
     imagen, nombre_mostrado, cargo_rubro, profesion, empresa, eslogan,
@@ -97,24 +105,24 @@ export default function PlantillaProBase({ tarjeta, tema }) {
   return (
     <div className={`min-h-screen ${bgClass}`} style={{ fontFamily }}>
 
-      <nav className="sticky top-0 z-40 border-b border-black/5 bg-white/85 backdrop-blur">
+      <nav className={`sticky top-0 z-40 ${navClass}`}>
         <div className="mx-auto flex max-w-5xl items-center justify-between px-5 py-3">
-          <span className="truncate text-sm font-semibold">{nombre_mostrado}</span>
+          <span className="truncate text-sm font-semibold" style={{ fontFamily: headingFontFamily }}>{nombre_mostrado}</span>
           <div className="flex items-center gap-5">
             <div className="hidden gap-5 sm:flex">
               {nav.map((n) => (
-                <a key={n.id} href={`#${n.id}`} className="text-sm text-gray-500 transition hover:text-[#1a1d21]">{n.label}</a>
+                <a key={n.id} href={`#${n.id}`} className={navLinkClass}>{n.label}</a>
               ))}
             </div>
             {waHref && (
               <a href={waHref} target="_blank" rel="noreferrer"
-                 className="rounded-full px-4 py-1.5 text-sm font-medium text-white transition"
+                 className={`rounded-full px-4 py-1.5 text-sm font-medium transition ${accentTextClass}`}
                  style={{ backgroundColor: accent }}>Contáctame</a>
             )}
             <button
               type="button"
               onClick={() => setMenuAbierto((v) => !v)}
-              className="sm:hidden flex h-9 w-9 items-center justify-center rounded-md text-gray-600"
+              className={`sm:hidden flex h-9 w-9 items-center justify-center rounded-md transition ${navLinkClass}`}
               aria-label="Abrir menú"
               aria-expanded={menuAbierto}
             >
@@ -128,14 +136,14 @@ export default function PlantillaProBase({ tarjeta, tema }) {
         </div>
 
         {menuAbierto && (
-          <div className="sm:hidden border-b border-black/5 bg-white/95 backdrop-blur">
+          <div className={`sm:hidden ${mobileMenuClass}`}>
             <div className="mx-auto flex max-w-5xl flex-col px-5 py-2">
               {nav.map((n) => (
                 <a
                   key={n.id}
                   href={`#${n.id}`}
                   onClick={() => setMenuAbierto(false)}
-                  className="py-2 text-sm text-gray-600 transition hover:text-[#1a1d21]"
+                  className={`py-2 ${navLinkClass}`}
                 >
                   {n.label}
                 </a>
@@ -146,32 +154,31 @@ export default function PlantillaProBase({ tarjeta, tema }) {
       </nav>
 
       <header className={`relative overflow-hidden ${heroClass}`}>
-        <div aria-hidden="true" className="absolute inset-0" style={{ background: `linear-gradient(160deg, ${accentSoft} 0%, rgba(255,255,255,0) 55%)` }} />
-        <div className="relative mx-auto flex max-w-5xl flex-col items-center gap-5 px-5 py-16 text-center">
+        <div aria-hidden="true" className="absolute inset-0" style={{ background: heroOverlayBg }} />
+        <div className={`relative mx-auto flex max-w-5xl flex-col items-center gap-5 px-5 py-16 text-center ${heroTextClass}`}>
           {imagen ? (
             <img src={imagen} alt={nombre_mostrado || ''} className="h-36 w-36 rounded-full object-cover shadow-md ring-4 ring-white" />
           ) : (
-            <div className="flex h-36 w-36 items-center justify-center rounded-full text-4xl font-semibold text-white shadow-md" style={{ backgroundColor: accent }}>
+            <div className={`flex h-36 w-36 items-center justify-center rounded-full text-4xl font-semibold shadow-md ${accentTextClass}`} style={{ backgroundColor: accent }}>
               {iniciales(nombre_mostrado)}
             </div>
           )}
           <div>
-            <h1 className="text-3xl font-semibold sm:text-4xl">{nombre_mostrado}</h1>
+            <h1 className={h1Class} style={{ fontFamily: headingFontFamily }}>{nombre_mostrado}</h1>
             {(profesion || cargo_rubro || empresa) && (
-              <p className="mt-2 text-base text-gray-500">{[profesion, cargo_rubro, empresa].filter(Boolean).join(' · ')}</p>
+              <p className={`mt-2 text-base ${heroMutedClass}`}>{[profesion, cargo_rubro, empresa].filter(Boolean).join(' · ')}</p>
             )}
-            {eslogan && <p className="mt-3 text-lg italic text-gray-400">{eslogan}</p>}
+            {eslogan && <p className={`mt-3 text-lg italic ${heroMutedClass}`}>{eslogan}</p>}
           </div>
           <div className="mt-2 flex flex-wrap items-center justify-center gap-3">
             {waHref && (
               <a href={waHref} target="_blank" rel="noreferrer"
-                 className="flex items-center gap-2 rounded-full px-6 py-3 text-sm font-medium text-white transition"
+                 className={`flex items-center gap-2 rounded-full px-6 py-3 text-sm font-medium transition ${accentTextClass}`}
                  style={{ backgroundColor: accent }}>
                 <IconWhatsApp className="h-5 w-5" /> Escríbeme por WhatsApp
               </a>
             )}
-            <button type="button" onClick={() => descargarVCard(tarjeta)}
-              className="flex items-center gap-2 rounded-full border border-gray-200 px-6 py-3 text-sm font-medium text-[#1a1d21] transition hover:bg-gray-50">
+            <button type="button" onClick={() => descargarVCard(tarjeta)} className={heroSecondaryBtnClass}>
               <IconContactCard /> Guardar contacto
             </button>
           </div>
@@ -181,17 +188,17 @@ export default function PlantillaProBase({ tarjeta, tema }) {
       <main className="mx-auto flex max-w-5xl flex-col gap-20 px-5 py-16">
 
         {mostrar_sobre && sobre_texto && (
-          <section id="sobre" className="scroll-mt-20">
-            <h2 className="mb-4 flex items-center gap-2 text-2xl font-semibold">
+          <section id="sobre" className={`scroll-mt-20 ${sectionClass}`}>
+            <h2 className={`mb-4 flex items-center gap-2 ${h2Class}`} style={{ fontFamily: headingFontFamily }}>
               <IconUser /> Sobre {tipo === 'negocio' ? 'nosotros' : 'mí'}
             </h2>
-            <p className="max-w-3xl text-lg leading-relaxed text-gray-600">{sobre_texto}</p>
+            <p className={`max-w-3xl text-lg leading-relaxed ${textBodyClass}`}>{sobre_texto}</p>
           </section>
         )}
 
         {mostrarProductosSeccion && (
-          <section id="servicios" className="scroll-mt-20">
-            <h2 className="mb-6 text-2xl font-semibold">Servicios y productos</h2>
+          <section id="servicios" className={`scroll-mt-20 ${sectionClass}`}>
+            <h2 className={`mb-6 ${h2Class}`} style={{ fontFamily: headingFontFamily }}>Servicios y productos</h2>
             <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
               {productos.map((p) => (
                 <article key={p.orden + p.nombre} className={`overflow-hidden transition hover:shadow-md ${cardClass}`}>
@@ -202,8 +209,8 @@ export default function PlantillaProBase({ tarjeta, tema }) {
                   )}
                   <div className="p-5">
                     <h3 className="font-semibold">{p.nombre}</h3>
-                    {p.caracteristicas && <p className="mt-1 text-sm text-gray-500">{p.caracteristicas}</p>}
-                    {p.detalle && <p className="mt-2 text-sm text-gray-600">{p.detalle}</p>}
+                    {p.caracteristicas && <p className={`mt-1 text-sm ${textMutedClass}`}>{p.caracteristicas}</p>}
+                    {p.detalle && <p className={`mt-2 text-sm ${textBodyClass}`}>{p.detalle}</p>}
                   </div>
                 </article>
               ))}
@@ -212,8 +219,8 @@ export default function PlantillaProBase({ tarjeta, tema }) {
         )}
 
         {hayNoticias && (
-          <section id="noticias" className="scroll-mt-20">
-            <h2 className="mb-6 text-2xl font-semibold">Noticias y novedades</h2>
+          <section id="noticias" className={`scroll-mt-20 ${sectionClass}`}>
+            <h2 className={`mb-6 ${h2Class}`} style={{ fontFamily: headingFontFamily }}>Noticias y novedades</h2>
             <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
               {noticias.map((n, i) => (
                 <article key={i} className={`overflow-hidden transition-transform duration-200 hover:scale-[1.03] hover:shadow-lg ${cardClass}`}>
@@ -223,9 +230,9 @@ export default function PlantillaProBase({ tarjeta, tema }) {
                     <div className="h-36 w-full" style={{ backgroundColor: accentSoft }} />
                   )}
                   <div className="p-5">
-                    {n.fecha && <p className="mb-1 text-xs uppercase tracking-wide text-gray-400">{n.fecha}</p>}
+                    {n.fecha && <p className={`mb-1 text-xs uppercase tracking-wide ${textMutedClass}`}>{n.fecha}</p>}
                     <h3 className="font-semibold">{n.titulo}</h3>
-                    {n.resumen && <p className="mt-1 text-sm text-gray-500">{n.resumen}</p>}
+                    {n.resumen && <p className={`mt-1 text-sm ${textMutedClass}`}>{n.resumen}</p>}
                     {n.enlace && (
                       <a href={n.enlace} target="_blank" rel="noreferrer" className="mt-3 inline-block text-sm font-medium" style={{ color: accent }}>Ver más →</a>
                     )}
@@ -237,22 +244,22 @@ export default function PlantillaProBase({ tarjeta, tema }) {
         )}
 
         {hayTestimonios && (
-          <section id="testimonios" className="scroll-mt-20">
-            <h2 className="mb-6 text-2xl font-semibold">Lo que dicen</h2>
+          <section id="testimonios" className={`scroll-mt-20 ${sectionClass}`}>
+            <h2 className={`mb-6 ${h2Class}`} style={{ fontFamily: headingFontFamily }}>Lo que dicen</h2>
             <div className="grid gap-6 sm:grid-cols-2">
               {testimonios.map((t, i) => (
                 <figure key={i} className={`p-6 ${cardClass}`}>
                   {t.calificacion ? <Estrellas n={t.calificacion} accent={accent} /> : null}
-                  <blockquote className="mt-3 text-gray-700">“{t.texto}”</blockquote>
+                  <blockquote className={`mt-3 ${textBodyClass}`}>“{t.texto}”</blockquote>
                   <figcaption className="mt-4 flex items-center gap-3">
                     {t.avatar ? (
                       <img src={t.avatar} alt={t.autor} className="h-10 w-10 rounded-full object-cover" />
                     ) : (
-                      <span className="flex h-10 w-10 items-center justify-center rounded-full text-sm font-semibold text-white" style={{ backgroundColor: accent }}>{iniciales(t.autor)}</span>
+                      <span className={`flex h-10 w-10 items-center justify-center rounded-full text-sm font-semibold ${accentTextClass}`} style={{ backgroundColor: accent }}>{iniciales(t.autor)}</span>
                     )}
                     <span>
                       <span className="block text-sm font-medium">{t.autor}</span>
-                      {t.relacion && <span className="block text-xs text-gray-400">{t.relacion}</span>}
+                      {t.relacion && <span className={`block text-xs ${textMutedClass}`}>{t.relacion}</span>}
                     </span>
                   </figcaption>
                 </figure>
@@ -262,40 +269,40 @@ export default function PlantillaProBase({ tarjeta, tema }) {
         )}
 
         {hayFaq && (
-          <section id="faq" className="scroll-mt-20">
-            <h2 className="mb-6 text-2xl font-semibold">Preguntas frecuentes</h2>
-            <div className="mx-auto max-w-3xl divide-y divide-gray-100 rounded-2xl border border-gray-100">
+          <section id="faq" className={`scroll-mt-20 ${sectionClass}`}>
+            <h2 className={`mb-6 ${h2Class}`} style={{ fontFamily: headingFontFamily }}>Preguntas frecuentes</h2>
+            <div className={`mx-auto max-w-3xl ${dividerClass} ${cardClass}`}>
               {faqs.map((f, i) => (
                 <details key={i} className="group px-5">
                   <summary className="flex cursor-pointer list-none items-center justify-between py-4 font-medium">
                     {f.pregunta}
-                    <svg className="h-4 w-4 shrink-0 text-gray-400 transition-transform group-open:rotate-180" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M6 9l6 6 6-6"/></svg>
+                    <svg className={`h-4 w-4 shrink-0 transition-transform group-open:rotate-180 ${textMutedClass}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M6 9l6 6 6-6"/></svg>
                   </summary>
-                  <p className="pb-4 text-sm leading-relaxed text-gray-600">{f.respuesta}</p>
+                  <p className={`pb-4 text-sm leading-relaxed ${textBodyClass}`}>{f.respuesta}</p>
                 </details>
               ))}
             </div>
           </section>
         )}
 
-        <section id="contacto" className="scroll-mt-20">
-          <h2 className="mb-6 text-2xl font-semibold">Contacto</h2>
+        <section id="contacto" className={`scroll-mt-20 ${sectionClass}`}>
+          <h2 className={`mb-6 ${h2Class}`} style={{ fontFamily: headingFontFamily }}>Contacto</h2>
           <div className="grid gap-6 md:grid-cols-3">
             {(contactos.length > 0 || redes.length > 0) && (
               <div className="flex flex-col gap-3">
                 {contactos.map((c) => (
                   <a key={c.key} href={c.href} target={c.href.startsWith('http') ? '_blank' : undefined} rel="noreferrer"
-                     className="flex items-center gap-3 rounded-xl border border-gray-200 px-4 py-3 transition hover:bg-gray-50">
+                     className={`flex items-center gap-3 rounded-xl border px-4 py-3 transition ${borderClass} ${hoverClass}`}>
                     <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full" style={{ backgroundColor: accentSoft, color: accent }}><c.Icon /></span>
                     <span className="flex min-w-0 flex-col text-left">
                       <span className="text-sm font-medium">{c.label}</span>
-                      {c.valor && <span className="truncate text-xs text-gray-400">{c.valor}</span>}
+                      {c.valor && <span className={`truncate text-xs ${textMutedClass}`}>{c.valor}</span>}
                     </span>
                   </a>
                 ))}
                 {redes.map((r) => (
                   <a key={r.key} href={r.href} target="_blank" rel="noreferrer"
-                     className="flex items-center gap-3 rounded-xl border border-gray-200 px-4 py-3 transition hover:bg-gray-50">
+                     className={`flex items-center gap-3 rounded-xl border px-4 py-3 transition ${borderClass} ${hoverClass}`}>
                     <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full" style={{ backgroundColor: accentSoft, color: accent }}><r.Icon /></span>
                     <span className="text-sm font-medium">{r.label}</span>
                   </a>
@@ -303,20 +310,20 @@ export default function PlantillaProBase({ tarjeta, tema }) {
               </div>
             )}
             {mostrarUbicacionSeccion && (
-              <div className="rounded-xl border border-gray-200 p-5">
+              <div className={`p-5 ${cardClass}`}>
                 <h3 className="mb-2 flex items-center gap-2 font-medium"><IconPin /> Ubicación</h3>
-                {direccion && <p className="text-sm text-gray-600">{direccion}</p>}
-                {horario && <p className="text-sm text-gray-400">{horario}</p>}
+                {direccion && <p className={`text-sm ${textBodyClass}`}>{direccion}</p>}
+                {horario && <p className={`text-sm ${textMutedClass}`}>{horario}</p>}
                 {direccion && (
                   <a href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(direccion)}`} target="_blank" rel="noreferrer"
-                     className="mt-4 inline-flex items-center gap-2 rounded-full px-5 py-2 text-sm font-medium text-white transition" style={{ backgroundColor: accent }}>
+                     className={`mt-4 inline-flex items-center gap-2 rounded-full px-5 py-2 text-sm font-medium transition ${accentTextClass}`} style={{ backgroundColor: accent }}>
                     <IconMap /> Cómo llegar
                   </a>
                 )}
               </div>
             )}
             {tarjeta.email_contacto && (
-              <div className="rounded-xl border border-gray-200 p-5">
+              <div className={`p-5 ${cardClass}`}>
                 <h3 className="mb-3 font-medium">Envíame un mensaje</h3>
                 <div className="flex flex-col gap-3">
                   <input
@@ -329,24 +336,24 @@ export default function PlantillaProBase({ tarjeta, tema }) {
                   <input
                     type="text" placeholder="Tu nombre" value={form.nombre}
                     onChange={(e) => setForm({ ...form, nombre: e.target.value })}
-                    className="rounded-lg border border-gray-200 px-3 py-2 text-sm outline-none focus:border-gray-400"
+                    className={`rounded-lg border bg-transparent px-3 py-2 text-sm outline-none ${borderClass}`}
                   />
                   <input
                     type="email" placeholder="Tu correo (opcional)" value={form.email}
                     onChange={(e) => setForm({ ...form, email: e.target.value })}
-                    className="rounded-lg border border-gray-200 px-3 py-2 text-sm outline-none focus:border-gray-400"
+                    className={`rounded-lg border bg-transparent px-3 py-2 text-sm outline-none ${borderClass}`}
                   />
                   <textarea
                     rows={4} placeholder="Tu mensaje" value={form.mensaje}
                     onChange={(e) => setForm({ ...form, mensaje: e.target.value })}
-                    className="resize-none rounded-lg border border-gray-200 px-3 py-2 text-sm outline-none focus:border-gray-400"
+                    className={`resize-none rounded-lg border bg-transparent px-3 py-2 text-sm outline-none ${borderClass}`}
                   />
                   {envio.estado === 'error' && <p className="text-xs text-red-500">{envio.error}</p>}
                   {envio.estado === 'ok' && <p className="text-xs text-green-600">¡Mensaje enviado! Te responderán pronto.</p>}
                   <button
                     type="button" onClick={enviarContacto}
                     disabled={envio.estado === 'enviando'}
-                    className="rounded-full px-5 py-2.5 text-sm font-medium text-white transition disabled:opacity-60"
+                    className={`rounded-full px-5 py-2.5 text-sm font-medium transition disabled:opacity-60 ${accentTextClass}`}
                     style={{ backgroundColor: accent }}
                   >
                     {envio.estado === 'enviando' ? 'Enviando...' : 'Enviar mensaje'}
@@ -358,9 +365,9 @@ export default function PlantillaProBase({ tarjeta, tema }) {
         </section>
       </main>
 
-      <footer className="border-t border-gray-100 py-10 text-center">
+      <footer className={`border-t py-10 text-center ${borderClass}`}>
         <p className="font-semibold">{nombre_mostrado}</p>
-        <p className="mt-1 text-sm text-gray-400">Powered by Kabymur</p>
+        <p className={`mt-1 text-sm ${textMutedClass}`}>Powered by Kabymur</p>
       </footer>
 
       {waHref && (

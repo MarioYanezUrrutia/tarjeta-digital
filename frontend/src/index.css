@@ -1,3 +1,8 @@
+/* Fuentes de las 6 pieles Pro (Fase 6, Tanda 2) — ver
+   plantillas/pro/temas.js. Un solo @import combinado para no repetir
+   handshakes con fonts.googleapis.com. */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Poppins:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=Fraunces:opsz,wght@9..144,400..600&family=Nunito:wght@400;600;700&family=Playfair+Display:wght@500;600;700&family=Libre+Baskerville:wght@400;700&display=swap');
+
 @import "tailwindcss";
 
 /* @theme block placeholder for Banexa-style theme */

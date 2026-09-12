@@ -35,6 +35,60 @@ const TEMAS = {
     cargoClassName: 'text-gray-300',
     botonClassName: 'rounded-[6px] bg-[#21242e] text-white',
   },
+  // Pro (Fase 6) — colores/tipografía tomados a mano de
+  // plantillas/pro/temas.js; si un tema Pro cambia su paleta, actualizar
+  // también acá (no se derivan programáticamente porque las clases
+  // Tailwind con valores arbitrarios deben ser texto literal para que el
+  // escaneo estático de Tailwind las detecte).
+  pro_min: {
+    fontFamily: "'Inter', ui-sans-serif, system-ui, sans-serif",
+    contenedorClassName: 'bg-white text-[#1a1a1a] border border-gray-100',
+    avatarClassName: 'border border-gray-200 bg-gray-50 text-[#1a1a1a]',
+    nombreClassName: 'text-[#1a1a1a]',
+    cargoClassName: 'text-gray-400',
+    botonClassName: 'rounded-full border border-gray-200 bg-white text-[#1a1a1a]',
+  },
+  pro_mod: {
+    fontFamily: "'Poppins', ui-sans-serif, system-ui, sans-serif",
+    contenedorStyle: { background: 'linear-gradient(135deg, #7c3aed 0%, #d6336c 55%, #ff7849 100%)' },
+    contenedorClassName: 'text-white',
+    avatarClassName: 'border-2 border-white bg-white/20 text-white',
+    nombreClassName: 'text-white',
+    cargoClassName: 'text-white/80',
+    botonClassName: 'rounded-full bg-white/20 text-white backdrop-blur-sm',
+  },
+  pro_corp: {
+    fontFamily: "'IBM Plex Sans', ui-sans-serif, system-ui, sans-serif",
+    contenedorClassName: 'bg-white text-[#111827] border border-gray-200',
+    avatarClassName: 'border border-[#1e40af] bg-[#eaf0fd] text-[#1e40af]',
+    nombreClassName: 'text-[#111827]',
+    cargoClassName: 'text-gray-500',
+    botonClassName: 'rounded-[4px] border border-gray-300 bg-white text-[#111827]',
+  },
+  pro_calido: {
+    fontFamily: "'Fraunces', ui-serif, Georgia, serif",
+    contenedorClassName: 'bg-[#faf3e8] text-[#4a3728] border border-[#e8d9c3]',
+    avatarClassName: 'border border-[#c2673f] bg-white text-[#c2673f]',
+    nombreClassName: 'text-[#4a3728]',
+    cargoClassName: 'text-[#8a7462]',
+    botonClassName: 'rounded-full bg-[#c2673f] text-white',
+  },
+  pro_dark: {
+    fontFamily: "'Playfair Display', ui-serif, Georgia, serif",
+    contenedorClassName: 'bg-[#0d0d0f] text-[#f2ead9] border border-white/10',
+    avatarClassName: 'border border-[#c9a24b] bg-white/5 text-[#c9a24b]',
+    nombreClassName: 'text-[#f2ead9]',
+    cargoClassName: 'text-[#b8ac95]',
+    botonClassName: 'rounded-full border border-[#c9a24b]/50 bg-[#c9a24b]/10 text-[#c9a24b]',
+  },
+  pro_editorial: {
+    fontFamily: "'Libre Baskerville', ui-serif, Georgia, serif",
+    contenedorClassName: 'bg-white text-black border border-black',
+    avatarClassName: 'border border-black bg-white text-black',
+    nombreClassName: 'text-black',
+    cargoClassName: 'text-gray-500',
+    botonClassName: 'rounded-none border border-black bg-white text-black',
+  },
 }
 
 /** Miniatura representativa (~140px) de una plantilla, con datos de

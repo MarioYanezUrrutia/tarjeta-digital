@@ -384,7 +384,7 @@ export default function TarjetaEditor() {
             />
           }
         >
-          <GestionProductos tarjetaId={id} />
+          <GestionProductos tarjetaId={id} esPro={esPro} />
         </Seccion>
 
         {esPro && (

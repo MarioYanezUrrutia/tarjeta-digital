@@ -21,10 +21,13 @@ from .models import Cliente, Producto
 from .panel_views import _obtener_tarjeta_del_cliente
 from .serializers import ProductoSerializer
 
-# Límite provisional mientras no exista el flujo de planes/tiers — el límite
-# real por plan se aplicará después; queda acá como constante única para
-# cambiarlo fácil.
-MAX_PRODUCTOS_POR_TARJETA = 20
+# Límite de productos por tarjeta según el plan: básica vs. Pro.
+MAX_PRODUCTOS_BASICO = 10
+MAX_PRODUCTOS_PRO = 20
+
+
+def _max_productos(tarjeta):
+    return MAX_PRODUCTOS_PRO if tarjeta.es_pro() else MAX_PRODUCTOS_BASICO
 
 
 def _cliente_autenticado(request):
@@ -90,9 +93,10 @@ def productos_lista(request, tarjeta_id):
         return Response(ProductoSerializer(productos, many=True, context={'request': request}).data)
 
     # POST.
-    if tarjeta.productos.count() >= MAX_PRODUCTOS_POR_TARJETA:
+    max_productos = _max_productos(tarjeta)
+    if tarjeta.productos.count() >= max_productos:
         return Response(
-            {'ok': False, 'error': f'Ya alcanzaste el máximo de {MAX_PRODUCTOS_POR_TARJETA} productos.'},
+            {'ok': False, 'error': f'Ya alcanzaste el máximo de {max_productos} productos.'},
             status=status.HTTP_400_BAD_REQUEST,
         )
 

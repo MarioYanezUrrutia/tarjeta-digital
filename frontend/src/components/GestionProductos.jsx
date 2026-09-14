@@ -8,7 +8,8 @@ import {
 } from '../api/productos'
 
 const TAMANO_MAXIMO_IMAGEN_BYTES = 5 * 1024 * 1024
-export const MAX_PRODUCTOS_POR_TARJETA = 20
+export const MAX_PRODUCTOS_BASICO = 10
+export const MAX_PRODUCTOS_PRO = 20
 
 const FORM_VACIO = { nombre: '', caracteristicas: '', detalle: '' }
 
@@ -85,7 +86,8 @@ function PlaceholderImagen() {
   )
 }
 
-export default function GestionProductos({ tarjetaId }) {
+export default function GestionProductos({ tarjetaId, esPro }) {
+  const maxProductos = esPro ? MAX_PRODUCTOS_PRO : MAX_PRODUCTOS_BASICO
   const [productos, setProductos] = useState([])
   const [cargando, setCargando] = useState(true)
   const [formularioAbierto, setFormularioAbierto] = useState(null) // null | 'nuevo' | producto
@@ -205,7 +207,7 @@ export default function GestionProductos({ tarjetaId }) {
     setProductos(status === 200 && Array.isArray(datos) ? datos : anterior)
   }
 
-  const limiteAlcanzado = productos.length >= MAX_PRODUCTOS_POR_TARJETA
+  const limiteAlcanzado = productos.length >= maxProductos
 
   if (cargando) {
     return <p className="text-sm text-gray-400">Cargando productos...</p>
@@ -215,7 +217,7 @@ export default function GestionProductos({ tarjetaId }) {
     <div className="flex flex-col gap-4">
       <div className="flex items-center justify-between">
         <p className="text-sm text-gray-500">
-          {productos.length} de {MAX_PRODUCTOS_POR_TARJETA} productos
+          {productos.length} de {maxProductos} productos
         </p>
         {!formularioAbierto && (
           <button

@@ -170,6 +170,15 @@ FLOW_API_URL = env('FLOW_API_URL', default='https://sandbox.flow.cl/api')
 FLOW_API_KEY = env('FLOW_API_KEY', default='')
 FLOW_SECRET_KEY = env('FLOW_SECRET_KEY', default='')
 
+# --- Mercado Pago (Cobro-5) ---
+# Pasarela de pago en dinero del plan Pro (reemplaza a Flow; ambos
+# coexisten mientras se prueba MP en producción). El modo test/prod NO
+# se distingue por URL (siempre api.mercadopago.com) sino por el prefijo
+# del token: TEST-... en dev/prueba, APP_USR-... en producción. Nunca
+# hardcodear el token acá — va en el .env de cada entorno.
+MP_ACCESS_TOKEN = env('MP_ACCESS_TOKEN', default='')
+MP_WEBHOOK_SECRET = env('MP_WEBHOOK_SECRET', default='')
+
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # DEFAULT_AUTHENTICATION_CLASSES vacío: sin esto, DRF cae a su default

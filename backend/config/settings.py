@@ -172,10 +172,21 @@ FLOW_SECRET_KEY = env('FLOW_SECRET_KEY', default='')
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
+# DEFAULT_AUTHENTICATION_CLASSES vacío: sin esto, DRF cae a su default
+# (SessionAuthentication + BasicAuthentication), y SessionAuthentication
+# exige un token CSRF en cualquier request no-GET — pero la auth real de
+# este proyecto es manual, vía resolver_perfil_banexa (cookie httpOnly de
+# Banexa), nunca por request.user/sesión de Django. Ese chequeo CSRF de
+# DRF era puro ruido: rompía POST/PATCH/DELETE en producción con "CSRF
+# Failed: CSRF token missing." sin aportar seguridad real (no hay sesión
+# Django que proteger). La seguridad sigue intacta: cada vista sigue
+# validando la sesión de Banexa a mano.
+#
 # Sin throttle global (DEFAULT_THROTTLE_CLASSES vacío) — solo se aplica
 # por-vista con ScopedRateThrottle donde hace falta (ej. el formulario de
 # contacto público de la landing Pro, Fase 3 bloque 5).
 REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': [],
     'DEFAULT_THROTTLE_CLASSES': [],
     'DEFAULT_THROTTLE_RATES': {
         'contacto_publico': '5/hour',

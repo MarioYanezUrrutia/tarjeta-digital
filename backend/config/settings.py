@@ -102,6 +102,14 @@ STORAGES = {
     "staticfiles": {"BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage"},
 }
 
+# Passenger monta la app bajo /api y quita ese prefijo antes de pasar la
+# request a Django. STATIC_URL lleva /api/ para que el admin genere los
+# <link> que Passenger enruta a la app; WHITENOISE_STATIC_PREFIX le dice
+# a WhiteNoise que internamente sirva bajo /static/ (la ruta ya sin /api
+# que efectivamente recibe). Sin esto, WhiteNoise busca /api/static/* que
+# nunca llega con ese prefijo -> 404 en todos los estáticos del admin.
+WHITENOISE_STATIC_PREFIX = '/static/'
+
 # CORS
 CORS_ALLOWED_ORIGINS = env.list('CORS_ALLOWED_ORIGINS', default=['http://localhost:5173'])
 CSRF_TRUSTED_ORIGINS = env.list('CSRF_TRUSTED_ORIGINS', default=['http://localhost:5173'])

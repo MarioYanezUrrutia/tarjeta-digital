@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { crearPagoFlow, obtenerEstadoPago, pagarTarjeta } from '../api/tarjetas'
+import { crearPagoMercadoPago, obtenerEstadoPago, pagarTarjeta } from '../api/tarjetas'
 import { formatearFecha } from '../constants/tarjetas'
 
 // Pago real de la suscripción (Cobro-2): consulta precio/saldo, cobra Terras
@@ -13,8 +13,8 @@ export default function ModalPago({ tarjetaId, esPro, onCerrar, onPagoExitoso })
   const [pagando, setPagando] = useState(false)
   const [error, setError] = useState(null)
   const [exito, setExito] = useState(null)
-  const [flowCargando, setFlowCargando] = useState(false)
-  const [flowError, setFlowError] = useState('')
+  const [mpCargando, setMpCargando] = useState(false)
+  const [mpError, setMpError] = useState('')
 
   useEffect(() => {
     let activo = true
@@ -49,16 +49,16 @@ export default function ModalPago({ tarjetaId, esPro, onCerrar, onPagoExitoso })
     }
   }
 
-  async function onPagarFlow() {
-    setFlowError('')
-    setFlowCargando(true)
-    const { status, datos } = await crearPagoFlow(tarjetaId)
+  async function onPagarMP() {
+    setMpError('')
+    setMpCargando(true)
+    const { status, datos } = await crearPagoMercadoPago(tarjetaId)
     if (status === 200 && datos?.ok && datos.url) {
-      window.location.href = datos.url // redirige a Flow
+      window.location.href = datos.url // redirige a Mercado Pago
       return
     }
-    setFlowCargando(false)
-    setFlowError(datos?.error || 'No se pudo iniciar el pago con Flow.')
+    setMpCargando(false)
+    setMpError(datos?.error || 'No se pudo iniciar el pago con Mercado Pago.')
   }
 
   return (
@@ -76,15 +76,15 @@ export default function ModalPago({ tarjetaId, esPro, onCerrar, onPagoExitoso })
           </button>
         </div>
 
-        {cargando && <p className="text-sm text-gray-500">Consultando tu saldo de Terras...</p>}
+        {!esPro && cargando && <p className="text-sm text-gray-500">Consultando tu saldo de Terras...</p>}
 
-        {!cargando && exito && (
+        {!esPro && !cargando && exito && (
           <p className="rounded-md bg-green-50 p-3 text-sm text-green-700">
             ¡Tu tarjeta está activa hasta {formatearFecha(exito.fecha_vencimiento)}!
           </p>
         )}
 
-        {!cargando && !exito && estadoPago && (
+        {!esPro && !cargando && !exito && estadoPago && (
           <form onSubmit={onPagar} className="flex flex-col gap-4">
             <p className="text-sm text-gray-700">
               Tu tarjeta cuesta <strong>{estadoPago.precio} Terras</strong> al mes.
@@ -143,22 +143,23 @@ export default function ModalPago({ tarjetaId, esPro, onCerrar, onPagoExitoso })
           </form>
         )}
 
-        {!cargando && !exito && !estadoPago && (
+        {!esPro && !cargando && !exito && !estadoPago && (
           <p className="text-sm text-red-600">{error || 'No se pudo cargar la información de pago.'}</p>
         )}
 
         {esPro && (
-          <div className="mt-4 border-t border-gray-200 pt-4">
+          <div>
             <p className="mb-2 text-sm text-gray-600">Plan Pro — pago en dinero</p>
             <button
               type="button"
-              onClick={onPagarFlow}
-              disabled={flowCargando}
-              className="w-full rounded-md bg-gray-900 px-4 py-2 text-sm font-medium text-white transition hover:bg-gray-800 disabled:opacity-50"
+              onClick={onPagarMP}
+              disabled={mpCargando}
+              className="w-full rounded-md px-4 py-2 text-sm font-medium text-white transition hover:opacity-90 disabled:opacity-50"
+              style={{ backgroundColor: '#009ee3' }}
             >
-              {flowCargando ? 'Redirigiendo a Flow...' : 'Pagar Pro con Flow'}
+              {mpCargando ? 'Redirigiendo a Mercado Pago...' : 'Pagar Pro con Mercado Pago'}
             </button>
-            {flowError && <p className="mt-2 text-xs text-red-600">{flowError}</p>}
+            {mpError && <p className="mt-2 text-xs text-red-600">{mpError}</p>}
           </div>
         )}
       </div>

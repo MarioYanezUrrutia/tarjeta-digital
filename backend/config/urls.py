@@ -5,7 +5,14 @@ from django.urls import include, path
 
 from apps.tarjetas.faq_views import faq_detalle, faqs_lista, faqs_reordenar
 from apps.tarjetas.noticias_views import noticia_detalle, noticias_lista, noticias_reordenar
-from apps.tarjetas.pago_views import confirmar_pago_flow, crear_pago_flow, estado_pago, pagar_tarjeta
+from apps.tarjetas.pago_views import (
+    confirmar_pago_flow,
+    confirmar_pago_mp,
+    crear_pago_flow,
+    crear_pago_mp,
+    estado_pago,
+    pagar_tarjeta,
+)
 from apps.tarjetas.panel_views import crear_tarjeta, mis_tarjetas, tarjeta_detalle
 from apps.tarjetas.productos_views import producto_detalle, productos_lista, productos_reordenar
 from apps.tarjetas.testimonios_views import testimonio_detalle, testimonios_lista, testimonios_reordenar
@@ -42,6 +49,8 @@ urlpatterns = [
     path(f'{prefix}tarjetas/<int:tarjeta_id>/pagar/', pagar_tarjeta, name='tarjeta-pagar'),
     path(f'{prefix}tarjetas/<int:tarjeta_id>/pagar-flow/', crear_pago_flow, name='tarjeta-pagar-flow'),
     path(f'{prefix}pagos/flow/confirmar/', confirmar_pago_flow, name='flow-confirmar'),
+    path(f'{prefix}tarjetas/<int:tarjeta_id>/pagar-mp/', crear_pago_mp, name='tarjeta-pagar-mp'),
+    path(f'{prefix}pagos/mercadopago/webhook/', confirmar_pago_mp, name='mercadopago-webhook'),
 ]
 
 if settings.DEBUG:

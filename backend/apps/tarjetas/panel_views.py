@@ -202,6 +202,10 @@ def tarjeta_detalle(request, tarjeta_id):
         return Response({'ok': False, 'error': 'Tarjeta no encontrada'}, status=status.HTTP_404_NOT_FOUND)
 
     if request.method == 'DELETE':
+        # Una landing Pro con pagos registrados no se borra: PagoTarjeta es
+        # CASCADE y se perdería el registro de lo cobrado.
+        if tarjeta.plan == 'kabymur_pro' and tarjeta.pagos.exists():
+            return Response({'detail': 'landing_con_pagos'}, status=status.HTTP_409_CONFLICT)
         # Borra la tarjeta y en cascada sus productos/noticias/testimonios/
         # faqs (on_delete=CASCADE). Borra también su imagen del disco.
         if tarjeta.imagen:

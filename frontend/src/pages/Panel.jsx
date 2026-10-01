@@ -25,6 +25,7 @@ export default function Panel() {
   const [landing, setLanding] = useState(undefined)
   const [creandoLanding, setCreandoLanding] = useState(false)
   const [errorLanding, setErrorLanding] = useState('')
+  const [borrandoLanding, setBorrandoLanding] = useState(false)
 
   useEffect(() => {
     let activo = true
@@ -80,6 +81,27 @@ export default function Panel() {
       setTarjetas((prev) => prev.filter((x) => x.id !== t.id))
     } else {
       alert('No se pudo eliminar la tarjeta.')
+    }
+  }
+
+  async function onEliminarLanding() {
+    if (borrandoLanding) return
+    if (
+      !window.confirm(
+        '¿Eliminar tu landing? Se borrará todo su contenido (productos, noticias, testimonios y preguntas). Esta acción no se puede deshacer.'
+      )
+    )
+      return
+    setErrorLanding('')
+    setBorrandoLanding(true)
+    const { status } = await borrarTarjeta(landing.id)
+    setBorrandoLanding(false)
+    if (status === 204) {
+      setLanding(null)
+    } else if (status === 409) {
+      setErrorLanding('Esta landing tiene pagos registrados y no se puede eliminar.')
+    } else {
+      setErrorLanding('No se pudo eliminar la landing.')
     }
   }
 
@@ -176,9 +198,20 @@ export default function Panel() {
                     {landing.estado === 'activa' ? 'Ver landing' : 'Vista previa'}
                   </a>
                 )}
+                {landing.estado === 'borrador' && (
+                  <button
+                    type="button"
+                    onClick={onEliminarLanding}
+                    disabled={borrandoLanding}
+                    className="text-sm font-medium text-red-600 transition hover:text-red-700 disabled:opacity-50"
+                  >
+                    {borrandoLanding ? 'Eliminando...' : 'Eliminar'}
+                  </button>
+                )}
               </div>
             </div>
           )}
+          {landing && errorLanding && <p className="mt-3 text-sm text-red-600">{errorLanding}</p>}
         </section>
 
         <h2 className="-mb-3 text-sm font-semibold uppercase tracking-wide text-gray-500">Mis Tarjetas</h2>

@@ -9,7 +9,7 @@ const PUBLIC_BASE_URL = import.meta.env.VITE_PUBLIC_BASE_URL || window.location.
 const TAMANO_PANTALLA_PX = 200
 const TAMANO_DESCARGA_PX = 512
 
-export default function CompartirTarjeta({ slug, estado }) {
+export default function CompartirTarjeta({ slug, estado, esPro }) {
   const canvasRef = useRef(null)
   const [copiado, setCopiado] = useState(false)
   const url = `${PUBLIC_BASE_URL}/t/${slug}`
@@ -44,7 +44,7 @@ export default function CompartirTarjeta({ slug, estado }) {
   return (
     <div className="flex flex-col items-center gap-4">
       {estado === 'borrador' && (
-        <p className="text-center text-xs text-amber-700">Tu tarjeta se verá cuando la actives.</p>
+        <p className="text-center text-xs text-amber-700">Tu {esPro ? 'landing' : 'tarjeta'} se verá cuando la actives.</p>
       )}
 
       <canvas ref={canvasRef} className="rounded-md border border-gray-200" />

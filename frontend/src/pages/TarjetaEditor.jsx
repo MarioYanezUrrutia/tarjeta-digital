@@ -60,7 +60,7 @@ function construirFormData(campos, archivoImagen) {
   return formData
 }
 
-function Campo({ label, value, onChange, placeholder, textarea = false }) {
+function Campo({ label, ayuda, value, onChange, placeholder, textarea = false }) {
   const Componente = textarea ? 'textarea' : 'input'
   return (
     <div>
@@ -72,6 +72,7 @@ function Campo({ label, value, onChange, placeholder, textarea = false }) {
         rows={textarea ? 4 : undefined}
         className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-gray-500 focus:outline-none"
       />
+      {ayuda && <p className="mt-1 text-xs text-gray-500">{ayuda}</p>}
     </div>
   )
 }
@@ -230,7 +231,7 @@ export default function TarjetaEditor() {
               rel="noreferrer"
               className="text-sm font-medium text-gray-900 underline"
             >
-              Ver mi tarjeta pública
+              {esPro ? 'Ver mi landing pública' : 'Ver mi tarjeta pública'}
             </a>
           )}
         </header>
@@ -251,7 +252,9 @@ export default function TarjetaEditor() {
         {(estado === 'borrador' || estado === 'vencida' || estado === 'cortada') && (
           <div className="rounded-lg border border-amber-200 bg-amber-50 p-4">
             <p className="text-sm font-medium text-amber-800">
-              {estado === 'borrador' ? 'Tu tarjeta aún no está publicada.' : 'Tu tarjeta está vencida.'}
+              {estado === 'borrador'
+                ? `Tu ${esPro ? 'landing' : 'tarjeta'} aún no está publicada.`
+                : `Tu ${esPro ? 'landing' : 'tarjeta'} está vencida.`}
             </p>
             <p className="mt-1 text-sm text-amber-700">
               {estado === 'borrador'
@@ -343,7 +346,7 @@ export default function TarjetaEditor() {
         </Seccion>
 
         <Seccion
-          titulo="Sobre"
+          titulo={esPro ? 'Sobre nosotros' : 'Sobre'}
           extra={
             <Interruptor
               label="Mostrar"
@@ -353,7 +356,8 @@ export default function TarjetaEditor() {
           }
         >
           <Campo
-            label="Descripción"
+            label={esPro ? 'Sobre nosotros' : 'Descripción'}
+            ayuda={esPro ? 'Cuéntale a tus clientes quiénes son y qué hacen.' : undefined}
             value={campos.sobre_texto}
             onChange={(v) => actualizar('sobre_texto', v)}
             textarea
@@ -458,8 +462,8 @@ export default function TarjetaEditor() {
           </div>
         </Seccion>
 
-        <Seccion titulo="Comparte tu tarjeta">
-          <CompartirTarjeta slug={slug} estado={estado} />
+        <Seccion titulo={esPro ? 'Comparte tu landing' : 'Comparte tu tarjeta'}>
+          <CompartirTarjeta slug={slug} estado={estado} esPro={esPro} />
         </Seccion>
 
         {mensaje && (

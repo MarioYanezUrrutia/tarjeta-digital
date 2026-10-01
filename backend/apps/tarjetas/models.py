@@ -291,7 +291,7 @@ class Noticia(models.Model):
             if self.pk:
                 qs = qs.exclude(pk=self.pk)
             if qs.count() >= 6:
-                raise ValidationError('Una tarjeta puede tener como máximo 6 noticias.')
+                raise ValidationError(f"Una {'landing' if self.tarjeta.plan == 'kabymur_pro' else 'tarjeta'} puede tener como máximo 6 noticias.")
 
     def save(self, *args, **kwargs):
         self.full_clean()
@@ -321,7 +321,7 @@ class Testimonio(models.Model):
             if self.pk:
                 qs = qs.exclude(pk=self.pk)
             if qs.count() >= 6:
-                raise ValidationError('Una tarjeta puede tener como máximo 6 testimonios.')
+                raise ValidationError(f"Una {'landing' if self.tarjeta.plan == 'kabymur_pro' else 'tarjeta'} puede tener como máximo 6 testimonios.")
         if self.calificacion is not None and not (1 <= self.calificacion <= 5):
             raise ValidationError('La calificación debe estar entre 1 y 5.')
 
@@ -350,7 +350,7 @@ class PreguntaFrecuente(models.Model):
             if self.pk:
                 qs = qs.exclude(pk=self.pk)
             if qs.count() >= 6:
-                raise ValidationError('Una tarjeta puede tener como máximo 6 preguntas frecuentes.')
+                raise ValidationError(f"Una {'landing' if self.tarjeta.plan == 'kabymur_pro' else 'tarjeta'} puede tener como máximo 6 preguntas frecuentes.")
 
     def save(self, *args, **kwargs):
         self.full_clean()

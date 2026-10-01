@@ -1,9 +1,18 @@
 import React, { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { borrarTarjeta, crearTarjeta, obtenerMisTarjetas } from '../api/tarjetas'
+import { borrarTarjeta, crearLandingPro, crearTarjeta, obtenerLandingPro, obtenerMisTarjetas } from '../api/tarjetas'
 import { PLANTILLA_LABEL, descripcionEstado } from '../constants/tarjetas'
 import { useAuth } from '../context/AuthContext'
 import PromosEcosistema from '../components/PromosEcosistema'
+
+// dd-mm-aaaa en hora local
+function formatearFechaCorta(fechaIso) {
+  if (!fechaIso) return ''
+  const d = new Date(fechaIso)
+  const dd = String(d.getDate()).padStart(2, '0')
+  const mm = String(d.getMonth() + 1).padStart(2, '0')
+  return `${dd}-${mm}-${d.getFullYear()}`
+}
 
 export default function Panel() {
   const { user, logout } = useAuth()
@@ -12,12 +21,20 @@ export default function Panel() {
   const [creando, setCreando] = useState(false)
   const [error, setError] = useState('')
   const [borrandoId, setBorrandoId] = useState(null)
+  // undefined = cargando, null = el usuario no tiene landing Pro todavía
+  const [landing, setLanding] = useState(undefined)
+  const [creandoLanding, setCreandoLanding] = useState(false)
+  const [errorLanding, setErrorLanding] = useState('')
 
   useEffect(() => {
     let activo = true
     obtenerMisTarjetas().then(({ datos }) => {
       if (!activo) return
       setTarjetas(Array.isArray(datos) ? datos : [])
+    })
+    obtenerLandingPro().then(({ datos }) => {
+      if (!activo) return
+      setLanding(datos?.landing_pro ?? null)
     })
     return () => {
       activo = false
@@ -34,6 +51,19 @@ export default function Panel() {
       navigate(`/panel/tarjeta/${datos.id}`)
     } else {
       setError(datos?.error || 'No se pudo crear la tarjeta.')
+    }
+  }
+
+  async function onCrearLanding() {
+    if (creandoLanding) return
+    setErrorLanding('')
+    setCreandoLanding(true)
+    const { datos, status } = await crearLandingPro()
+    if ((status === 201 || status === 200) && datos?.id) {
+      navigate(`/panel/tarjeta/${datos.id}`)
+    } else {
+      setCreandoLanding(false)
+      setErrorLanding(datos?.error || 'No se pudo crear la landing.')
     }
   }
 
@@ -60,6 +90,7 @@ export default function Panel() {
 
   const nombre = user?.nombre_preferido || user?.nombre_completo?.trim() || user?.username
   const cargando = tarjetas === null
+  const basicas = (tarjetas || []).filter((t) => t.plan !== 'kabymur_pro')
 
   return (
     <div className="min-h-screen bg-gray-50 px-4 py-10">
@@ -75,13 +106,90 @@ export default function Panel() {
           </button>
         </header>
 
+        <section className="rounded-lg border border-teal-200 bg-teal-50 p-5 shadow">
+          <h2 className="text-sm font-semibold uppercase tracking-wide text-teal-800">
+            Mi Landing Profesional
+          </h2>
+
+          {landing === undefined && (
+            <div className="flex justify-center py-6">
+              <div className="h-6 w-6 animate-spin rounded-full border-4 border-teal-200 border-t-teal-600" />
+            </div>
+          )}
+
+          {landing === null && (
+            <div className="mt-3">
+              <p className="text-lg font-semibold text-gray-900">Crea tu Landing Profesional</p>
+              <p className="mt-1 text-sm text-gray-600">
+                Ármala gratis. Solo pagas cuando quieras publicarla.
+              </p>
+              {errorLanding && <p className="mt-3 text-sm text-red-600">{errorLanding}</p>}
+              <button
+                type="button"
+                onClick={onCrearLanding}
+                disabled={creandoLanding}
+                className="mt-4 w-full rounded-md bg-teal-600 px-4 py-3 text-sm font-medium text-white transition hover:bg-teal-700 disabled:opacity-50"
+              >
+                {creandoLanding ? 'Creando...' : 'Crear mi landing'}
+              </button>
+            </div>
+          )}
+
+          {landing && (
+            <div className="mt-3 flex items-center justify-between gap-3">
+              <div className="min-w-0">
+                <p className="truncate font-medium text-gray-900">
+                  {landing.nombre_mostrado || 'Landing sin nombre'}
+                </p>
+                {landing.estado === 'borrador' && (
+                  <p className="text-xs text-gray-600">Borrador · solo tú puedes verla</p>
+                )}
+                {landing.estado === 'activa' && (
+                  <>
+                    <p className="text-xs font-medium text-teal-700">Publicada</p>
+                    {landing.fecha_vencimiento && (
+                      <p className="text-xs text-gray-600">
+                        Vigente hasta {formatearFechaCorta(landing.fecha_vencimiento)}
+                      </p>
+                    )}
+                  </>
+                )}
+                {landing.estado !== 'borrador' && landing.estado !== 'activa' && (
+                  <p className="text-xs text-gray-600">{landing.estado}</p>
+                )}
+              </div>
+              <div className="flex shrink-0 items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => navigate(`/panel/tarjeta/${landing.id}`)}
+                  className="rounded-md border border-teal-300 bg-white px-3 py-1.5 text-sm font-medium text-teal-800 transition hover:bg-teal-100"
+                >
+                  Editar
+                </button>
+                {(landing.estado === 'borrador' || landing.estado === 'activa') && (
+                  <a
+                    href={`/t/${landing.slug}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="rounded-md bg-teal-600 px-3 py-1.5 text-sm font-medium text-white transition hover:bg-teal-700"
+                  >
+                    {landing.estado === 'activa' ? 'Ver landing' : 'Vista previa'}
+                  </a>
+                )}
+              </div>
+            </div>
+          )}
+        </section>
+
+        <h2 className="-mb-3 text-sm font-semibold uppercase tracking-wide text-gray-500">Mis Tarjetas</h2>
+
         {cargando && (
           <div className="flex justify-center py-10">
             <div className="h-8 w-8 animate-spin rounded-full border-4 border-gray-200 border-t-gray-500" />
           </div>
         )}
 
-        {!cargando && tarjetas.length === 0 && (
+        {!cargando && basicas.length === 0 && (
           <div className="rounded-lg bg-white p-6 text-center shadow">
             <p className="text-gray-700">Todavía no tienes ninguna tarjeta digital.</p>
             <p className="mt-1 text-sm text-gray-500">
@@ -99,9 +207,9 @@ export default function Panel() {
           </div>
         )}
 
-        {!cargando && tarjetas.length > 0 && (
+        {!cargando && basicas.length > 0 && (
           <div className="flex flex-col gap-3">
-            {tarjetas.map((t) => (
+            {basicas.map((t) => (
               <div
                 key={t.id}
                 className="flex items-center justify-between rounded-lg bg-white p-4 shadow"
@@ -137,7 +245,7 @@ export default function Panel() {
 
             {error && <p className="text-sm text-red-600">{error}</p>}
 
-            {tarjetas.length < 3 && (
+            {basicas.length < 3 && (
               <button
                 type="button"
                 onClick={onCrear}

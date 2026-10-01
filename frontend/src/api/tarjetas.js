@@ -30,3 +30,7 @@ export const crearPagoFlow = (id) => llamarApi(`/tarjetas/${id}/pagar-flow/`, { 
 export const crearPagoMercadoPago = (id) => llamarApi(`/tarjetas/${id}/pagar-mp/`, { method: 'POST' })
 
 export const borrarTarjeta = (id) => llamarApi(`/tarjetas/${id}/`, { method: 'DELETE' })
+
+export const obtenerLandingPro = () => llamarApi('/panel/landing-pro/')
+
+export const crearLandingPro = () => llamarApi('/panel/landing-pro/crear/', { method: 'POST' })

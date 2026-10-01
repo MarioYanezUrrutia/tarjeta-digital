@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { actualizarTarjeta, obtenerTarjeta } from '../api/tarjetas'
-import { PLANTILLAS_DISPONIBLES, PLANTILLAS_PRO_DISPONIBLES, descripcionEstado } from '../constants/tarjetas'
+import { PLANTILLAS_DISPONIBLES, PLANTILLAS_PRO_DISPONIBLES, descripcionEstado, formatearFechaCorta } from '../constants/tarjetas'
 import MiniPreviewPlantilla from '../plantillas/MiniPreviewPlantilla'
 import { iniciales } from '../plantillas/useDatosTarjeta'
 import GestionProductos from '../components/GestionProductos'
@@ -238,18 +238,40 @@ export default function TarjetaEditor() {
 
         <div className="flex items-center justify-between">
           <p className="text-sm text-gray-500">
-            Estado: <span className="font-medium text-gray-700">{descripcionEstado(estado, fechaVencimiento)}</span>
+            Estado:{' '}
+            <span className="font-medium text-gray-700">
+              {esPro && estado === 'activa' && fechaVencimiento
+                ? `Publicada · vigente hasta ${formatearFechaCorta(fechaVencimiento)}`
+                : descripcionEstado(estado, fechaVencimiento)}
+            </span>
           </p>
-          <button
-            type="button"
-            onClick={() => setMostrarModalPago(true)}
-            className="text-sm font-medium text-gray-900 underline"
-          >
-            {estado === 'activa' ? 'Renovar' : 'Activar / Pagar'}
-          </button>
+          {!(esPro && estado === 'borrador') && (
+            <button
+              type="button"
+              onClick={() => setMostrarModalPago(true)}
+              className="text-sm font-medium text-gray-900 underline"
+            >
+              {estado === 'activa' ? 'Renovar' : 'Activar / Pagar'}
+            </button>
+          )}
         </div>
 
-        {(estado === 'borrador' || estado === 'vencida' || estado === 'cortada') && (
+        {esPro && estado === 'borrador' && (
+          <div className="rounded-lg border border-amber-200 bg-amber-50 p-4">
+            <p className="text-sm font-medium text-amber-800">
+              Tu landing es privada. Publícala para que todos la vean.
+            </p>
+            <button
+              type="button"
+              onClick={() => setMostrarModalPago(true)}
+              className="mt-3 rounded-md bg-amber-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-amber-700"
+            >
+              Publicar mi landing
+            </button>
+          </div>
+        )}
+
+        {!(esPro && estado === 'borrador') && (estado === 'borrador' || estado === 'vencida' || estado === 'cortada') && (
           <div className="rounded-lg border border-amber-200 bg-amber-50 p-4">
             <p className="text-sm font-medium text-amber-800">
               {estado === 'borrador'

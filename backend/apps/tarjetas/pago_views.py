@@ -13,8 +13,10 @@ activar sin haber cobrado, nunca cobrar sin activar.
 """
 import time
 from datetime import timedelta
+from decimal import Decimal, InvalidOperation
 
 import requests
+from django.db import transaction
 from django.utils import timezone
 from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
@@ -342,20 +344,110 @@ def crear_pago_mp(request, tarjeta_id):
     return Response({'ok': True, 'url': datos['checkout_url']})
 
 
+def _clasificar_orden_mp(order):
+    """'aprobado' | 'rechazado' | 'pendiente' según la orden REAL que
+    devolvió la API de MP (nunca según parámetros de URL ni del aviso)."""
+    estado = order.get('status')
+    if estado == mp.ESTADO_APROBADO:
+        detalle = order.get('status_detail')
+        return 'aprobado' if detalle in (None, '', 'accredited') else 'pendiente'
+    if estado in ('failed', 'canceled', 'cancelled', 'expired', 'refunded', 'rejected'):
+        return 'rechazado'
+    return 'pendiente'
+
+
+def _monto_clp_valido(order, precio):
+    """True si la orden es por exactamente `precio` CLP. El monto sale de la
+    orden consultada a MP; la moneda, si MP la informa, debe ser CLP."""
+    if precio <= 0:
+        return False
+    for clave in ('currency', 'currency_id'):
+        moneda = order.get(clave)
+        if moneda and str(moneda).upper() != 'CLP':
+            return False
+    try:
+        return Decimal(str(order.get('total_amount'))) == Decimal(precio)
+    except (InvalidOperation, TypeError, ValueError):
+        return False
+
+
+def _tarjeta_id_de_referencia(external_reference):
+    """'pro-<id>-<timestamp>' -> id (int) o None."""
+    partes = (external_reference or '').split('-')
+    if len(partes) != 3 or partes[0] != 'pro':
+        return None
+    try:
+        return int(partes[1])
+    except ValueError:
+        return None
+
+
+def _activar_pro_desde_orden(order_id, order):
+    """Punto único de activación del plan Pro por Mercado Pago, usado por el
+    webhook y por la verificación al volver del checkout. `order` es la
+    orden recién consultada a la API de MP. Devuelve (resultado, tarjeta):
+      'activada' | 'ya_procesado' | 'no_aprobado' | 'monto_invalido'
+      | 'referencia_invalida' | 'no_encontrada' | 'no_pro'
+    Idempotente: la fila de la tarjeta se bloquea (select_for_update) y el
+    chequeo de PagoTarjeta ocurre ya dentro del bloqueo, así que dos
+    confirmaciones simultáneas (retorno + webhook) nunca extienden dos veces."""
+    if _clasificar_orden_mp(order) != 'aprobado':
+        return 'no_aprobado', None
+
+    tarjeta_id = _tarjeta_id_de_referencia(order.get('external_reference'))
+    if tarjeta_id is None:
+        return 'referencia_invalida', None
+
+    config = ConfiguracionTarjetas.obtener()
+    if not _monto_clp_valido(order, config.precio_pro_clp):
+        return 'monto_invalido', None
+
+    with transaction.atomic():
+        tarjeta = Tarjeta.objects.select_for_update().filter(pk=tarjeta_id).first()
+        if tarjeta is None:
+            return 'no_encontrada', None
+        if not tarjeta.es_pro():
+            return 'no_pro', tarjeta
+        if PagoTarjeta.objects.filter(flow_order=str(order_id)).exists():
+            return 'ya_procesado', tarjeta
+
+        # TODO: campo propio (mp_order_id) en vez de reusar flow_order; se
+        # reusa para no sumar una migración — renombrar al retirar Flow.
+        ahora = timezone.now()
+        sigue_vigente = tarjeta.fecha_vencimiento and tarjeta.fecha_vencimiento > ahora
+        base = tarjeta.fecha_vencimiento if sigue_vigente else ahora
+        tarjeta.estado = 'activa'
+        tarjeta.fecha_ultimo_pago = ahora
+        tarjeta.fecha_vencimiento = base + timedelta(days=config.dias_suscripcion)
+        tarjeta.save()
+
+        PagoTarjeta.objects.create(
+            tarjeta=tarjeta,
+            monto_terras=None,
+            monto_clp=int(Decimal(str(order['total_amount']))),
+            medio='mercadopago',
+            flow_order=str(order_id),
+        )
+
+    try:
+        correo_pago_confirmado(tarjeta)
+    except Exception:
+        pass  # el correo no debe tumbar la confirmación del pago
+
+    return 'activada', tarjeta
+
+
 @api_view(['POST'])
 @permission_classes([AllowAny])
 def confirmar_pago_mp(request):
     """Webhook público que Mercado Pago invoca tras un evento de pago.
     Regla de oro: NO confiar en el aviso; se re-consulta la orden real a MP
-    (consultar_orden) y solo si su estado es el de aprobada se activa la
-    suscripción. Idempotente: si ya existe un PagoTarjeta con ese order_id
-    de MP, no duplica ni reactiva.
+    (consultar_orden) y solo si MP dice que está aprobada, por el monto
+    esperado en CLP, se activa (ver _activar_pro_desde_orden, idempotente).
 
     Devuelve 200 siempre que el procesamiento sea correcto o no haya nada
-    que hacer (para que MP no reintente de más), incluidos los casos 'sin
-    id' / 'ya procesado' / 'estado no aprobado'. Devuelve 403 si la firma
-    no valida y 500 si no se pudo consultar la orden (para que MP sí
-    reintente el webhook en ese caso)."""
+    que hacer (para que MP no reintente de más). 403 si la firma no valida y
+    500 si no se pudo consultar la orden (para que MP sí reintente)."""
     if not mp.verificar_firma_webhook(request):
         return Response({'ok': False, 'error': 'Firma inválida'}, status=status.HTTP_403_FORBIDDEN)
 
@@ -371,65 +463,83 @@ def confirmar_pago_mp(request):
     if not order_id:
         return Response({'ok': True, 'info': 'sin id'})
 
-    # 1) Re-verificar el estado real contra MP — nunca confiar en el aviso
-    # mismo (podría venir falsificado o incompleto).
     try:
         order = mp.consultar_orden(order_id)
     except mp.MercadoPagoError as e:
         return Response({'ok': False, 'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-    # OJO: mp.ESTADO_APROBADO ('processed') todavía no está confirmado
-    # contra una orden realmente aprobada en la Orders API — se devuelve
-    # el estado real en la respuesta para poder verificarlo en la prueba.
-    estado = order.get('status')
-    if estado != mp.ESTADO_APROBADO:
-        return Response({'ok': True, 'info': f'estado no aprobado: {estado}'})
-
-    external_reference = order.get('external_reference') or ''
-    amount = order.get('total_amount')
-
-    # 2) Idempotencia. TODO: agregar un campo propio (p.ej. mp_order_id) en
-    # vez de reusar flow_order — se reusa acá para no sumar una migración
-    # en esta primera versión; renombrar a algo neutro (referencia_externa)
-    # cuando se retire Flow.
-    if PagoTarjeta.objects.filter(flow_order=str(order_id)).exists():
+    resultado, _tarjeta = _activar_pro_desde_orden(order_id, order)
+    if resultado == 'activada':
+        return Response({'ok': True, 'pagada': True})
+    if resultado == 'ya_procesado':
         return Response({'ok': True, 'info': 'ya procesado'})
+    if resultado == 'no_aprobado':
+        return Response({'ok': True, 'info': f"estado no aprobado: {order.get('status')}"})
+    # monto/moneda inválidos, referencia rara, tarjeta inexistente o no Pro:
+    # nada que activar; 200 para que MP no reintente algo que no va a cambiar.
+    return Response({'ok': True, 'info': resultado})
 
-    # 3) Parsear tarjeta_id del external_reference 'pro-<id>-<timestamp>'
-    # (ver crear_pago_mp, que lo arma así — mismo formato que Flow).
-    try:
-        tarjeta_id = int(external_reference.split('-')[1])
-    except (IndexError, ValueError):
-        return Response(
-            {'ok': False, 'error': 'external_reference inválido'}, status=status.HTTP_400_BAD_REQUEST
-        )
 
-    tarjeta = Tarjeta.objects.filter(pk=tarjeta_id).first()
-    if tarjeta is None:
-        return Response({'ok': False, 'error': 'Tarjeta no encontrada'}, status=status.HTTP_404_NOT_FOUND)
+@api_view(['POST'])
+@permission_classes([AllowAny])
+def verificar_pago_mp(request, tarjeta_id):
+    """POST /api/tarjetas/<tarjeta_id>/verificar-pago-mp/ — Body: {"ref":
+    "pro-<id>-<ts>"}. Lo llama la página de retorno desde Mercado Pago (en
+    desarrollo el webhook no puede llegar a localhost). `ref` solo sirve para
+    BUSCAR la orden en MP; el resultado sale siempre de lo que MP responde
+    sobre esa orden (estado, monto, referencia), nunca de la URL. Comparte
+    _activar_pro_desde_orden con el webhook, por lo que confirmar dos veces
+    (o retorno + webhook) extiende la vigencia una sola vez.
 
-    # 4) Activar/renovar la suscripción — misma lógica que
-    # confirmar_pago_flow/pagar_tarjeta (Terras).
-    config = ConfiguracionTarjetas.obtener()
-    ahora = timezone.now()
-    sigue_vigente = tarjeta.fecha_vencimiento and tarjeta.fecha_vencimiento > ahora
-    base = tarjeta.fecha_vencimiento if sigue_vigente else ahora
-    tarjeta.estado = 'activa'
-    tarjeta.fecha_ultimo_pago = ahora
-    tarjeta.fecha_vencimiento = base + timedelta(days=config.dias_suscripcion)
-    tarjeta.save()
+    Responde {'ok': True, 'resultado': 'aprobado'|'rechazado'|'pendiente'
+    |'no_encontrado', 'estado', 'fecha_vencimiento', 'slug'}."""
+    tarjeta, error = _obtener_tarjeta_o_404(request, tarjeta_id)
+    if error is not None:
+        return error
+    if not tarjeta.es_pro():
+        return Response({'ok': False, 'error': 'Esta landing no es Pro.'}, status=status.HTTP_400_BAD_REQUEST)
 
-    PagoTarjeta.objects.create(
-        tarjeta=tarjeta,
-        monto_terras=None,
-        monto_clp=int(amount) if amount is not None else config.precio_pro_clp,
-        medio='mercadopago',
-        flow_order=str(order_id),
-    )
+    ref = str(request.data.get('ref') or '')
+    if _tarjeta_id_de_referencia(ref) != tarjeta.id:
+        return Response({'ok': False, 'error': 'Referencia de pago inválida.'}, status=status.HTTP_400_BAD_REQUEST)
 
     try:
-        correo_pago_confirmado(tarjeta)
-    except Exception:
-        pass  # el correo no debe tumbar la confirmación del pago
+        ordenes = mp.buscar_ordenes_por_referencia(ref)
+    except mp.MercadoPagoError as e:
+        return Response({'ok': False, 'error': str(e)}, status=status.HTTP_502_BAD_GATEWAY)
 
-    return Response({'ok': True, 'pagada': True})
+    def respuesta(resultado):
+        tarjeta.refresh_from_db()
+        return Response({
+            'ok': True,
+            'resultado': resultado,
+            'estado': tarjeta.estado,
+            'fecha_vencimiento': tarjeta.fecha_vencimiento,
+            'slug': tarjeta.slug,
+        })
+
+    if not ordenes:
+        return respuesta('no_encontrado')
+
+    # Se consulta cada orden por su id (la búsqueda puede traer datos
+    # parciales) y se prefiere una aprobada.
+    consultadas = []
+    for resumen in ordenes:
+        try:
+            consultadas.append(mp.consultar_orden(resumen['id']))
+        except (mp.MercadoPagoError, KeyError) as e:
+            return Response({'ok': False, 'error': str(e)}, status=status.HTTP_502_BAD_GATEWAY)
+
+    for order in consultadas:
+        if _clasificar_orden_mp(order) == 'aprobado':
+            resultado, _t = _activar_pro_desde_orden(order['id'], order)
+            if resultado in ('activada', 'ya_procesado'):
+                return respuesta('aprobado')
+            return Response(
+                {'ok': False, 'error': 'No se pudo confirmar el pago. Contáctanos con tu comprobante.'},
+                status=status.HTTP_409_CONFLICT,
+            )
+
+    if any(_clasificar_orden_mp(o) == 'pendiente' for o in consultadas):
+        return respuesta('pendiente')
+    return respuesta('rechazado')

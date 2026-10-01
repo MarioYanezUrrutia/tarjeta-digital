@@ -112,6 +112,37 @@ def consultar_orden(order_id):
     return resp.json()
 
 
+def buscar_ordenes_por_referencia(external_reference, dias=7):
+    """Busca las órdenes recientes con ese external_reference
+    (GET /v1/orders exige begin_date/end_date, máximo 1 mes de rango).
+    El filtro se repite acá del lado nuestro por si MP ignora el parámetro:
+    solo se devuelven órdenes cuyo external_reference coincide EXACTO."""
+    from datetime import timedelta
+    from django.utils import timezone
+
+    fin = timezone.now() + timedelta(days=1)
+    inicio = fin - timedelta(days=dias + 1)
+    formato = '%Y-%m-%dT%H:%M:%SZ'
+    try:
+        resp = requests.get(
+            f'{MP_API_URL}/v1/orders',
+            params={
+                'begin_date': inicio.astimezone(timezone.utc).strftime(formato),
+                'end_date': fin.astimezone(timezone.utc).strftime(formato),
+                'external_reference': external_reference,
+            },
+            headers=_headers(),
+            timeout=15,
+        )
+    except requests.RequestException as e:
+        raise MercadoPagoError(f'No se pudo conectar con Mercado Pago: {e}')
+
+    if resp.status_code != 200:
+        raise MercadoPagoError(f'Mercado Pago respondió {resp.status_code}: {resp.text}')
+    datos = resp.json().get('data') or []
+    return [o for o in datos if o.get('external_reference') == external_reference]
+
+
 def verificar_firma_webhook(request):
     """TODO: validar x-signature en el paso del webhook, con
     MP_WEBHOOK_SECRET (HMAC sobre el manifest id/request-id/ts que exige

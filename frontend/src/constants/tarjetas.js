@@ -23,6 +23,15 @@ export function formatearFecha(fechaIso) {
   return new Date(fechaIso).toLocaleDateString('es-CL', { day: 'numeric', month: 'short', year: 'numeric' })
 }
 
+// dd-mm-aaaa en hora local
+export function formatearFechaCorta(fechaIso) {
+  if (!fechaIso) return ''
+  const d = new Date(fechaIso)
+  const dd = String(d.getDate()).padStart(2, '0')
+  const mm = String(d.getMonth() + 1).padStart(2, '0')
+  return `${dd}-${mm}-${d.getFullYear()}`
+}
+
 // Texto claro para el panel/editor — "Activa hasta 12 mar 2026" en vez de
 // solo "Activa", que no dice cuándo se corta.
 export function descripcionEstado(estado, fechaVencimiento) {

@@ -34,3 +34,6 @@ export const borrarTarjeta = (id) => llamarApi(`/tarjetas/${id}/`, { method: 'DE
 export const obtenerLandingPro = () => llamarApi('/panel/landing-pro/')
 
 export const crearLandingPro = () => llamarApi('/panel/landing-pro/crear/', { method: 'POST' })
+
+export const verificarPagoMercadoPago = (id, ref) =>
+  llamarApi(`/tarjetas/${id}/verificar-pago-mp/`, { method: 'POST', body: JSON.stringify({ ref }) })

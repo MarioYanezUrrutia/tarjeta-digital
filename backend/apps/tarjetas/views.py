@@ -6,12 +6,35 @@ from rest_framework.response import Response
 from rest_framework.throttling import ScopedRateThrottle
 from rest_framework.views import APIView
 
+from apps.cuentas.auth import resolver_perfil_banexa
+
 from .models import Tarjeta
 from .serializers import TarjetaPublicaSerializer
 
 
 def health(request):
     return JsonResponse({'status': 'ok'})
+
+
+def _es_dueno(request, tarjeta):
+    """True si hay sesión de Banexa válida y es la del dueño de la tarjeta.
+    Cualquier fallo (sin cookie, sesión inválida, Banexa caído) cuenta como
+    "no es el dueño" — la respuesta de error de resolver_perfil_banexa se
+    descarta a propósito (acá la sesión es opcional)."""
+    perfil, error = resolver_perfil_banexa(request)
+    if error is not None:
+        return False
+    return str(perfil['user_profile_id']) == str(tarjeta.cliente.banexa_user_id)
+
+
+def _pro_sin_publicar(tarjeta):
+    """La landing Pro es pública solo cuando está pagada (estado 'activa').
+    Aplica únicamente a plan='kabymur_pro'; el resto de los planes conserva
+    su comportamiento."""
+    return tarjeta.es_pro() and tarjeta.estado != 'activa'
+
+
+NO_PUBLICADA = {'detail': 'no_publicada'}
 
 
 class TarjetaPublicaView(APIView):
@@ -25,6 +48,17 @@ class TarjetaPublicaView(APIView):
                 {'error': 'Tarjeta no encontrada'},
                 status=status.HTTP_404_NOT_FOUND,
             )
+
+        # Landing Pro sin pagar: solo el dueño la ve (vista previa privada);
+        # para el resto es como si no existiera. `preview` + no-store evitan
+        # que un caché le sirva la vista previa a otra persona.
+        if _pro_sin_publicar(tarjeta):
+            if not _es_dueno(request, tarjeta):
+                return Response(NO_PUBLICADA, status=status.HTTP_404_NOT_FOUND)
+            serializer = TarjetaPublicaSerializer(tarjeta, context={'request': request})
+            respuesta = Response({'disponible': True, 'preview': True, **serializer.data})
+            respuesta['Cache-Control'] = 'private, no-store'
+            return respuesta
 
         # Cobro-1: la tarjeta solo se muestra si su suscripción está vigente
         # (estado 'activa' con vencimiento futuro) — una en 'borrador'
@@ -59,6 +93,9 @@ class ContactoPublicoView(APIView):
             tarjeta = Tarjeta.objects.get(slug=slug)
         except Tarjeta.DoesNotExist:
             return Response({'ok': False, 'error': 'Tarjeta no encontrada'}, status=404)
+
+        if _pro_sin_publicar(tarjeta) and not _es_dueno(request, tarjeta):
+            return Response(NO_PUBLICADA, status=status.HTTP_404_NOT_FOUND)
 
         if (request.data.get('website') or '').strip():
             return Response({'ok': True})

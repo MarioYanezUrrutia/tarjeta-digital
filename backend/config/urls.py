@@ -13,7 +13,13 @@ from apps.tarjetas.pago_views import (
     estado_pago,
     pagar_tarjeta,
 )
-from apps.tarjetas.panel_views import crear_tarjeta, mis_tarjetas, tarjeta_detalle
+from apps.tarjetas.panel_views import (
+    crear_landing_pro,
+    crear_tarjeta,
+    mis_tarjetas,
+    obtener_landing_pro,
+    tarjeta_detalle,
+)
 from apps.tarjetas.productos_views import producto_detalle, productos_lista, productos_reordenar
 from apps.tarjetas.testimonios_views import testimonio_detalle, testimonios_lista, testimonios_reordenar
 from apps.tarjetas.views import ContactoPublicoView, TarjetaPublicaView, health
@@ -28,6 +34,8 @@ urlpatterns = [
     path(f'{prefix}auth/', include('apps.cuentas.urls')),
     path(f'{prefix}mis-tarjetas/', mis_tarjetas, name='mis-tarjetas'),
     path(f'{prefix}tarjetas/', crear_tarjeta, name='crear-tarjeta'),
+    path(f'{prefix}panel/landing-pro/', obtener_landing_pro, name='landing-pro-obtener'),
+    path(f'{prefix}panel/landing-pro/crear/', crear_landing_pro, name='landing-pro-crear'),
     path(f'{prefix}tarjetas/<int:tarjeta_id>/', tarjeta_detalle, name='tarjeta-detalle'),
     path(f'{prefix}tarjetas/<int:tarjeta_id>/productos/reordenar/', productos_reordenar, name='productos-reordenar'),
     path(f'{prefix}tarjetas/<int:tarjeta_id>/productos/', productos_lista, name='productos-lista'),

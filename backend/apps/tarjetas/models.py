@@ -117,12 +117,16 @@ class Tarjeta(models.Model):
     mostrar_faq = models.BooleanField(default=True)
 
     def clean(self):
-        # Límite de 3 tarjetas por cliente
+        # Límites por cliente: 1 landing Pro; 3 tarjetas del resto de los
+        # planes (la Pro no cuenta para ese 3).
         if self.cliente_id:
             qs = Tarjeta.objects.filter(cliente_id=self.cliente_id)
             if self.pk:
                 qs = qs.exclude(pk=self.pk)
-            if qs.count() >= 3:
+            if self.plan == 'kabymur_pro':
+                if qs.filter(plan='kabymur_pro').exists():
+                    raise ValidationError('Solo puedes tener una landing Pro.')
+            elif qs.exclude(plan='kabymur_pro').count() >= 3:
                 raise ValidationError('Cada cliente puede tener como máximo 3 tarjetas.')
 
     def save(self, *args, **kwargs):

@@ -124,6 +124,7 @@ def crear_tarjeta(request):
     reciente = (
         Tarjeta.objects
         .filter(cliente=cliente, estado='borrador', creado__gte=timezone.now() - timedelta(seconds=10))
+        .exclude(plan='kabymur_pro')
         .order_by('-creado')
         .first()
     )
@@ -131,6 +132,47 @@ def crear_tarjeta(request):
         return Response(MisTarjetasSerializer(reciente).data, status=status.HTTP_200_OK)
 
     tarjeta = Tarjeta(cliente=cliente, tipo='persona', plan='kabymur_basico')
+    try:
+        tarjeta.save()
+    except DjangoValidationError as e:
+        return Response(
+            {'ok': False, 'error': _mensaje_validation_error(e)}, status=status.HTTP_400_BAD_REQUEST
+        )
+
+    return Response(MisTarjetasSerializer(tarjeta).data, status=status.HTTP_201_CREATED)
+
+
+@api_view(['GET'])
+@permission_classes([AllowAny])
+def obtener_landing_pro(request):
+    """GET /api/panel/landing-pro/ — la landing Pro del usuario (una Tarjeta
+    plan='kabymur_pro'), o {"landing_pro": null} si todavía no la tiene."""
+    perfil, error = resolver_perfil_banexa(request)
+    if error is not None:
+        return error
+
+    cliente = Cliente.objects.filter(banexa_user_id=str(perfil['user_profile_id'])).first()
+    landing = cliente.tarjetas.filter(plan='kabymur_pro').first() if cliente else None
+    return Response({'landing_pro': MisTarjetasSerializer(landing).data if landing else None})
+
+
+@api_view(['POST'])
+@permission_classes([AllowAny])
+def crear_landing_pro(request):
+    """POST /api/panel/landing-pro/crear/ — crea la landing Pro (Tarjeta
+    plan='kabymur_pro') del usuario. Máximo una por cliente: si ya existe se
+    devuelve esa con 200. El límite también lo valida Tarjeta.clean()."""
+    perfil, error = resolver_perfil_banexa(request)
+    if error is not None:
+        return error
+
+    cliente = _obtener_o_crear_cliente(perfil)
+
+    existente = cliente.tarjetas.filter(plan='kabymur_pro').first()
+    if existente is not None:
+        return Response(MisTarjetasSerializer(existente).data, status=status.HTTP_200_OK)
+
+    tarjeta = Tarjeta(cliente=cliente, tipo='persona', plan='kabymur_pro', estado='borrador', plantilla='pro_min')
     try:
         tarjeta.save()
     except DjangoValidationError as e:

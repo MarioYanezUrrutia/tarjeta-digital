@@ -201,3 +201,26 @@ REST_FRAMEWORK = {
         'contacto_publico': '5/hour',
     },
 }
+
+# --- Logging ---
+# Con DEBUG=False Django no muestra tracebacks y, sin esta config, los
+# errores no salían a ningún lado. Todo va a stderr, que en producción
+# (Passenger) termina en el log de errores del hosting.
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'simple': {'format': '%(asctime)s %(levelname)s %(name)s: %(message)s'},
+    },
+    'handlers': {
+        'stderr': {
+            'class': 'logging.StreamHandler',
+            'stream': 'ext://sys.stderr',
+            'formatter': 'simple',
+        },
+    },
+    'loggers': {
+        'django.request': {'handlers': ['stderr'], 'level': 'ERROR', 'propagate': False},
+        'apps.tarjetas': {'handlers': ['stderr'], 'level': 'INFO', 'propagate': False},
+    },
+}

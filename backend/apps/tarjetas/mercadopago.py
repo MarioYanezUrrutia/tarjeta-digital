@@ -11,6 +11,8 @@ Este módulo NO decide reglas de negocio (activar suscripción, etc.); solo
 habla con Mercado Pago. Quien orquesta es el endpoint que lo llama.
 """
 import uuid
+from datetime import datetime, timedelta
+from datetime import timezone as dt_timezone
 
 import requests
 from django.conf import settings
@@ -117,18 +119,16 @@ def buscar_ordenes_por_referencia(external_reference, dias=7):
     (GET /v1/orders exige begin_date/end_date, máximo 1 mes de rango).
     El filtro se repite acá del lado nuestro por si MP ignora el parámetro:
     solo se devuelven órdenes cuyo external_reference coincide EXACTO."""
-    from datetime import timedelta
-    from django.utils import timezone
-
-    fin = timezone.now() + timedelta(days=1)
+    # datetime.timezone.utc, NO django.utils.timezone.utc (eliminado en Django 5).
+    fin = datetime.now(dt_timezone.utc) + timedelta(days=1)
     inicio = fin - timedelta(days=dias + 1)
     formato = '%Y-%m-%dT%H:%M:%SZ'
     try:
         resp = requests.get(
             f'{MP_API_URL}/v1/orders',
             params={
-                'begin_date': inicio.astimezone(timezone.utc).strftime(formato),
-                'end_date': fin.astimezone(timezone.utc).strftime(formato),
+                'begin_date': inicio.strftime(formato),
+                'end_date': fin.strftime(formato),
                 'external_reference': external_reference,
             },
             headers=_headers(),

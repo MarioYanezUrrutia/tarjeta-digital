@@ -11,6 +11,8 @@ cualquier motivo (clave, saldo, lo que sea), la tarjeta NO se toca. El dinero
 (Terras) y el estado de la tarjeta nunca deben quedar desincronizados: nunca
 activar sin haber cobrado, nunca cobrar sin activar.
 """
+import functools
+import logging
 import time
 from datetime import timedelta
 from decimal import Decimal, InvalidOperation
@@ -32,9 +34,34 @@ from .correos import correo_pago_confirmado
 from .models import Cliente, ConfiguracionTarjetas, PagoTarjeta, Tarjeta
 from .panel_views import _obtener_tarjeta_del_cliente
 
+logger = logging.getLogger(__name__)
+
 MENSAJE_BANEXA_NO_DISPONIBLE = (
     'No se pudo contactar el servicio de Terras. Intenta de nuevo en un momento.'
 )
+
+MENSAJE_ERROR_PAGO_INTERNO = (
+    'Ocurrió un error al procesar el pago. Si ya pagaste, no se pierde: '
+    'vuelve a revisar en unos minutos o contáctanos.'
+)
+
+
+def _sin_500_mudo(vista):
+    """Cualquier excepción inesperada de una vista de pago MP queda en el log
+    con su traceback completo (logger.exception) y el cliente recibe un JSON
+    con un mensaje claro en vez de un 500 sin explicación. Va por DEBAJO de
+    @api_view."""
+    @functools.wraps(vista)
+    def envoltura(request, *args, **kwargs):
+        try:
+            return vista(request, *args, **kwargs)
+        except Exception:
+            logger.exception('Error inesperado en %s (args=%s)', vista.__name__, kwargs)
+            return Response(
+                {'ok': False, 'error': MENSAJE_ERROR_PAGO_INTERNO},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
+    return envoltura
 
 
 def _obtener_tarjeta_o_404(request, tarjeta_id):
@@ -292,6 +319,7 @@ def confirmar_pago_flow(request):
 
 @api_view(['POST'])
 @permission_classes([AllowAny])
+@_sin_500_mudo
 def crear_pago_mp(request, tarjeta_id):
     """POST /api/tarjetas/<tarjeta_id>/pagar-mp/ — crea una orden de pago en
     Mercado Pago (Cobro-5) por el precio del plan Pro en CLP, y devuelve la
@@ -400,6 +428,10 @@ def _activar_pro_desde_orden(order_id, order):
 
     config = ConfiguracionTarjetas.obtener()
     if not _monto_clp_valido(order, config.precio_pro_clp):
+        logger.warning(
+            'Orden MP %s aprobada pero con monto/moneda inesperados (esperado %s CLP)',
+            order.get('id'), config.precio_pro_clp,
+        )
         return 'monto_invalido', None
 
     with transaction.atomic():
@@ -434,11 +466,13 @@ def _activar_pro_desde_orden(order_id, order):
     except Exception:
         pass  # el correo no debe tumbar la confirmación del pago
 
+    logger.info('Landing Pro %s activada por la orden MP %s', tarjeta.id, order_id)
     return 'activada', tarjeta
 
 
 @api_view(['POST'])
 @permission_classes([AllowAny])
+@_sin_500_mudo
 def confirmar_pago_mp(request):
     """Webhook público que Mercado Pago invoca tras un evento de pago.
     Regla de oro: NO confiar en el aviso; se re-consulta la orden real a MP
@@ -469,6 +503,7 @@ def confirmar_pago_mp(request):
         return Response({'ok': False, 'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     resultado, _tarjeta = _activar_pro_desde_orden(order_id, order)
+    logger.info('Webhook MP: orden %s -> %s', order_id, resultado)
     if resultado == 'activada':
         return Response({'ok': True, 'pagada': True})
     if resultado == 'ya_procesado':
@@ -482,6 +517,7 @@ def confirmar_pago_mp(request):
 
 @api_view(['POST'])
 @permission_classes([AllowAny])
+@_sin_500_mudo
 def verificar_pago_mp(request, tarjeta_id):
     """POST /api/tarjetas/<tarjeta_id>/verificar-pago-mp/ — Body: {"ref":
     "pro-<id>-<ts>"}. Lo llama la página de retorno desde Mercado Pago (en
@@ -533,6 +569,7 @@ def verificar_pago_mp(request, tarjeta_id):
     for order in consultadas:
         if _clasificar_orden_mp(order) == 'aprobado':
             resultado, _t = _activar_pro_desde_orden(order['id'], order)
+            logger.info('Verificar MP: orden %s (tarjeta %s) -> %s', order['id'], tarjeta.id, resultado)
             if resultado in ('activada', 'ya_procesado'):
                 return respuesta('aprobado')
             return Response(

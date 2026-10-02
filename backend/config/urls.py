@@ -10,8 +10,10 @@ from apps.tarjetas.pago_views import (
     confirmar_pago_mp,
     crear_pago_flow,
     crear_pago_mp,
+    cupos_fundador,
     estado_pago,
     pagar_tarjeta,
+    planes_pro,
     verificar_pago_mp,
 )
 from apps.tarjetas.panel_views import (
@@ -60,6 +62,8 @@ urlpatterns = [
     path(f'{prefix}pagos/flow/confirmar/', confirmar_pago_flow, name='flow-confirmar'),
     path(f'{prefix}tarjetas/<int:tarjeta_id>/pagar-mp/', crear_pago_mp, name='tarjeta-pagar-mp'),
     path(f'{prefix}tarjetas/<int:tarjeta_id>/verificar-pago-mp/', verificar_pago_mp, name='tarjeta-verificar-pago-mp'),
+    path(f'{prefix}tarjetas/<int:tarjeta_id>/planes-pro/', planes_pro, name='tarjeta-planes-pro'),
+    path(f'{prefix}cupos-fundador/', cupos_fundador, name='cupos-fundador'),
     path(f'{prefix}pagos/mercadopago/webhook/', confirmar_pago_mp, name='mercadopago-webhook'),
 ]
 

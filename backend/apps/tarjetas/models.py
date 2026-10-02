@@ -77,6 +77,12 @@ class Tarjeta(models.Model):
     # reintentos, etc.). No es un log completo, solo la última vez.
     fecha_ultimo_aviso = models.DateTimeField(null=True, blank=True)
 
+    # Plan Fundador (landing Pro): número correlativo que recibe al confirmarse
+    # su primer pago como fundador, y fecha hasta la que rige su precio de
+    # renovación preferente (ver apps/tarjetas/planes.py).
+    numero_fundador = models.PositiveIntegerField(unique=True, null=True, blank=True)
+    fundador_precio_hasta = models.DateTimeField(null=True, blank=True)
+
     # Bloque Identidad
     imagen = models.ImageField(upload_to='tarjetas/', blank=True, null=True)
     nombre_mostrado = models.CharField(max_length=255, blank=True, null=True)
@@ -192,6 +198,23 @@ class ConfiguracionTarjetas(models.Model):
     dias_suscripcion = models.PositiveIntegerField(default=30)
     dias_aviso_previo = models.PositiveIntegerField(default=5)
 
+    # Planes Pro en CLP. `precio_pro_clp` es el precio base MENSUAL; los
+    # planes de varios meses se calculan sobre él (ver apps/tarjetas/planes.py).
+    descuento_semestral_pct = models.PositiveSmallIntegerField(
+        default=10, help_text='Descuento (%) del plan semestral sobre 6 × precio mensual.')
+    anual_meses_pagados = models.PositiveSmallIntegerField(
+        default=10, help_text='Meses que se pagan en el plan anual (12 meses de servicio).')
+    # Plan Fundador
+    fundador_cupos = models.PositiveIntegerField(default=100, help_text='Cupos totales del plan Fundador.')
+    fundador_precio_clp = models.PositiveIntegerField(default=9000, help_text='Pago único del plan Fundador.')
+    fundador_meses = models.PositiveSmallIntegerField(default=6, help_text='Meses que da el plan Fundador.')
+    fundador_renovacion_precio_clp = models.PositiveIntegerField(
+        default=3500, help_text='Precio base mensual del fundador tras sus meses de fundador.')
+    fundador_renovacion_meses = models.PositiveSmallIntegerField(
+        default=24, help_text='Meses que rige el precio de renovación del fundador.')
+    fundador_dias_gracia = models.PositiveSmallIntegerField(
+        default=5, help_text='Días tras vencer en que el fundador aún conserva su precio preferente.')
+
     class Meta:
         verbose_name = 'Configuración'
         verbose_name_plural = 'Configuración'
@@ -242,6 +265,40 @@ class PagoTarjeta(models.Model):
         if self.medio == 'flow':
             return f"${self.monto_clp} CLP — {self.tarjeta} ({self.fecha:%d-%m-%Y})"
         return f"{self.monto_terras} Terras — {self.tarjeta} ({self.fecha:%d-%m-%Y})"
+
+
+class OrdenPagoPro(models.Model):
+    """Orden de pago de la landing Pro, creada al INICIAR el pago con el
+    monto calculado en el servidor. La confirmación (retorno y webhook de MP)
+    valida contra el monto de ESTA orden y no contra la configuración vigente,
+    así un cambio de precio a mitad de un pago no lo rechaza."""
+    PLAN_CHOICES = [
+        ('fundador', 'Fundador'),
+        ('mensual', 'Mensual'),
+        ('semestral', 'Semestral'),
+        ('anual', 'Anual'),
+    ]
+    ESTADO_CHOICES = [
+        ('pendiente', 'Pendiente'),
+        ('pagada', 'Pagada'),
+    ]
+
+    tarjeta = models.ForeignKey('Tarjeta', on_delete=models.CASCADE, related_name='ordenes_pago')
+    referencia = models.CharField(max_length=64, unique=True)  # external_reference en MP
+    plan = models.CharField(max_length=16, choices=PLAN_CHOICES)
+    meses = models.PositiveSmallIntegerField()
+    monto_clp = models.PositiveIntegerField()
+    estado = models.CharField(max_length=16, choices=ESTADO_CHOICES, default='pendiente')
+    mp_order_id = models.CharField(max_length=64, unique=True, null=True, blank=True)
+    creado = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-creado']
+        verbose_name = 'Orden de pago Pro'
+        verbose_name_plural = 'Órdenes de pago Pro'
+
+    def __str__(self):
+        return f"{self.referencia} — {self.plan} ${self.monto_clp} ({self.estado})"
 
 
 class Estadisticas(Tarjeta):

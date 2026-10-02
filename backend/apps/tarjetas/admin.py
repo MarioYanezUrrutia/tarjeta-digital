@@ -13,7 +13,7 @@ from django.shortcuts import redirect
 from django.template.response import TemplateResponse
 from django.utils import timezone
 
-from .models import Cliente, ConfiguracionTarjetas, Estadisticas, PagoTarjeta, Producto, Tarjeta
+from .models import Cliente, ConfiguracionTarjetas, Estadisticas, OrdenPagoPro, PagoTarjeta, Producto, Tarjeta
 
 
 @admin.register(Cliente)
@@ -38,7 +38,7 @@ class ProductoInline(admin.TabularInline):
 class TarjetaAdmin(admin.ModelAdmin):
     list_display = (
         'id', 'nombre_mostrado', 'cliente', 'plan', 'estado_coloreado',
-        'fecha_vencimiento', 'dias_para_vencer_admin', 'slug', 'creado',
+        'fecha_vencimiento', 'dias_para_vencer_admin', 'numero_fundador', 'slug', 'creado',
     )
     list_filter = ('estado', 'plan', 'tipo')
     search_fields = ('nombre_mostrado', 'slug', 'cliente__email', 'cliente__nombre')
@@ -88,13 +88,32 @@ class PagoTarjetaAdmin(admin.ModelAdmin):
         return False
 
 
+@admin.register(OrdenPagoPro)
+class OrdenPagoProAdmin(admin.ModelAdmin):
+    """Órdenes de pago Pro: solo lectura (las crea el servidor al iniciar el
+    pago y las marca pagadas la confirmación de Mercado Pago)."""
+    list_display = ('id', 'referencia', 'tarjeta', 'plan', 'meses', 'monto_clp', 'estado', 'mp_order_id', 'creado')
+    list_filter = ('estado', 'plan')
+    search_fields = ('referencia', 'mp_order_id', 'tarjeta__slug', 'tarjeta__nombre_mostrado')
+    ordering = ('-creado',)
+
+    def has_add_permission(self, request):
+        return False
+
+    def has_change_permission(self, request, obj=None):
+        return False
+
+    def has_delete_permission(self, request, obj=None):
+        return False
+
+
 @admin.register(ConfiguracionTarjetas)
 class ConfiguracionTarjetasAdmin(admin.ModelAdmin):
     """Singleton: una sola fila (pk=1, ver `ConfiguracionTarjetas.save`).
     El changelist no tiene sentido para una sola fila — se salta directo al
     formulario de edición, así el admin se siente como una página de
     "Configuración" en vez de una tabla."""
-    list_display = ('precio_terras', 'dias_suscripcion', 'dias_aviso_previo')
+    list_display = ('precio_terras', 'precio_pro_clp', 'dias_suscripcion', 'dias_aviso_previo')
 
     def has_add_permission(self, request):
         return not ConfiguracionTarjetas.objects.exists()

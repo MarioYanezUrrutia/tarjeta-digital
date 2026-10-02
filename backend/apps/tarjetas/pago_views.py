@@ -19,6 +19,7 @@ from decimal import Decimal, InvalidOperation
 
 import requests
 from django.db import transaction
+from django.db.models import Max
 from django.utils import timezone
 from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
@@ -30,14 +31,20 @@ from apps.cuentas.banexa import banexa_get, banexa_post
 
 from . import flow
 from . import mercadopago as mp
+from . import planes as pl
 from .correos import correo_pago_confirmado
-from .models import Cliente, ConfiguracionTarjetas, PagoTarjeta, Tarjeta
+from .models import Cliente, ConfiguracionTarjetas, OrdenPagoPro, PagoTarjeta, Tarjeta
 from .panel_views import _obtener_tarjeta_del_cliente
 
 logger = logging.getLogger(__name__)
 
 MENSAJE_BANEXA_NO_DISPONIBLE = (
     'No se pudo contactar el servicio de Terras. Intenta de nuevo en un momento.'
+)
+
+MENSAJE_ORDEN_DESCONOCIDA = (
+    'Este pago no tiene una orden registrada (formato antiguo o referencia desconocida). '
+    'Contáctanos con tu comprobante de Mercado Pago.'
 )
 
 MENSAJE_ERROR_PAGO_INTERNO = (
@@ -317,16 +324,44 @@ def confirmar_pago_flow(request):
     return Response({'ok': True, 'pagada': True})
 
 
+@api_view(['GET'])
+@permission_classes([AllowAny])
+@_sin_500_mudo
+def planes_pro(request, tarjeta_id):
+    """GET /api/tarjetas/<tarjeta_id>/planes-pro/ — planes de pago disponibles
+    HOY para esta landing Pro (nombre, meses, monto, ahorro y, en el plan
+    Fundador, los cupos que quedan). Los montos los calcula siempre el
+    servidor (apps/tarjetas/planes.py); el frontend solo los muestra."""
+    tarjeta, error = _obtener_tarjeta_o_404(request, tarjeta_id)
+    if error is not None:
+        return error
+    if not tarjeta.es_pro():
+        return Response({'ok': False, 'error': 'Esta landing no es Pro.'}, status=status.HTTP_400_BAD_REQUEST)
+    return Response({'planes': pl.calcular_planes(tarjeta, timezone.now())})
+
+
+@api_view(['GET'])
+@permission_classes([AllowAny])
+@_sin_500_mudo
+def cupos_fundador(request):
+    """GET /api/cupos-fundador/ — público (sin login): cupos del plan Fundador."""
+    config = ConfiguracionTarjetas.obtener()
+    return Response({
+        'cupos_total': config.fundador_cupos,
+        'cupos_restantes': pl.cupos_fundador_restantes(config),
+    })
+
+
 @api_view(['POST'])
 @permission_classes([AllowAny])
 @_sin_500_mudo
 def crear_pago_mp(request, tarjeta_id):
-    """POST /api/tarjetas/<tarjeta_id>/pagar-mp/ — crea una orden de pago en
-    Mercado Pago (Cobro-5) por el precio del plan Pro en CLP, y devuelve la
-    URL de checkout a la que el frontend debe redirigir al usuario para
-    pagar. No activa ni toca la tarjeta acá: eso lo hace el webhook
-    `mercadopago-webhook` cuando MP confirme el pago de verdad. Mismo
-    patrón que crear_pago_flow — ambos coexisten mientras se prueba MP."""
+    """POST /api/tarjetas/<tarjeta_id>/pagar-mp/ — Body: {"plan": "fundador"
+    |"mensual"|"semestral"|"anual"} (por defecto "mensual"). Valida que el
+    plan esté disponible para la landing, guarda una OrdenPagoPro con el monto
+    y los meses calculados en el servidor y crea la orden en Mercado Pago por
+    ESE monto. No activa nada acá: eso lo hace la confirmación (retorno o
+    webhook) cuando MP confirme el pago de verdad."""
     tarjeta, error = _obtener_tarjeta_o_404(request, tarjeta_id)
     if error is not None:
         return error
@@ -334,42 +369,53 @@ def crear_pago_mp(request, tarjeta_id):
     if not tarjeta.es_pro():
         return Response({'ok': False, 'error': 'Esta tarjeta no es Pro.'}, status=status.HTTP_400_BAD_REQUEST)
 
-    config = ConfiguracionTarjetas.obtener()
-    precio = config.precio_pro_clp
-    if precio <= 0:
+    if ConfiguracionTarjetas.obtener().precio_pro_clp <= 0:
         return Response(
             {'ok': False, 'error': 'El precio del plan Pro no está configurado.'},
             status=status.HTTP_400_BAD_REQUEST,
         )
 
-    external_reference = f'pro-{tarjeta.id}-{int(time.time())}'
+    plan_id = str(request.data.get('plan') or pl.PLAN_MENSUAL)
+    if plan_id not in pl.NOMBRES:
+        return Response({'ok': False, 'error': 'Plan inválido.'}, status=status.HTTP_400_BAD_REQUEST)
+    plan = pl.plan_disponible(tarjeta, plan_id, timezone.now())
+    if plan is None:
+        return Response(
+            {'ok': False, 'error': 'Este plan no está disponible para tu landing.'},
+            status=status.HTTP_409_CONFLICT,
+        )
 
-    # Webhook de confirmación (backend) — ruta literal en vez de reverse()
-    # por el mismo motivo que crear_pago_flow; mismo URL_PREFIX que el
-    # resto de las rutas. El helper hoy ignora url_notification (MP la
-    # rechaza en el body — ver mercadopago.py), pero se arma y pasa igual
-    # para no reescribir la firma cuando el webhook se configure distinto.
+    # El formato 'pro-<id>-<dígitos>' lo parsea también la página de retorno.
+    external_reference = f'pro-{tarjeta.id}-{int(time.time() * 1000)}'
+    orden = OrdenPagoPro.objects.create(
+        tarjeta=tarjeta, referencia=external_reference, plan=plan['id'],
+        meses=plan['meses'], monto_clp=plan['monto'],
+    )
+
+    # El helper hoy ignora url_notification (el webhook se registra en el
+    # panel de MP, ver mercadopago.py); se arma igual para no cambiar firma.
     from django.conf import settings as dj
     conf_path = f"/{dj.URL_PREFIX}pagos/mercadopago/webhook/"
     url_notification = request.build_absolute_uri(conf_path)
     url_return = f"{dj.PUBLIC_BASE_URL}/pago/mp/retorno?ref={external_reference}"
 
     email = (tarjeta.email_contacto or '').strip() or 'sin-correo@kabymur.com'
-    subject = f'Plan Pro - {tarjeta.nombre_mostrado or tarjeta.slug}'
+    subject = f"Plan Pro {plan['nombre']} - {tarjeta.nombre_mostrado or tarjeta.slug}"
 
     try:
         datos = mp.crear_orden(
             external_reference=external_reference,
             subject=subject,
-            amount=precio,
+            amount=plan['monto'],
             email=email,
             url_return=url_return,
             url_notification=url_notification,
         )
     except mp.MercadoPagoError as e:
+        orden.delete()  # no se llegó a cobrar nada: no dejar la orden huérfana
         return Response({'ok': False, 'error': str(e)}, status=status.HTTP_502_BAD_GATEWAY)
 
-    return Response({'ok': True, 'url': datos['checkout_url']})
+    return Response({'ok': True, 'url': datos['checkout_url'], 'plan': plan['id'], 'monto': plan['monto']})
 
 
 def _clasificar_orden_mp(order):
@@ -384,17 +430,18 @@ def _clasificar_orden_mp(order):
     return 'pendiente'
 
 
-def _monto_clp_valido(order, precio):
-    """True si la orden es por exactamente `precio` CLP. El monto sale de la
-    orden consultada a MP; la moneda, si MP la informa, debe ser CLP."""
-    if precio <= 0:
+def _monto_clp_valido(order, monto_esperado):
+    """True si la orden de MP es por exactamente `monto_esperado` CLP — el
+    monto de la OrdenPagoPro guardada al iniciar el pago, no el precio
+    vigente en la configuración. La moneda, si MP la informa, debe ser CLP."""
+    if monto_esperado <= 0:
         return False
     for clave in ('currency', 'currency_id'):
         moneda = order.get(clave)
         if moneda and str(moneda).upper() != 'CLP':
             return False
     try:
-        return Decimal(str(order.get('total_amount'))) == Decimal(precio)
+        return Decimal(str(order.get('total_amount'))) == Decimal(monto_esperado)
     except (InvalidOperation, TypeError, ValueError):
         return False
 
@@ -415,24 +462,25 @@ def _activar_pro_desde_orden(order_id, order):
     webhook y por la verificación al volver del checkout. `order` es la
     orden recién consultada a la API de MP. Devuelve (resultado, tarjeta):
       'activada' | 'ya_procesado' | 'no_aprobado' | 'monto_invalido'
-      | 'referencia_invalida' | 'no_encontrada' | 'no_pro'
-    Idempotente: la fila de la tarjeta se bloquea (select_for_update) y el
-    chequeo de PagoTarjeta ocurre ya dentro del bloqueo, así que dos
-    confirmaciones simultáneas (retorno + webhook) nunca extienden dos veces."""
+      | 'orden_desconocida' | 'no_encontrada' | 'no_pro'
+
+    - Se valida contra la OrdenPagoPro guardada al iniciar el pago (su monto
+      y sus meses), no contra la configuración de hoy.
+    - Todo (PagoTarjeta + estado + vigencia + número de fundador + orden
+      pagada) ocurre en UNA transacción: o queda todo o no queda nada.
+    - Idempotente: la tarjeta se bloquea (select_for_update), y el chequeo de
+      duplicado (orden ya pagada / mp_order_id único / PagoTarjeta) corre
+      ya dentro del bloqueo."""
     if _clasificar_orden_mp(order) != 'aprobado':
         return 'no_aprobado', None
 
-    tarjeta_id = _tarjeta_id_de_referencia(order.get('external_reference'))
+    referencia = order.get('external_reference') or ''
+    tarjeta_id = (
+        OrdenPagoPro.objects.filter(referencia=referencia).values_list('tarjeta_id', flat=True).first()
+    )
     if tarjeta_id is None:
-        return 'referencia_invalida', None
-
-    config = ConfiguracionTarjetas.obtener()
-    if not _monto_clp_valido(order, config.precio_pro_clp):
-        logger.warning(
-            'Orden MP %s aprobada pero con monto/moneda inesperados (esperado %s CLP)',
-            order.get('id'), config.precio_pro_clp,
-        )
-        return 'monto_invalido', None
+        logger.warning('Orden MP %s aprobada con referencia sin OrdenPagoPro: %r', order.get('id'), referencia)
+        return 'orden_desconocida', None
 
     with transaction.atomic():
         tarjeta = Tarjeta.objects.select_for_update().filter(pk=tarjeta_id).first()
@@ -440,33 +488,72 @@ def _activar_pro_desde_orden(order_id, order):
             return 'no_encontrada', None
         if not tarjeta.es_pro():
             return 'no_pro', tarjeta
-        if PagoTarjeta.objects.filter(flow_order=str(order_id)).exists():
+        orden = OrdenPagoPro.objects.select_for_update().get(referencia=referencia)
+
+        if (
+            orden.estado == 'pagada'
+            or OrdenPagoPro.objects.filter(mp_order_id=str(order_id)).exists()
+            or PagoTarjeta.objects.filter(flow_order=str(order_id)).exists()
+        ):
             return 'ya_procesado', tarjeta
 
-        # TODO: campo propio (mp_order_id) en vez de reusar flow_order; se
-        # reusa para no sumar una migración — renombrar al retirar Flow.
+        if not _monto_clp_valido(order, orden.monto_clp):
+            logger.warning(
+                'Orden MP %s aprobada pero con monto/moneda distintos a la orden %s (esperado %s CLP)',
+                order.get('id'), orden.referencia, orden.monto_clp,
+            )
+            return 'monto_invalido', tarjeta
+
+        config = ConfiguracionTarjetas.obtener()
         ahora = timezone.now()
+
+        # Un fundador que ya no cumple las condiciones (terminó el período
+        # del beneficio o dejó vencer más allá de la gracia) lo pierde.
+        if (
+            tarjeta.numero_fundador is not None
+            and tarjeta.fundador_precio_hasta is not None
+            and not pl.beneficio_fundador_activo(tarjeta, config, ahora)
+        ):
+            tarjeta.fundador_precio_hasta = None
+
         sigue_vigente = tarjeta.fecha_vencimiento and tarjeta.fecha_vencimiento > ahora
         base = tarjeta.fecha_vencimiento if sigue_vigente else ahora
+        nuevo_vencimiento = pl.sumar_meses(base, orden.meses)
+
+        if orden.plan == pl.PLAN_FUNDADOR and tarjeta.numero_fundador is None:
+            # Se serializa la numeración bloqueando la fila de configuración:
+            # dos pagos simultáneos del último cupo reciben números
+            # consecutivos (se respeta a ambos, aunque pasen del cupo).
+            config = ConfiguracionTarjetas.objects.select_for_update().get(pk=config.pk)
+            maximo = Tarjeta.objects.aggregate(m=Max('numero_fundador'))['m'] or 0
+            tarjeta.numero_fundador = maximo + 1
+            tarjeta.fundador_precio_hasta = pl.sumar_meses(nuevo_vencimiento, config.fundador_renovacion_meses)
+
         tarjeta.estado = 'activa'
         tarjeta.fecha_ultimo_pago = ahora
-        tarjeta.fecha_vencimiento = base + timedelta(days=config.dias_suscripcion)
+        tarjeta.fecha_vencimiento = nuevo_vencimiento
         tarjeta.save()
 
         PagoTarjeta.objects.create(
             tarjeta=tarjeta,
             monto_terras=None,
-            monto_clp=int(Decimal(str(order['total_amount']))),
+            monto_clp=orden.monto_clp,
             medio='mercadopago',
             flow_order=str(order_id),
         )
+        orden.estado = 'pagada'
+        orden.mp_order_id = str(order_id)
+        orden.save(update_fields=['estado', 'mp_order_id'])
 
     try:
         correo_pago_confirmado(tarjeta)
     except Exception:
         pass  # el correo no debe tumbar la confirmación del pago
 
-    logger.info('Landing Pro %s activada por la orden MP %s', tarjeta.id, order_id)
+    logger.info(
+        'Landing Pro %s activada por la orden MP %s (plan %s, %s meses, $%s)',
+        tarjeta.id, order_id, orden.plan, orden.meses, orden.monto_clp,
+    )
     return 'activada', tarjeta
 
 
@@ -510,6 +597,9 @@ def confirmar_pago_mp(request):
         return Response({'ok': True, 'info': 'ya procesado'})
     if resultado == 'no_aprobado':
         return Response({'ok': True, 'info': f"estado no aprobado: {order.get('status')}"})
+    if resultado == 'orden_desconocida':
+        # 200 (no 5xx) para que MP no reintente algo que no va a cambiar.
+        return Response({'ok': False, 'error': MENSAJE_ORDEN_DESCONOCIDA})
     # monto/moneda inválidos, referencia rara, tarjeta inexistente o no Pro:
     # nada que activar; 200 para que MP no reintente algo que no va a cambiar.
     return Response({'ok': True, 'info': resultado})
@@ -572,6 +662,8 @@ def verificar_pago_mp(request, tarjeta_id):
             logger.info('Verificar MP: orden %s (tarjeta %s) -> %s', order['id'], tarjeta.id, resultado)
             if resultado in ('activada', 'ya_procesado'):
                 return respuesta('aprobado')
+            if resultado == 'orden_desconocida':
+                return Response({'ok': False, 'error': MENSAJE_ORDEN_DESCONOCIDA}, status=status.HTTP_409_CONFLICT)
             return Response(
                 {'ok': False, 'error': 'No se pudo confirmar el pago. Contáctanos con tu comprobante.'},
                 status=status.HTTP_409_CONFLICT,

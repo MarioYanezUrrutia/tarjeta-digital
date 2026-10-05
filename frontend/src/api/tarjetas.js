@@ -2,7 +2,9 @@ import { llamarApi } from './cliente'
 
 export const obtenerMisTarjetas = () => llamarApi('/mis-tarjetas/')
 
-export const crearTarjeta = () => llamarApi('/tarjetas/', { method: 'POST' })
+// `campos`: datos iniciales de la tarjeta (el editor la crea al primer Guardar).
+export const crearTarjeta = (campos = {}) =>
+  llamarApi('/tarjetas/', { method: 'POST', body: JSON.stringify(campos) })
 
 export const obtenerTarjeta = (id) => llamarApi(`/tarjetas/${id}/`)
 

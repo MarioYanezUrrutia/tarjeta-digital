@@ -353,9 +353,13 @@ def planes_pro(request, tarjeta_id):
 def cupos_fundador(request):
     """GET /api/cupos-fundador/ — público (sin login): cupos del plan Fundador."""
     config = ConfiguracionTarjetas.obtener()
+    meses = config.fundador_meses
+    # Lo que cuesta al mes el plan Fundador (redondeado): lo muestra el panel.
+    equivalente = (config.fundador_precio_clp + meses // 2) // meses if meses > 0 else 0
     return Response({
         'cupos_total': config.fundador_cupos,
         'cupos_restantes': pl.cupos_fundador_restantes(config),
+        'equivalente_mensual': equivalente,
     })
 
 

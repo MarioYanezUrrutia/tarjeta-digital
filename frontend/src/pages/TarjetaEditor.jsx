@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react'
-import { Link, useParams } from 'react-router-dom'
-import { actualizarTarjeta, obtenerTarjeta } from '../api/tarjetas'
+import { Link, useNavigate, useParams } from 'react-router-dom'
+import { actualizarTarjeta, crearTarjeta, obtenerTarjeta } from '../api/tarjetas'
 import { PLANTILLAS_DISPONIBLES, PLANTILLAS_PRO_DISPONIBLES, descripcionEstado, formatearFechaCorta } from '../constants/tarjetas'
 import MiniPreviewPlantilla from '../plantillas/MiniPreviewPlantilla'
 import { iniciales } from '../plantillas/useDatosTarjeta'
@@ -49,6 +49,8 @@ const VALORES_INICIALES = {
 }
 
 const CAMPOS_A_GUARDAR = Object.keys(VALORES_INICIALES)
+
+const AVISO_GUARDAR_PRIMERO = 'Guarda tu tarjeta para agregar fotos y productos.'
 
 function construirFormData(campos, archivoImagen) {
   const formData = new FormData()
@@ -110,9 +112,12 @@ function Seccion({ titulo, extra, children }) {
 
 export default function TarjetaEditor() {
   const { id } = useParams()
+  const navigate = useNavigate()
+  // Ruta /panel/tarjeta/nueva: la tarjeta (básica) no existe en la BD hasta el primer Guardar.
+  const esNueva = id === undefined
   const [campos, setCampos] = useState(VALORES_INICIALES)
   const [slug, setSlug] = useState(null)
-  const [cargando, setCargando] = useState(true)
+  const [cargando, setCargando] = useState(!esNueva)
   const [guardando, setGuardando] = useState(false)
   const [mensaje, setMensaje] = useState(null)
   const [noEncontrada, setNoEncontrada] = useState(false)
@@ -126,6 +131,7 @@ export default function TarjetaEditor() {
   const [esPro, setEsPro] = useState(false)
 
   useEffect(() => {
+    if (esNueva) return undefined
     let activo = true
     obtenerTarjeta(id).then(({ status, datos }) => {
       if (!activo) return
@@ -148,7 +154,7 @@ export default function TarjetaEditor() {
     return () => {
       activo = false
     }
-  }, [id])
+  }, [id, esNueva])
 
   function actualizar(campo, valor) {
     setCampos((prev) => ({ ...prev, [campo]: valor }))
@@ -180,8 +186,19 @@ export default function TarjetaEditor() {
   }
 
   async function onGuardar() {
+    if (guardando) return
     setMensaje(null)
     setGuardando(true)
+    if (esNueva) {
+      const { status, datos } = await crearTarjeta(Object.fromEntries(CAMPOS_A_GUARDAR.map((c) => [c, campos[c]])))
+      if ((status === 201 || status === 200) && datos?.id) {
+        navigate(`/panel/tarjeta/${datos.id}`, { replace: true })
+        return
+      }
+      setGuardando(false)
+      setMensaje({ tipo: 'error', texto: datos?.error || 'No se pudo crear la tarjeta.' })
+      return
+    }
     const { status, datos } = imagenArchivo
       ? await actualizarTarjeta(id, construirFormData(campos, imagenArchivo))
       : await actualizarTarjeta(id, Object.fromEntries(CAMPOS_A_GUARDAR.map((c) => [c, campos[c]])))
@@ -236,6 +253,7 @@ export default function TarjetaEditor() {
           )}
         </header>
 
+        {!esNueva && (
         <div className="flex items-center justify-between">
           <p className="text-sm text-gray-500">
             Estado:{' '}
@@ -255,6 +273,7 @@ export default function TarjetaEditor() {
             </button>
           )}
         </div>
+        )}
 
         {esPro && (estado === 'vencida' || estado === 'cortada') && (
           <div className="rounded-lg border border-amber-200 bg-amber-50 p-4">
@@ -286,7 +305,7 @@ export default function TarjetaEditor() {
           </div>
         )}
 
-        {!esPro && (estado === 'borrador' || estado === 'vencida' || estado === 'cortada') && (
+        {!esNueva && !esPro && (estado === 'borrador' || estado === 'vencida' || estado === 'cortada') && (
           <div className="rounded-lg border border-amber-200 bg-amber-50 p-4">
             <p className="text-sm font-medium text-amber-800">
               {estado === 'borrador'
@@ -308,7 +327,7 @@ export default function TarjetaEditor() {
           </div>
         )}
 
-        {mostrarModalPago && (
+        {mostrarModalPago && !esNueva && (
           <ModalPago
             tarjetaId={id}
             esPro={esPro}
@@ -328,10 +347,15 @@ export default function TarjetaEditor() {
               iniciales(campos.nombre_mostrado)
             )}
           </div>
-          <label className="inline-flex w-fit cursor-pointer items-center rounded-md border border-gray-300 px-3 py-2 text-sm font-medium text-gray-700 transition hover:bg-gray-50">
+          <label
+            className={`inline-flex w-fit items-center rounded-md border border-gray-300 px-3 py-2 text-sm font-medium text-gray-700 transition ${
+              esNueva ? 'cursor-not-allowed opacity-50' : 'cursor-pointer hover:bg-gray-50'
+            }`}
+          >
             {campos.tipo === 'negocio' ? 'Elegir logo' : 'Elegir foto'}
-            <input type="file" accept="image/*" className="hidden" onChange={onElegirImagen} />
+            <input type="file" accept="image/*" className="hidden" onChange={onElegirImagen} disabled={esNueva} />
           </label>
+          {esNueva && <p className="text-xs text-gray-500">{AVISO_GUARDAR_PRIMERO}</p>}
           {errorImagen && <p className="text-xs text-red-600">{errorImagen}</p>}
         </section>
 
@@ -425,7 +449,11 @@ export default function TarjetaEditor() {
             />
           }
         >
-          <GestionProductos tarjetaId={id} esPro={esPro} />
+          {esNueva ? (
+            <p className="text-sm text-gray-500">{AVISO_GUARDAR_PRIMERO}</p>
+          ) : (
+            <GestionProductos tarjetaId={id} esPro={esPro} />
+          )}
         </Seccion>
 
         {esPro && (
@@ -499,9 +527,11 @@ export default function TarjetaEditor() {
           </div>
         </Seccion>
 
-        <Seccion titulo={esPro ? 'Comparte tu landing' : 'Comparte tu tarjeta'}>
-          <CompartirTarjeta slug={slug} estado={estado} esPro={esPro} />
-        </Seccion>
+        {!esNueva && (
+          <Seccion titulo={esPro ? 'Comparte tu landing' : 'Comparte tu tarjeta'}>
+            <CompartirTarjeta slug={slug} estado={estado} esPro={esPro} />
+          </Seccion>
+        )}
 
         {mensaje && (
           <p className={`text-sm ${mensaje.tipo === 'ok' ? 'text-green-700' : 'text-red-600'}`}>

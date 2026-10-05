@@ -43,10 +43,18 @@ export default function App() {
           }
         />
         <Route
+          path="/panel/tarjeta/nueva"
+          element={
+            <RutaProtegida>
+              <TarjetaEditor key="nueva" />
+            </RutaProtegida>
+          }
+        />
+        <Route
           path="/panel/tarjeta/:id"
           element={
             <RutaProtegida>
-              <TarjetaEditor />
+              <TarjetaEditor key="existente" />
             </RutaProtegida>
           }
         />

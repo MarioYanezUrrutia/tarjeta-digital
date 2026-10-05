@@ -105,10 +105,12 @@ def mis_tarjetas(request):
 @api_view(['POST'])
 @permission_classes([AllowAny])
 def crear_tarjeta(request):
-    """POST /api/tarjetas/ — crea una tarjeta nueva (en blanco) para el
-    usuario autenticado. El slug se genera solo (Tarjeta.save() ya lo hace
-    si viene vacío); el resto de los campos se completan después desde el
-    formulario (PATCH /api/tarjetas/<id>/). El límite de 3 por cliente lo
+    """POST /api/tarjetas/ — crea una tarjeta básica para el usuario
+    autenticado con los datos que vengan en el body (los mismos campos que
+    acepta el PATCH, ver CAMPOS_EDITABLES; todos opcionales). El editor la
+    llama al primer "Guardar", así no quedan tarjetas vacías. La imagen no
+    se sube acá: se agrega después, ya con la tarjeta creada. El slug se
+    genera solo (Tarjeta.save() ya lo hace si viene vacío). El límite de 3 por cliente lo
     valida el propio modelo (Tarjeta.clean()) — acá solo se traduce el
     ValidationError a una respuesta HTTP clara."""
     perfil, error = resolver_perfil_banexa(request)
@@ -132,6 +134,9 @@ def crear_tarjeta(request):
         return Response(MisTarjetasSerializer(reciente).data, status=status.HTTP_200_OK)
 
     tarjeta = Tarjeta(cliente=cliente, tipo='persona', plan='kabymur_basico')
+    for campo in CAMPOS_EDITABLES:
+        if campo in request.data:
+            setattr(tarjeta, campo, _coerce_valor_campo(campo, request.data[campo]))
     try:
         tarjeta.save()
     except DjangoValidationError as e:

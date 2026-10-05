@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import {
-  borrarTarjeta, crearLandingPro, crearTarjeta, obtenerCuposFundador, obtenerLandingPro, obtenerMisTarjetas,
+  borrarTarjeta, crearLandingPro, obtenerCuposFundador, obtenerLandingPro, obtenerMisTarjetas,
 } from '../api/tarjetas'
 import { PLANTILLA_LABEL, descripcionEstado, formatearCLP } from '../constants/tarjetas'
 import { useAuth } from '../context/AuthContext'
@@ -20,8 +20,6 @@ export default function Panel() {
   const { user, logout } = useAuth()
   const navigate = useNavigate()
   const [tarjetas, setTarjetas] = useState(null)
-  const [creando, setCreando] = useState(false)
-  const [error, setError] = useState('')
   const [borrandoId, setBorrandoId] = useState(null)
   // undefined = cargando, null = el usuario no tiene landing Pro todavía
   const [landing, setLanding] = useState(undefined)
@@ -48,17 +46,9 @@ export default function Panel() {
     }
   }, [])
 
-  async function onCrear() {
-    if (creando) return
-    setError('')
-    setCreando(true)
-    const { datos, status } = await crearTarjeta()
-    setCreando(false)
-    if ((status === 201 || status === 200) && datos?.id) {
-      navigate(`/panel/tarjeta/${datos.id}`)
-    } else {
-      setError(datos?.error || 'No se pudo crear la tarjeta.')
-    }
+  // La tarjeta no se crea acá: el editor la crea al primer Guardar.
+  function onCrear() {
+    navigate('/panel/tarjeta/nueva')
   }
 
   async function onCrearLanding() {
@@ -119,12 +109,12 @@ export default function Panel() {
   const nombre = user?.nombre_preferido || user?.nombre_completo?.trim() || user?.username
   const cargando = tarjetas === null
   const basicas = (tarjetas || []).filter((t) => t.plan !== 'kabymur_pro')
-  // Precio Fundador: se muestra mientras queden cupos (el monto sale del servidor
-  // en el selector; acá es solo el aviso comercial).
+  // Precio Fundador: se muestra mientras queden cupos; el equivalente mensual
+  // lo calcula el servidor (cupos-fundador).
   const avisoFundador =
     cupos && cupos.cupos_restantes > 0 ? (
       <p className="mt-2 text-sm font-medium text-amber-800">
-        Precio Fundador: {formatearCLP(1500)} al mes · Quedan {cupos.cupos_restantes} de {cupos.cupos_total} cupos
+        Precio Fundador: {formatearCLP(cupos.equivalente_mensual)} al mes · Quedan {cupos.cupos_restantes} de {cupos.cupos_total} cupos
       </p>
     ) : null
 
@@ -250,14 +240,12 @@ export default function Panel() {
             <p className="mt-1 text-sm text-gray-500">
               Crea la primera en unos segundos y compártela con un link o un QR.
             </p>
-            {error && <p className="mt-3 text-sm text-red-600">{error}</p>}
             <button
               type="button"
               onClick={onCrear}
-              disabled={creando}
               className="mt-5 w-full rounded-md bg-gray-900 px-4 py-3 text-sm font-medium text-white transition hover:bg-gray-800 disabled:opacity-50"
             >
-              {creando ? 'Creando...' : 'Crear mi tarjeta'}
+              Crear mi tarjeta
             </button>
           </div>
         )}
@@ -298,16 +286,13 @@ export default function Panel() {
               </div>
             ))}
 
-            {error && <p className="text-sm text-red-600">{error}</p>}
-
             {basicas.length < 3 && (
               <button
                 type="button"
                 onClick={onCrear}
-                disabled={creando}
-                className="rounded-md border border-dashed border-gray-300 px-4 py-3 text-sm font-medium text-gray-600 transition hover:bg-white disabled:opacity-50"
+                className="rounded-md border border-dashed border-gray-300 px-4 py-3 text-sm font-medium text-gray-600 transition hover:bg-white"
               >
-                {creando ? 'Creando...' : '+ Crear otra tarjeta'}
+                + Crear otra tarjeta
               </button>
             )}
           </div>

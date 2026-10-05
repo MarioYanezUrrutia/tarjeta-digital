@@ -160,21 +160,16 @@ def _firma_x_signature(header):
 def verificar_firma_webhook(request):
     """Valida la firma (header x-signature) de una notificación de MP.
 
-    Según la documentación de MP para notificaciones de Order
-    (https://www.mercadopago.com.ar/developers/es/docs/checkout-api-orders/notifications
-    — misma mecánica que https://www.mercadopago.cl/developers/es/docs/your-integrations/notifications/webhooks):
+    Según la documentación oficial de MP Chile
+    (https://www.mercadopago.cl/developers/es/docs/your-integrations/notifications/webhooks):
     - x-signature = 'ts=<ts>,v1=<hmac hex>'.
-    - Se firma con HMAC-SHA256 y la clave secreta de la app (MP_WEBHOOK_SECRET)
-      un "manifest" armado con el id de la notificación (query param `data.id`,
-      en minúsculas), el header x-request-id y el `ts`.
-    - Se compara el resultado con `v1` en tiempo constante.
-
-    Formato del manifest: la documentación general de webhooks lo define como
-    'id:<data.id>;request-id:<x-request-id>;ts:<ts>;'; la página de Orders lo
-    presenta con el mismo trío de datos. Se aceptan las dos formas ('id:..;'
-    y 'id|request-id|ts') — ambas exigen conocer el secreto, así que aceptar
-    las dos no debilita nada. CONFIRMAR con una notificación real de MP y,
-    si solo una resulta válida, dejar solo esa.
+    - Texto firmado: 'id:[data.id];request-id:[x-request-id];ts:[ts];', con
+      HMAC-SHA256 (hex) y la clave secreta de la app (MP_WEBHOOK_SECRET),
+      comparado con `v1` en tiempo constante.
+    - `data.id` viene del query param. La doc no exige minúsculas y los id de
+      orden llegan en mayúsculas (ORD01...), así que se prueba el id tal como
+      llega y, si no valida, en minúsculas; basta con que una coincida. El log
+      INFO dice cuál validó, para dejar solo esa.
 
     Devuelve False (y deja log) si el secreto no está configurado, falta algún
     dato o la firma no coincide: el llamador responde 401 sin procesar nada."""
@@ -191,14 +186,15 @@ def verificar_firma_webhook(request):
         logger.warning('Webhook MP rechazado: faltan x-signature/x-request-id/data.id.')
         return False
 
-    data_id = str(data_id).lower()
-    manifests = (
-        f'id:{data_id};request-id:{request_id};ts:{ts};',
-        f'{data_id}|{request_id}|{ts}',
-    )
-    for manifest in manifests:
+    data_id = str(data_id)
+    variantes = [('tal cual', data_id)]
+    if data_id.lower() != data_id:
+        variantes.append(('minúsculas', data_id.lower()))
+    for nombre, id_usado in variantes:
+        manifest = f'id:{id_usado};request-id:{request_id};ts:{ts};'
         esperado = hmac.new(secreto.encode(), manifest.encode(), hashlib.sha256).hexdigest()
         if hmac.compare_digest(esperado, v1.lower()):
+            logger.info('Webhook MP: firma válida con data.id %s.', nombre)
             return True
     logger.warning('Webhook MP rechazado: firma inválida (data.id=%s).', data_id)
     return False

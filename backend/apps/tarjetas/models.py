@@ -249,7 +249,10 @@ class PagoTarjeta(models.Model):
     (se pisa en cada pago, no permite reconstruir historial ni sumar por
     período) — este modelo es la fuente de verdad para las estadísticas de
     ingresos del admin."""
-    tarjeta = models.ForeignKey('Tarjeta', on_delete=models.CASCADE, related_name='pagos')
+    # SET_NULL: borrar una tarjeta no borra el registro de lo que se cobró.
+    # `tarjeta_ref` conserva a qué tarjeta correspondía ("id=7 slug=ana-perez").
+    tarjeta = models.ForeignKey('Tarjeta', null=True, blank=True, on_delete=models.SET_NULL, related_name='pagos')
+    tarjeta_ref = models.CharField(max_length=160, blank=True, default='')
     monto_terras = models.PositiveIntegerField(null=True, blank=True)
     monto_clp = models.PositiveIntegerField(null=True, blank=True)
     medio = models.CharField(max_length=16, default='terras')
@@ -261,10 +264,20 @@ class PagoTarjeta(models.Model):
         verbose_name = 'Pago'
         verbose_name_plural = 'Pagos'
 
+    @staticmethod
+    def referencia_de(tarjeta):
+        return f'id={tarjeta.pk} slug={tarjeta.slug}'
+
+    def save(self, *args, **kwargs):
+        # Se llena sola al crear el pago, para todos los medios de pago.
+        if not self.tarjeta_ref and self.tarjeta_id:
+            self.tarjeta_ref = self.referencia_de(self.tarjeta)
+        super().save(*args, **kwargs)
+
     def __str__(self):
-        if self.medio == 'flow':
-            return f"${self.monto_clp} CLP — {self.tarjeta} ({self.fecha:%d-%m-%Y})"
-        return f"{self.monto_terras} Terras — {self.tarjeta} ({self.fecha:%d-%m-%Y})"
+        destino = self.tarjeta or self.tarjeta_ref or 'tarjeta eliminada'
+        monto = f"${self.monto_clp} CLP" if self.monto_clp is not None else f"{self.monto_terras} Terras"
+        return f"{monto} — {destino} ({self.fecha:%d-%m-%Y})"
 
 
 class OrdenPagoPro(models.Model):

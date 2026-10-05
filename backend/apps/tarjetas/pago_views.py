@@ -18,6 +18,7 @@ from datetime import timedelta
 from decimal import Decimal, InvalidOperation
 
 import requests
+from django.conf import settings
 from django.db import transaction
 from django.db.models import Max
 from django.utils import timezone
@@ -29,7 +30,6 @@ from rest_framework.response import Response
 from apps.cuentas.auth import resolver_perfil_banexa
 from apps.cuentas.banexa import banexa_get, banexa_post
 
-from . import flow
 from . import mercadopago as mp
 from . import planes as pl
 from .correos import correo_pago_confirmado
@@ -41,6 +41,17 @@ logger = logging.getLogger(__name__)
 MENSAJE_BANEXA_NO_DISPONIBLE = (
     'No se pudo contactar el servicio de Terras. Intenta de nuevo en un momento.'
 )
+
+# Único lugar donde se reconoce el error "el usuario nunca creó su clave
+# privada": Banexa lo informa con un 400 y este texto (apps/terras/views.py
+# de bot_ia). Si Banexa cambia ese mensaje, se ajusta SOLO esta constante.
+BANEXA_MSG_SIN_CLAVE = 'primero debes crear tu clave privada'
+MENSAJE_SIN_CLAVE = 'Para pagar con Terras necesitas tu clave privada de Banexa.'
+
+
+def _es_error_sin_clave(status_code, mensaje):
+    return status_code == 400 and BANEXA_MSG_SIN_CLAVE in (mensaje or '').lower()
+
 
 MENSAJE_ORDEN_DESCONOCIDA = (
     'Este pago no tiene una orden registrada (formato antiguo o referencia desconocida). '
@@ -171,6 +182,14 @@ def pagar_tarjeta(request, tarjeta_id):
         except ValueError:
             datos_error = {}
         mensaje = datos_error.get('error') or MENSAJE_BANEXA_NO_DISPONIBLE
+        if _es_error_sin_clave(resp.status_code, mensaje):
+            return Response({
+                'ok': False,
+                'codigo': 'sin_clave_privada',
+                'detail': MENSAJE_SIN_CLAVE,
+                'error': MENSAJE_SIN_CLAVE,
+                'url_clave': settings.BANEXA_URL_CLAVE,
+            }, status=status.HTTP_400_BAD_REQUEST)
         # Banexa devuelve 400 (saldo/tope/clave no configurada) o 403 (clave
         # incorrecta/bloqueada) — se reenvían tal cual; cualquier otra cosa
         # (5xx, cuerpo raro) se traduce a 502, mismo criterio que
@@ -196,132 +215,6 @@ def pagar_tarjeta(request, tarjeta_id):
         'fecha_vencimiento': tarjeta.fecha_vencimiento,
         'nuevo_saldo': resp.json().get('nuevo_saldo'),
     })
-
-
-@api_view(['POST'])
-@permission_classes([AllowAny])
-def crear_pago_flow(request, tarjeta_id):
-    """POST /api/tarjetas/<tarjeta_id>/pagar-flow/ — crea una orden de pago
-    en Flow (Cobro-4) por el precio del plan Pro en CLP, y devuelve la URL
-    a la que el frontend debe redirigir al usuario para pagar. No activa
-    ni toca la tarjeta acá: eso lo hace el webhook `flow-confirmar` (paso
-    siguiente) cuando Flow confirme el pago de verdad."""
-    tarjeta, error = _obtener_tarjeta_o_404(request, tarjeta_id)
-    if error is not None:
-        return error
-
-    if not tarjeta.es_pro():
-        return Response({'ok': False, 'error': 'Esta tarjeta no es Pro.'}, status=status.HTTP_400_BAD_REQUEST)
-
-    config = ConfiguracionTarjetas.obtener()
-    precio = config.precio_pro_clp
-    if precio <= 0:
-        return Response(
-            {'ok': False, 'error': 'El precio del plan Pro no está configurado.'},
-            status=status.HTTP_400_BAD_REQUEST,
-        )
-
-    commerce_order = f'pro-{tarjeta.id}-{int(time.time())}'
-
-    # Webhook de confirmación (backend) — ruta literal en vez de reverse()
-    # porque 'flow-confirmar' todavía no existe (se crea en el paso
-    # siguiente); mismo URL_PREFIX que el resto de las rutas.
-    from django.conf import settings as dj
-    conf_path = f"/{dj.URL_PREFIX}pagos/flow/confirmar/"
-    url_confirmation = request.build_absolute_uri(conf_path)
-    url_return = f"{dj.PUBLIC_BASE_URL}/pago/flow/retorno?order={commerce_order}"
-
-    email = (tarjeta.email_contacto or '').strip() or 'sin-correo@kabymur.com'
-    subject = f'Plan Pro - {tarjeta.nombre_mostrado or tarjeta.slug}'
-
-    try:
-        datos = flow.crear_pago(
-            commerce_order=commerce_order,
-            subject=subject,
-            amount=precio,
-            email=email,
-            url_confirmation=url_confirmation,
-            url_return=url_return,
-        )
-    except flow.FlowError as e:
-        return Response({'ok': False, 'error': str(e)}, status=status.HTTP_502_BAD_GATEWAY)
-
-    return Response({'ok': True, 'url': f"{datos['url']}?token={datos['token']}"})
-
-
-@api_view(['POST'])
-@permission_classes([AllowAny])
-def confirmar_pago_flow(request):
-    """Webhook público que Flow invoca (POST, x-www-form-urlencoded) tras un
-    pago, enviando 'token'. Regla de oro: NO confiar en el aviso; se
-    re-consulta el estado real a Flow (getStatus) y solo si status==1
-    (pagada) se activa la suscripción. Idempotente: si ya existe un
-    PagoTarjeta con ese flow_order, no duplica ni reactiva.
-
-    Devuelve 200 siempre que el procesamiento sea correcto (Flow reintenta
-    ante no-200), incluido el caso 'ya procesado'. Devuelve 400 solo si
-    falta el token, y deja propagar errores realmente inesperados."""
-    token = (request.data.get('token') or '').strip()
-    if not token:
-        return Response({'ok': False, 'error': 'Falta token'}, status=status.HTTP_400_BAD_REQUEST)
-
-    # 1) Re-verificar el estado real contra Flow — nunca confiar en el
-    # aviso mismo (podría venir falsificado).
-    try:
-        estado = flow.consultar_estado(token)
-    except flow.FlowError as e:
-        # Si no pudimos verificar, 502 para que Flow reintente el webhook.
-        return Response({'ok': False, 'error': str(e)}, status=status.HTTP_502_BAD_GATEWAY)
-
-    if estado.get('status') != flow.ESTADO_PAGADA:
-        # No pagada (rechazada/pendiente): 200 sin activar nada.
-        return Response({'ok': True, 'pagada': False})
-
-    commerce_order = estado.get('commerceOrder') or ''
-    amount = estado.get('amount')
-
-    # 2) Idempotencia: si ya registramos este flow_order, no repetir (Flow
-    # puede reintentar el mismo webhook varias veces).
-    if PagoTarjeta.objects.filter(flow_order=commerce_order).exists():
-        return Response({'ok': True, 'duplicado': True})
-
-    # 3) Parsear tarjeta_id del commerceOrder 'pro-<id>-<timestamp>' (ver
-    # crear_pago_flow, que lo arma así).
-    try:
-        tarjeta_id = int(commerce_order.split('-')[1])
-    except (IndexError, ValueError):
-        return Response({'ok': False, 'error': 'commerceOrder inválido'}, status=status.HTTP_400_BAD_REQUEST)
-
-    tarjeta = Tarjeta.objects.filter(pk=tarjeta_id).first()
-    if tarjeta is None:
-        return Response({'ok': False, 'error': 'Tarjeta no encontrada'}, status=status.HTTP_404_NOT_FOUND)
-
-    # 4) Activar/renovar la suscripción — misma lógica que pagar_tarjeta
-    # (Terras): si sigue vigente, los días se suman desde el vencimiento
-    # actual; si no, desde ahora.
-    config = ConfiguracionTarjetas.obtener()
-    ahora = timezone.now()
-    sigue_vigente = tarjeta.fecha_vencimiento and tarjeta.fecha_vencimiento > ahora
-    base = tarjeta.fecha_vencimiento if sigue_vigente else ahora
-    tarjeta.estado = 'activa'
-    tarjeta.fecha_ultimo_pago = ahora
-    tarjeta.fecha_vencimiento = base + timedelta(days=config.dias_suscripcion)
-    tarjeta.save()
-
-    PagoTarjeta.objects.create(
-        tarjeta=tarjeta,
-        monto_terras=None,
-        monto_clp=int(amount) if amount is not None else config.precio_pro_clp,
-        medio='flow',
-        flow_order=commerce_order,
-    )
-
-    try:
-        correo_pago_confirmado(tarjeta)
-    except Exception:
-        pass  # el correo no debe tumbar la confirmación del pago
-
-    return Response({'ok': True, 'pagada': True})
 
 
 @api_view(['GET'])
@@ -578,10 +471,10 @@ def confirmar_pago_mp(request):
     esperado en CLP, se activa (ver _activar_pro_desde_orden, idempotente).
 
     Devuelve 200 siempre que el procesamiento sea correcto o no haya nada
-    que hacer (para que MP no reintente de más). 403 si la firma no valida y
+    que hacer (para que MP no reintente de más). 401 si la firma no valida y
     500 si no se pudo consultar la orden (para que MP sí reintente)."""
     if not mp.verificar_firma_webhook(request):
-        return Response({'ok': False, 'error': 'Firma inválida'}, status=status.HTTP_403_FORBIDDEN)
+        return Response({'ok': False, 'error': 'Firma inválida'}, status=status.HTTP_401_UNAUTHORIZED)
 
     # MP manda el id de la orden de formas distintas según el tipo de
     # notificación (webhook v1, query params, etc.) — se prueban las

@@ -73,9 +73,9 @@ class ProductoAdmin(admin.ModelAdmin):
 
 @admin.register(PagoTarjeta)
 class PagoTarjetaAdmin(admin.ModelAdmin):
-    list_display = ('id', 'tarjeta', 'monto_terras', 'fecha')
-    list_filter = ('fecha',)
-    search_fields = ('tarjeta__slug', 'tarjeta__nombre_mostrado', 'tarjeta__cliente__email')
+    list_display = ('id', 'tarjeta', 'tarjeta_ref', 'medio', 'monto_terras', 'monto_clp', 'fecha')
+    list_filter = ('fecha', 'medio')
+    search_fields = ('tarjeta_ref', 'tarjeta__slug', 'tarjeta__nombre_mostrado', 'tarjeta__cliente__email')
     date_hierarchy = 'fecha'
     ordering = ('-fecha',)
 

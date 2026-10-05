@@ -122,6 +122,9 @@ CORS_ALLOW_CREDENTIALS = True
 # dev: http://localhost:8000/api. Producción: https://api.kabymur.com/api
 # (se setea en el .env de cada entorno, nunca hardcodeado acá).
 BANEXA_API_URL = env('BANEXA_API_URL', default='http://localhost:8000/api')
+# Página de Banexa donde el usuario crea su clave privada de Terras. Si queda
+# vacía, el aviso de "sin clave" del pago con Terras se muestra sin botón.
+BANEXA_URL_CLAVE = env('BANEXA_URL_CLAVE', default='')
 
 # --- Suscripción de tarjetas (Cobro) ---
 # El cobro real es Cobro-2; acá solo viven las constantes que va a usar (el
@@ -130,7 +133,7 @@ BANEXA_API_URL = env('BANEXA_API_URL', default='http://localhost:8000/api')
 TARJETA_PRECIO_TERRAS = env.int('TARJETA_PRECIO_TERRAS', default=5)
 TARJETA_DIAS_SUSCRIPCION = env.int('TARJETA_DIAS_SUSCRIPCION', default=30)
 TARJETA_DIAS_AVISO_PREVIO = env.int('TARJETA_DIAS_AVISO_PREVIO', default=5)
-# Precio del plan Pro en CLP, cobrado vía Flow (Cobro-4) — separado de
+# Precio del plan Pro en CLP, cobrado vía Mercado Pago — separado de
 # TARJETA_PRECIO_TERRAS porque son dos medios de pago distintos.
 TARJETA_PRECIO_PRO_CLP = env.int('TARJETA_PRECIO_PRO_CLP', default=0)
 
@@ -162,17 +165,8 @@ DEFAULT_FROM_EMAIL = env('DEFAULT_FROM_EMAIL', default='Tarjeta Digital <no-repl
 # en el código: en producción esta variable apunta al dominio real.
 PUBLIC_BASE_URL = env('PUBLIC_BASE_URL', default='http://localhost:5173')
 
-# --- Flow (Cobro-4) ---
-# Cobro en dinero (CLP) del plan Pro, vía Flow — dev usa el sandbox de
-# Flow por defecto; producción setea las credenciales reales vía .env
-# (nunca hardcodeadas acá), mismo patrón que BANEXA_API_URL.
-FLOW_API_URL = env('FLOW_API_URL', default='https://sandbox.flow.cl/api')
-FLOW_API_KEY = env('FLOW_API_KEY', default='')
-FLOW_SECRET_KEY = env('FLOW_SECRET_KEY', default='')
-
 # --- Mercado Pago (Cobro-5) ---
-# Pasarela de pago en dinero del plan Pro (reemplaza a Flow; ambos
-# coexisten mientras se prueba MP en producción). El modo test/prod NO
+# Pasarela de pago en dinero del plan Pro. El modo test/prod NO
 # se distingue por URL (siempre api.mercadopago.com) sino por el prefijo
 # del token: TEST-... en dev/prueba, APP_USR-... en producción. Nunca
 # hardcodear el token acá — va en el .env de cada entorno.

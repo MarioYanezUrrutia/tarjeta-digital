@@ -6,9 +6,7 @@ from django.urls import include, path
 from apps.tarjetas.faq_views import faq_detalle, faqs_lista, faqs_reordenar
 from apps.tarjetas.noticias_views import noticia_detalle, noticias_lista, noticias_reordenar
 from apps.tarjetas.pago_views import (
-    confirmar_pago_flow,
     confirmar_pago_mp,
-    crear_pago_flow,
     crear_pago_mp,
     cupos_fundador,
     estado_pago,
@@ -58,8 +56,6 @@ urlpatterns = [
     path(f'{prefix}faqs/<int:faq_id>/', faq_detalle, name='faq-detalle'),
     path(f'{prefix}tarjetas/<int:tarjeta_id>/estado-pago/', estado_pago, name='tarjeta-estado-pago'),
     path(f'{prefix}tarjetas/<int:tarjeta_id>/pagar/', pagar_tarjeta, name='tarjeta-pagar'),
-    path(f'{prefix}tarjetas/<int:tarjeta_id>/pagar-flow/', crear_pago_flow, name='tarjeta-pagar-flow'),
-    path(f'{prefix}pagos/flow/confirmar/', confirmar_pago_flow, name='flow-confirmar'),
     path(f'{prefix}tarjetas/<int:tarjeta_id>/pagar-mp/', crear_pago_mp, name='tarjeta-pagar-mp'),
     path(f'{prefix}tarjetas/<int:tarjeta_id>/verificar-pago-mp/', verificar_pago_mp, name='tarjeta-verificar-pago-mp'),
     path(f'{prefix}tarjetas/<int:tarjeta_id>/planes-pro/', planes_pro, name='tarjeta-planes-pro'),

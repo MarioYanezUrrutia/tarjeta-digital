@@ -21,6 +21,8 @@ export default function ModalPago({ tarjetaId, esPro, onCerrar, onPagoExitoso })
   const [clavePrivada, setClavePrivada] = useState('')
   const [pagando, setPagando] = useState(false)
   const [error, setError] = useState(null)
+  // { url } cuando Banexa dice que el usuario aún no creó su clave privada
+  const [sinClave, setSinClave] = useState(null)
   const [exito, setExito] = useState(null)
   const [mpCargando, setMpCargando] = useState(false)
   const [mpError, setMpError] = useState('')
@@ -76,6 +78,7 @@ export default function ModalPago({ tarjetaId, esPro, onCerrar, onPagoExitoso })
   async function onPagar(evento) {
     evento.preventDefault()
     setError(null)
+    setSinClave(null)
     setPagando(true)
     const { status, datos } = await pagarTarjeta(tarjetaId, clavePrivada)
     setPagando(false)
@@ -85,6 +88,8 @@ export default function ModalPago({ tarjetaId, esPro, onCerrar, onPagoExitoso })
       setExito(datos)
       onPagoExitoso(datos)
       setTimeout(onCerrar, 1500)
+    } else if (datos?.codigo === 'sin_clave_privada') {
+      setSinClave({ url: datos.url_clave || '' })
     } else {
       setError(datos?.error || 'No se pudo procesar el pago.')
     }
@@ -159,6 +164,23 @@ export default function ModalPago({ tarjetaId, esPro, onCerrar, onPagoExitoso })
                   autoComplete="off"
                   className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-gray-500 focus:outline-none"
                 />
+              </div>
+            )}
+
+            {sinClave && (
+              <div className="rounded-md bg-amber-50 p-3 text-sm text-amber-800">
+                <p>Para pagar con Terras necesitas tu clave privada de Banexa.</p>
+                {sinClave.url && (
+                  <a
+                    href={sinClave.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="mt-2 inline-block rounded-md bg-amber-600 px-3 py-1.5 font-medium text-white transition hover:bg-amber-700"
+                  >
+                    Crear mi clave en Banexa
+                  </a>
+                )}
+                <p className="mt-2 text-xs text-amber-700">Cuando la hayas creado, vuelve acá y reintenta el pago.</p>
               </div>
             )}
 

@@ -1,21 +1,25 @@
 # apps/tarjetas/mercadopago.py
 """Cliente mínimo de Mercado Pago (Orders API, Checkout Pro) para el cobro
-en dinero del plan Pro — reemplazo de Flow (Cobro-4).
+en dinero del plan Pro (Cobro-5).
 
-A diferencia de Flow (que firma cada request con HMAC propio), Mercado
-Pago se autentica con un Bearer token (`MP_ACCESS_TOKEN`) mandado en el
-header Authorization — no hace falta firmar nada para crear/consultar una
-orden. Doc: https://www.mercadopago.cl/developers/es/docs
+Mercado Pago se autentica con un Bearer token (`MP_ACCESS_TOKEN`) mandado
+en el header Authorization — no hace falta firmar nada para crear/consultar
+una orden. Doc: https://www.mercadopago.cl/developers/es/docs
 
 Este módulo NO decide reglas de negocio (activar suscripción, etc.); solo
 habla con Mercado Pago. Quien orquesta es el endpoint que lo llama.
 """
+import hashlib
+import hmac
+import logging
 import uuid
 from datetime import datetime, timedelta
 from datetime import timezone as dt_timezone
 
 import requests
 from django.conf import settings
+
+logger = logging.getLogger(__name__)
 
 MP_API_URL = 'https://api.mercadopago.com'
 
@@ -143,12 +147,61 @@ def buscar_ordenes_por_referencia(external_reference, dias=7):
     return [o for o in datos if o.get('external_reference') == external_reference]
 
 
+def _firma_x_signature(header):
+    """{'ts': ..., 'v1': ...} a partir de 'ts=1742505638683,v1=ced36a...'."""
+    partes = {}
+    for trozo in (header or '').split(','):
+        clave, _, valor = trozo.partition('=')
+        if clave.strip() and valor.strip():
+            partes[clave.strip()] = valor.strip()
+    return partes
+
+
 def verificar_firma_webhook(request):
-    """TODO: validar x-signature en el paso del webhook, con
-    MP_WEBHOOK_SECRET (HMAC sobre el manifest id/request-id/ts que exige
-    MP — ver doc de notificaciones). Por ahora siempre True: se implementa
-    de verdad recién al construir el webhook, no en este paso aislado."""
-    return True
+    """Valida la firma (header x-signature) de una notificación de MP.
+
+    Según la documentación de MP para notificaciones de Order
+    (https://www.mercadopago.com.ar/developers/es/docs/checkout-api-orders/notifications
+    — misma mecánica que https://www.mercadopago.cl/developers/es/docs/your-integrations/notifications/webhooks):
+    - x-signature = 'ts=<ts>,v1=<hmac hex>'.
+    - Se firma con HMAC-SHA256 y la clave secreta de la app (MP_WEBHOOK_SECRET)
+      un "manifest" armado con el id de la notificación (query param `data.id`,
+      en minúsculas), el header x-request-id y el `ts`.
+    - Se compara el resultado con `v1` en tiempo constante.
+
+    Formato del manifest: la documentación general de webhooks lo define como
+    'id:<data.id>;request-id:<x-request-id>;ts:<ts>;'; la página de Orders lo
+    presenta con el mismo trío de datos. Se aceptan las dos formas ('id:..;'
+    y 'id|request-id|ts') — ambas exigen conocer el secreto, así que aceptar
+    las dos no debilita nada. CONFIRMAR con una notificación real de MP y,
+    si solo una resulta válida, dejar solo esa.
+
+    Devuelve False (y deja log) si el secreto no está configurado, falta algún
+    dato o la firma no coincide: el llamador responde 401 sin procesar nada."""
+    secreto = settings.MP_WEBHOOK_SECRET
+    if not secreto:
+        logger.error('Webhook MP rechazado: MP_WEBHOOK_SECRET no está configurado.')
+        return False
+
+    firma = _firma_x_signature(request.headers.get('x-signature'))
+    ts, v1 = firma.get('ts'), firma.get('v1')
+    request_id = request.headers.get('x-request-id')
+    data_id = request.query_params.get('data.id') or (request.data.get('data') or {}).get('id')
+    if not (ts and v1 and request_id and data_id):
+        logger.warning('Webhook MP rechazado: faltan x-signature/x-request-id/data.id.')
+        return False
+
+    data_id = str(data_id).lower()
+    manifests = (
+        f'id:{data_id};request-id:{request_id};ts:{ts};',
+        f'{data_id}|{request_id}|{ts}',
+    )
+    for manifest in manifests:
+        esperado = hmac.new(secreto.encode(), manifest.encode(), hashlib.sha256).hexdigest()
+        if hmac.compare_digest(esperado, v1.lower()):
+            return True
+    logger.warning('Webhook MP rechazado: firma inválida (data.id=%s).', data_id)
+    return False
 
 
 ESTADO_APROBADO = 'processed'  # a confirmar en prueba real

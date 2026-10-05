@@ -367,7 +367,11 @@ export default function PlantillaProBase({ tarjeta, tema }) {
 
       <footer className={`border-t py-10 text-center ${borderClass}`}>
         <p className="font-semibold">{nombre_mostrado}</p>
-        <p className={`mt-1 text-sm ${textMutedClass}`}>Powered by Kabymur</p>
+        <p className={`mt-1 text-xs ${textMutedClass}`}>
+          <a href="https://tarjeta.kabymur.com" target="_blank" rel="noopener" className="underline-offset-2 hover:underline">
+            Hecho con Kabymur
+          </a>
+        </p>
       </footer>
 
       {waHref && (

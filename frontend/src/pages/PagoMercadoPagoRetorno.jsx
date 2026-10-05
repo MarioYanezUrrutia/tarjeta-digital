@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import { verificarPagoMercadoPago } from '../api/tarjetas'
+import { formatearFechaCorta } from '../constants/tarjetas'
 
 // Al volver de Mercado Pago NO se confía en nada de la URL salvo `ref`
 // ('pro-<id>-<ts>'), que solo sirve para saber qué orden preguntarle al
@@ -21,7 +22,7 @@ export default function PagoMercadoPagoRetorno() {
     setRes({ tipo: 'cargando' })
     const { status, datos } = await verificarPagoMercadoPago(tarjetaId, ref)
     if (status === 401) setRes({ tipo: 'sin_sesion' })
-    else if (status === 200 && datos?.resultado) setRes({ tipo: datos.resultado, slug: datos.slug })
+    else if (status === 200 && datos?.resultado) setRes({ tipo: datos.resultado, slug: datos.slug, vencimiento: datos.fecha_vencimiento })
     else setRes({ tipo: 'error' })
   }, [tarjetaId, ref])
 
@@ -45,6 +46,9 @@ export default function PagoMercadoPagoRetorno() {
         {res.tipo === 'aprobado' && (
           <>
             <h1 className="text-lg font-semibold text-green-700">¡Tu landing está publicada!</h1>
+            {res.vencimiento && (
+              <p className="mt-2 text-sm font-medium text-gray-800">Vigente hasta {formatearFechaCorta(res.vencimiento)}</p>
+            )}
             <p className="mt-3 text-sm text-gray-600">Ya es pública: cualquiera con tu enlace puede verla.</p>
             {res.slug && (
               <a href={`/t/${res.slug}`} className={boton}>Ver mi landing</a>

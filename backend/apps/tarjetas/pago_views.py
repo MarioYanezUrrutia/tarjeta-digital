@@ -337,7 +337,14 @@ def planes_pro(request, tarjeta_id):
         return error
     if not tarjeta.es_pro():
         return Response({'ok': False, 'error': 'Esta landing no es Pro.'}, status=status.HTTP_400_BAD_REQUEST)
-    return Response({'planes': pl.calcular_planes(tarjeta, timezone.now())})
+    ahora = timezone.now()
+    config = ConfiguracionTarjetas.obtener()
+    # Solo de lectura: hasta cuándo rige el precio fundador (None si no rige).
+    precio_hasta = tarjeta.fundador_precio_hasta if pl.beneficio_fundador_activo(tarjeta, config, ahora) else None
+    return Response({
+        'planes': pl.calcular_planes(tarjeta, ahora, config),
+        'fundador_precio_hasta': precio_hasta,
+    })
 
 
 @api_view(['GET'])

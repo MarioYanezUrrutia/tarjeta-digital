@@ -1,7 +1,9 @@
 import React, { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { borrarTarjeta, crearLandingPro, crearTarjeta, obtenerLandingPro, obtenerMisTarjetas } from '../api/tarjetas'
-import { PLANTILLA_LABEL, descripcionEstado } from '../constants/tarjetas'
+import {
+  borrarTarjeta, crearLandingPro, crearTarjeta, obtenerCuposFundador, obtenerLandingPro, obtenerMisTarjetas,
+} from '../api/tarjetas'
+import { PLANTILLA_LABEL, descripcionEstado, formatearCLP } from '../constants/tarjetas'
 import { useAuth } from '../context/AuthContext'
 import PromosEcosistema from '../components/PromosEcosistema'
 
@@ -26,9 +28,13 @@ export default function Panel() {
   const [creandoLanding, setCreandoLanding] = useState(false)
   const [errorLanding, setErrorLanding] = useState('')
   const [borrandoLanding, setBorrandoLanding] = useState(false)
+  const [cupos, setCupos] = useState(null) // { cupos_total, cupos_restantes }
 
   useEffect(() => {
     let activo = true
+    obtenerCuposFundador().then(({ status, datos }) => {
+      if (activo && status === 200) setCupos(datos)
+    })
     obtenerMisTarjetas().then(({ datos }) => {
       if (!activo) return
       setTarjetas(Array.isArray(datos) ? datos : [])
@@ -113,6 +119,14 @@ export default function Panel() {
   const nombre = user?.nombre_preferido || user?.nombre_completo?.trim() || user?.username
   const cargando = tarjetas === null
   const basicas = (tarjetas || []).filter((t) => t.plan !== 'kabymur_pro')
+  // Precio Fundador: se muestra mientras queden cupos (el monto sale del servidor
+  // en el selector; acá es solo el aviso comercial).
+  const avisoFundador =
+    cupos && cupos.cupos_restantes > 0 ? (
+      <p className="mt-2 text-sm font-medium text-amber-800">
+        Precio Fundador: {formatearCLP(1500)} al mes · Quedan {cupos.cupos_restantes} de {cupos.cupos_total} cupos
+      </p>
+    ) : null
 
   return (
     <div className="min-h-screen bg-gray-50 px-4 py-10">
@@ -145,6 +159,7 @@ export default function Panel() {
               <p className="mt-1 text-sm text-gray-600">
                 Ármala gratis. Solo pagas cuando quieras publicarla.
               </p>
+              {avisoFundador}
               {errorLanding && <p className="mt-3 text-sm text-red-600">{errorLanding}</p>}
               <button
                 type="button"
@@ -157,12 +172,19 @@ export default function Panel() {
             </div>
           )}
 
+          {landing && landing.estado === 'borrador' && avisoFundador}
+
           {landing && (
             <div className="mt-3 flex items-center justify-between gap-3">
               <div className="min-w-0">
                 <p className="truncate font-medium text-gray-900">
                   {landing.nombre_mostrado || 'Landing sin nombre'}
                 </p>
+                {landing.numero_fundador != null && (
+                  <span className="mb-0.5 inline-block rounded-full bg-amber-500 px-2 py-0.5 text-xs font-medium text-white">
+                    Fundador Nº {landing.numero_fundador}
+                  </span>
+                )}
                 {landing.estado === 'borrador' && (
                   <p className="text-xs text-gray-600">Borrador · solo tú puedes verla</p>
                 )}

@@ -245,16 +245,31 @@ export default function TarjetaEditor() {
                 : descripcionEstado(estado, fechaVencimiento)}
             </span>
           </p>
-          {!(esPro && estado === 'borrador') && (
+          {!(esPro && (estado === 'borrador' || estado === 'vencida' || estado === 'cortada')) && (
             <button
               type="button"
               onClick={() => setMostrarModalPago(true)}
               className="text-sm font-medium text-gray-900 underline"
             >
-              {estado === 'activa' ? 'Renovar' : 'Activar / Pagar'}
+              {esPro ? 'Extender vigencia' : estado === 'activa' ? 'Renovar' : 'Activar / Pagar'}
             </button>
           )}
         </div>
+
+        {esPro && (estado === 'vencida' || estado === 'cortada') && (
+          <div className="rounded-lg border border-amber-200 bg-amber-50 p-4">
+            <p className="text-sm font-medium text-amber-800">
+              Tu landing venció y no se está mostrando. Renuévala para que vuelva a verse.
+            </p>
+            <button
+              type="button"
+              onClick={() => setMostrarModalPago(true)}
+              className="mt-3 rounded-md bg-amber-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-amber-700"
+            >
+              Renovar
+            </button>
+          </div>
+        )}
 
         {esPro && estado === 'borrador' && (
           <div className="rounded-lg border border-amber-200 bg-amber-50 p-4">
@@ -271,7 +286,7 @@ export default function TarjetaEditor() {
           </div>
         )}
 
-        {!(esPro && estado === 'borrador') && (estado === 'borrador' || estado === 'vencida' || estado === 'cortada') && (
+        {!esPro && (estado === 'borrador' || estado === 'vencida' || estado === 'cortada') && (
           <div className="rounded-lg border border-amber-200 bg-amber-50 p-4">
             <p className="text-sm font-medium text-amber-800">
               {estado === 'borrador'

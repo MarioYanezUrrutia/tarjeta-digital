@@ -143,7 +143,8 @@ class MisTarjetasSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Tarjeta
-        fields = ['id', 'slug', 'nombre_mostrado', 'plan', 'estado', 'plantilla', 'fecha_vencimiento']
+        fields = ['id', 'slug', 'nombre_mostrado', 'plan', 'estado', 'plantilla', 'fecha_vencimiento', 'numero_fundador']
+        read_only_fields = fields
 
 
 class TarjetaPanelSerializer(serializers.ModelSerializer):

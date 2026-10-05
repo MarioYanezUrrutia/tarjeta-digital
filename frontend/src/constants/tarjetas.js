@@ -32,6 +32,12 @@ export function formatearFechaCorta(fechaIso) {
   return `${dd}-${mm}-${d.getFullYear()}`
 }
 
+// Monto en CLP con formato chileno: $5.000. Solo formatea, nunca calcula.
+const formatoCLP = new Intl.NumberFormat('es-CL')
+export function formatearCLP(monto) {
+  return `$${formatoCLP.format(monto)}`
+}
+
 // Texto claro para el panel/editor — "Activa hasta 12 mar 2026" en vez de
 // solo "Activa", que no dice cuándo se corta.
 export function descripcionEstado(estado, fechaVencimiento) {

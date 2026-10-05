@@ -27,7 +27,12 @@ export const pagarTarjeta = (id, clavePrivada) =>
 
 export const crearPagoFlow = (id) => llamarApi(`/tarjetas/${id}/pagar-flow/`, { method: 'POST' })
 
-export const crearPagoMercadoPago = (id) => llamarApi(`/tarjetas/${id}/pagar-mp/`, { method: 'POST' })
+export const crearPagoMercadoPago = (id, plan) =>
+  llamarApi(`/tarjetas/${id}/pagar-mp/`, { method: 'POST', body: JSON.stringify({ plan }) })
+
+export const obtenerPlanesPro = (id) => llamarApi(`/tarjetas/${id}/planes-pro/`)
+
+export const obtenerCuposFundador = () => llamarApi('/cupos-fundador/')
 
 export const borrarTarjeta = (id) => llamarApi(`/tarjetas/${id}/`, { method: 'DELETE' })
 

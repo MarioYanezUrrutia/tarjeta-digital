@@ -331,6 +331,8 @@ export default function TarjetaEditor() {
           <ModalPago
             tarjetaId={id}
             esPro={esPro}
+            estado={estado}
+            fechaVencimiento={fechaVencimiento}
             onCerrar={() => setMostrarModalPago(false)}
             onPagoExitoso={onPagoExitoso}
           />

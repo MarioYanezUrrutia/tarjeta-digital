@@ -11,11 +11,36 @@ function mesesGratis(plan, planes) {
   return plan.ahorro / mensual.monto
 }
 
+// Textos del modal de la landing Pro según el momento: publicar (borrador),
+// extender (activa) o renovar (vencida/cortada). Sin estado, vale "borrador".
+function textosLanding(estado, fechaVencimiento) {
+  if (estado === 'activa') {
+    const fecha = formatearFechaCorta(fechaVencimiento)
+    return {
+      titulo: 'Extender vigencia',
+      intro: `Suma más meses a tu landing.${fecha ? ` Hoy vence el ${fecha}.` : ''}`,
+      boton: 'Extender y pagar',
+    }
+  }
+  if (estado === 'vencida' || estado === 'cortada') {
+    return {
+      titulo: 'Renovar mi landing',
+      intro: 'Tu landing dejó de verse. Renuévala para volver a publicarla.',
+      boton: 'Renovar y pagar',
+    }
+  }
+  return {
+    titulo: 'Publicar mi landing',
+    intro: 'Elige cuánto tiempo quieres que esté publicada.',
+    boton: 'Publicar y pagar',
+  }
+}
+
 // Pago real de la suscripción (Cobro-2): consulta precio/saldo, cobra Terras
 // vía el backend (que a su vez cobra en Banexa) y, solo si Banexa confirma,
 // la tarjeta pasa a activa. La clave privada vive en un input type="password"
 // y en un solo estado local que se limpia apenas se usa — nunca se loguea.
-export default function ModalPago({ tarjetaId, esPro, onCerrar, onPagoExitoso }) {
+export default function ModalPago({ tarjetaId, esPro, estado, fechaVencimiento, onCerrar, onPagoExitoso }) {
   const [cargando, setCargando] = useState(true)
   const [estadoPago, setEstadoPago] = useState(null)
   const [clavePrivada, setClavePrivada] = useState('')
@@ -33,6 +58,7 @@ export default function ModalPago({ tarjetaId, esPro, onCerrar, onPagoExitoso })
   const [fundadorPrecioHasta, setFundadorPrecioHasta] = useState(null)
   const [cuposTotal, setCuposTotal] = useState(null)
   const planActual = planes.find((p) => p.id === planElegido) || null
+  const textos = textosLanding(estado, fechaVencimiento)
 
   // Landing Pro: los planes y sus montos vienen calculados del servidor.
   useEffect(() => {
@@ -112,7 +138,7 @@ export default function ModalPago({ tarjetaId, esPro, onCerrar, onPagoExitoso })
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4">
       <div className="max-h-[92vh] w-full max-w-sm overflow-y-auto rounded-lg bg-white p-6 shadow-xl">
         <div className="mb-4 flex items-center justify-between">
-          <h2 className="text-lg font-semibold text-gray-900">{esPro ? 'Activar landing' : 'Activar tarjeta'}</h2>
+          <h2 className="text-lg font-semibold text-gray-900">{esPro ? textos.titulo : 'Activar tarjeta'}</h2>
           <button
             type="button"
             onClick={onCerrar}
@@ -213,7 +239,7 @@ export default function ModalPago({ tarjetaId, esPro, onCerrar, onPagoExitoso })
 
         {esPro && (
           <div>
-            <p className="mb-3 text-sm text-gray-600">Elige cuánto tiempo quieres publicar tu landing.</p>
+            <p className="mb-3 text-sm text-gray-600">{textos.intro}</p>
 
             {planesCargando && <p className="text-sm text-gray-500">Cargando planes...</p>}
             {!planesCargando && planes.length === 0 && (
@@ -279,7 +305,7 @@ export default function ModalPago({ tarjetaId, esPro, onCerrar, onPagoExitoso })
                 className="mt-4 w-full rounded-md px-4 py-3 text-sm font-medium text-white transition hover:opacity-90 disabled:opacity-50"
                 style={{ backgroundColor: '#009ee3' }}
               >
-                {mpCargando ? 'Redirigiendo a Mercado Pago...' : `Pagar ${formatearCLP(planActual.monto)}`}
+                {mpCargando ? 'Redirigiendo a Mercado Pago...' : `${textos.boton} ${formatearCLP(planActual.monto)}`}
               </button>
             )}
             {mpError && <p className="mt-2 text-xs text-red-600">{mpError}</p>}

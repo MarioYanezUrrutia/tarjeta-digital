@@ -122,6 +122,39 @@ const TEMAS = {
     cargoClassName: 'text-[#6b6459]',
     botonClassName: 'rounded-none border border-[#1a1a1a] bg-[#fffef9] text-[#1a1a1a]',
   },
+  // Pro 2.0, tanda 2 — paletas de plantillas/pro/tanda2.css.
+  pausa: {
+    fontFamily: "'Instrument Serif', ui-serif, Georgia, serif",
+    contenedorClassName: 'bg-[#f3eee6] text-[#2e2a25] border border-[#e2d9cc]',
+    avatarClassName: 'border border-[#a8714f] bg-[#fbf8f3] text-[#a8714f]',
+    nombreClassName: 'text-[#2e2a25]',
+    cargoClassName: 'text-[#6c645a]',
+    botonClassName: 'rounded-full bg-[#33423a] text-[#fbf8f3]',
+  },
+  huella: {
+    fontFamily: "'Gabarito', ui-sans-serif, system-ui, sans-serif",
+    contenedorClassName: 'bg-[#fff7ea] text-[#1d2b2c] border border-[#eadfcb]',
+    avatarClassName: 'bg-[#ffc94a] text-[#0e5a5e]',
+    nombreClassName: 'text-[#1d2b2c] font-black',
+    cargoClassName: 'text-[#5c696a]',
+    botonClassName: 'rounded-full bg-[#0e5a5e] text-white',
+  },
+  lustre: {
+    fontFamily: "'Bodoni Moda', ui-serif, Georgia, serif",
+    contenedorClassName: 'bg-[#110d0e] text-[#f3e9da] border border-[#e8c878]/30',
+    avatarClassName: 'border border-[#e8c878] bg-[#4a1626] text-[#e8c878]',
+    nombreClassName: 'text-[#f3e9da]',
+    cargoClassName: 'text-[#a89a88]',
+    botonClassName: 'rounded-[3px] bg-[#e8c878] text-[#1a1208]',
+  },
+  mosaico: {
+    fontFamily: "'Unbounded', ui-sans-serif, system-ui, sans-serif",
+    contenedorClassName: 'bg-[#f6f3ee] text-[#121212] border-2 border-[#121212]',
+    avatarClassName: 'border-2 border-[#121212] bg-[#ff5ca8] text-[#121212]',
+    nombreClassName: 'text-[#121212] font-extrabold',
+    cargoClassName: 'text-[#4b4b4b]',
+    botonClassName: 'rounded-[8px] border-2 border-[#121212] bg-[#b9a6ff] text-[#121212]',
+  },
 }
 
 /** Miniatura representativa (~140px) de una plantilla, con datos de

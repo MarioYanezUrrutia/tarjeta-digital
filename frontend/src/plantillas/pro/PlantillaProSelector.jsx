@@ -5,13 +5,21 @@ import PlantillaSerena from './PlantillaSerena'
 import PlantillaConfianza from './PlantillaConfianza'
 import PlantillaVacio from './PlantillaVacio'
 import PlantillaRevista from './PlantillaRevista'
+import PlantillaPausa from './PlantillaPausa'
+import PlantillaHuella from './PlantillaHuella'
+import PlantillaLustre from './PlantillaLustre'
+import PlantillaMosaico from './PlantillaMosaico'
 
-// Plantillas Pro con layout propio (tanda 1): cada clave tiene su componente.
+// Plantillas Pro con layout propio (tandas 1 y 2): cada clave tiene su componente.
 const PLANTILLAS_PROPIAS = {
   serena: PlantillaSerena,
   confianza: PlantillaConfianza,
   vacio: PlantillaVacio,
   revista: PlantillaRevista,
+  pausa: PlantillaPausa,
+  huella: PlantillaHuella,
+  lustre: PlantillaLustre,
+  mosaico: PlantillaMosaico,
 }
 
 const TEMA_POR_DEFECTO = 'pro_min'

@@ -13,6 +13,10 @@ export const PLANTILLA_LABEL = {
   confianza: 'Pro — Confianza',
   vacio: 'Pro — Vacío',
   revista: 'Pro — Revista',
+  pausa: 'Pro — Pausa',
+  huella: 'Pro — Huella',
+  lustre: 'Pro — Lustre',
+  mosaico: 'Pro — Mosaico',
 }
 
 export const ESTADO_LABEL = {
@@ -86,4 +90,8 @@ export const PLANTILLAS_PRO_DISPONIBLES = [
   { valor: 'confianza', nombre: 'Confianza', descripcion: 'Oficios: WhatsApp directo, zonas que cubres y trabajos con precio.' },
   { valor: 'vacio', nombre: 'Vacío', descripcion: 'Moderna oscura: tipografía enorme y acento rosa.' },
   { valor: 'revista', nombre: 'Revista', descripcion: 'Editorial: titular grande, texto en columnas y cita final.' },
+  { valor: 'pausa', nombre: 'Pausa', descripcion: 'Salud y bienestar: tonos arcilla y salvia, pasos de "Cómo trabajo".' },
+  { valor: 'huella', nombre: 'Huella', descripcion: 'Mascotas: colores alegres, servicios como tickets y reseñas en fichas.' },
+  { valor: 'lustre', nombre: 'Lustre', descripcion: 'Lujo metálico: fondo oscuro, dorado y carta con puntos guía.' },
+  { valor: 'mosaico', nombre: 'Mosaico', descripcion: 'Bento: cada dato en su propia tarjeta de colores.' },
 ]

@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from .models import Noticia, PreguntaFrecuente, Producto, Tarjeta, Testimonio
+from .models import Noticia, PasoProceso, PreguntaFrecuente, Producto, Tarjeta, Testimonio
 
 
 class ProductoPublicoSerializer(serializers.ModelSerializer):
@@ -29,12 +29,19 @@ class FaqPublicaSerializer(serializers.ModelSerializer):
         fields = ['pregunta', 'respuesta', 'orden']
 
 
+class PasoPublicoSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = PasoProceso
+        fields = ['titulo', 'texto', 'orden']
+
+
 class TarjetaPublicaSerializer(serializers.ModelSerializer):
     productos = serializers.SerializerMethodField()
     es_pro = serializers.SerializerMethodField()
     noticias = serializers.SerializerMethodField()
     testimonios = serializers.SerializerMethodField()
     faqs = serializers.SerializerMethodField()
+    pasos = serializers.SerializerMethodField()
 
     class Meta:
         model = Tarjeta
@@ -54,11 +61,11 @@ class TarjetaPublicaSerializer(serializers.ModelSerializer):
             # Flags de visibilidad
             'mostrar_contacto', 'mostrar_redes', 'mostrar_sobre',
             'mostrar_ubicacion', 'mostrar_productos',
-            'mostrar_noticias', 'mostrar_testimonios', 'mostrar_faq',
+            'mostrar_noticias', 'mostrar_testimonios', 'mostrar_faq', 'mostrar_pasos',
             # Productos
             'productos',
             # Noticias / Testimonios / FAQ (Pro)
-            'noticias', 'testimonios', 'faqs',
+            'noticias', 'testimonios', 'faqs', 'pasos',
         ]
 
     def get_productos(self, obj):
@@ -79,6 +86,11 @@ class TarjetaPublicaSerializer(serializers.ModelSerializer):
         if not obj.mostrar_testimonios:
             return []
         return TestimonioPublicoSerializer(obj.testimonios.all(), many=True, context=self.context).data
+
+    def get_pasos(self, obj):
+        if not obj.mostrar_pasos or not obj.es_pro():
+            return []
+        return PasoPublicoSerializer(obj.pasos.all(), many=True, context=self.context).data
 
     def get_faqs(self, obj):
         if not obj.mostrar_faq:
@@ -137,6 +149,17 @@ class FaqSerializer(serializers.ModelSerializer):
         read_only_fields = ['id', 'orden']
 
 
+class PasoSerializer(serializers.ModelSerializer):
+    """Panel: gestión de pasos de "Cómo funciona" (GET/POST/PATCH/DELETE en
+    pasos_views.py). `orden` de solo lectura — se fija solo (al crear) o vía
+    POST .../pasos/reordenar/."""
+
+    class Meta:
+        model = PasoProceso
+        fields = ['id', 'titulo', 'texto', 'orden']
+        read_only_fields = ['id', 'orden']
+
+
 class MisTarjetasSerializer(serializers.ModelSerializer):
     """GET /api/mis-tarjetas/ y respuesta de POST /api/tarjetas/ — lo mínimo
     para la pantalla de inicio del panel (lista de tarjetas + botón crear)."""
@@ -166,7 +189,7 @@ class TarjetaPanelSerializer(serializers.ModelSerializer):
             'sobre_texto', 'direccion', 'horario', 'zonas_cobertura',
             'mostrar_contacto', 'mostrar_redes', 'mostrar_sobre',
             'mostrar_ubicacion', 'mostrar_productos',
-            'mostrar_noticias', 'mostrar_testimonios', 'mostrar_faq',
+            'mostrar_noticias', 'mostrar_testimonios', 'mostrar_faq', 'mostrar_pasos',
             'es_pro',
         ]
         read_only_fields = [

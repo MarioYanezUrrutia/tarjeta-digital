@@ -4,6 +4,7 @@ from django.contrib import admin
 from django.urls import include, path
 
 from apps.tarjetas.faq_views import faq_detalle, faqs_lista, faqs_reordenar
+from apps.tarjetas.pasos_views import paso_detalle, pasos_lista, pasos_reordenar
 from apps.tarjetas.noticias_views import noticia_detalle, noticias_lista, noticias_reordenar
 from apps.tarjetas.pago_views import (
     confirmar_pago_mp,
@@ -54,6 +55,9 @@ urlpatterns = [
     path(f'{prefix}tarjetas/<int:tarjeta_id>/faqs/reordenar/', faqs_reordenar, name='faqs-reordenar'),
     path(f'{prefix}tarjetas/<int:tarjeta_id>/faqs/', faqs_lista, name='faqs-lista'),
     path(f'{prefix}faqs/<int:faq_id>/', faq_detalle, name='faq-detalle'),
+    path(f'{prefix}tarjetas/<int:tarjeta_id>/pasos/reordenar/', pasos_reordenar, name='pasos-reordenar'),
+    path(f'{prefix}tarjetas/<int:tarjeta_id>/pasos/', pasos_lista, name='pasos-lista'),
+    path(f'{prefix}pasos/<int:paso_id>/', paso_detalle, name='paso-detalle'),
     path(f'{prefix}tarjetas/<int:tarjeta_id>/estado-pago/', estado_pago, name='tarjeta-estado-pago'),
     path(f'{prefix}tarjetas/<int:tarjeta_id>/pagar/', pagar_tarjeta, name='tarjeta-pagar'),
     path(f'{prefix}tarjetas/<int:tarjeta_id>/pagar-mp/', crear_pago_mp, name='tarjeta-pagar-mp'),

@@ -73,6 +73,15 @@ class Tarjeta(models.Model):
         ('confianza', 'Pro — Confianza (oficios)'),
         ('vacio', 'Pro — Vacío (moderna oscura)'),
         ('revista', 'Pro — Revista (editorial)'),
+        # Pro 2.0, tandas 2 y 3.
+        ('pausa', 'Pro — Pausa (salud)'),
+        ('huella', 'Pro — Huella (mascotas)'),
+        ('lustre', 'Pro — Lustre (lujo metálico)'),
+        ('mosaico', 'Pro — Mosaico (bento)'),
+        ('balance', 'Pro — Balance (consultoría)'),
+        ('miga', 'Pro — Miga (comida por encargo)'),
+        ('forma', 'Pro — Forma (talleres)'),
+        ('tinta', 'Pro — Tinta (eventos)'),
     ]
 
     cliente = models.ForeignKey('Cliente', on_delete=models.CASCADE, related_name='tarjetas')
@@ -146,6 +155,7 @@ class Tarjeta(models.Model):
     mostrar_noticias = models.BooleanField(default=True)
     mostrar_testimonios = models.BooleanField(default=True)
     mostrar_faq = models.BooleanField(default=True)
+    mostrar_pasos = models.BooleanField(default=True)
 
     def clean(self):
         # Límites por cliente: 1 landing Pro; 3 tarjetas del resto de los
@@ -437,6 +447,41 @@ class Testimonio(models.Model):
 
     def __str__(self):
         return f"Testimonio de {self.autor} ({self.tarjeta})"
+
+
+MAX_PASOS_POR_TARJETA = 4
+
+
+class PasoProceso(models.Model):
+    """Bloque Pro "Cómo funciona": hasta 4 pasos (título + texto corto)."""
+    tarjeta = models.ForeignKey('Tarjeta', on_delete=models.CASCADE, related_name='pasos')
+    titulo = models.CharField(max_length=60)
+    texto = models.TextField(
+        validators=[MaxLengthValidator(200, message='El texto no puede superar los 200 caracteres.')],
+    )
+    orden = models.PositiveIntegerField(default=0)
+
+    class Meta:
+        ordering = ['orden']
+        verbose_name = 'Paso de "Cómo funciona"'
+        verbose_name_plural = 'Pasos de "Cómo funciona"'
+
+    def clean(self):
+        if self.tarjeta_id:
+            if not self.tarjeta.es_pro():
+                raise ValidationError('El bloque "Cómo funciona" solo está disponible en la landing Pro.')
+            qs = PasoProceso.objects.filter(tarjeta_id=self.tarjeta_id)
+            if self.pk:
+                qs = qs.exclude(pk=self.pk)
+            if qs.count() >= MAX_PASOS_POR_TARJETA:
+                raise ValidationError(f'Una landing puede tener como máximo {MAX_PASOS_POR_TARJETA} pasos.')
+
+    def save(self, *args, **kwargs):
+        self.full_clean()
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return f"{self.titulo} ({self.tarjeta})"
 
 
 class PreguntaFrecuente(models.Model):

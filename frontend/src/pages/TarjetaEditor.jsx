@@ -8,6 +8,7 @@ import GestionProductos from '../components/GestionProductos'
 import GestionNoticias from '../components/GestionNoticias'
 import GestionTestimonios from '../components/GestionTestimonios'
 import GestionFaqs from '../components/GestionFaqs'
+import GestionPasos from '../components/GestionPasos'
 import ModalPago from '../components/ModalPago'
 import CompartirTarjeta from '../components/CompartirTarjeta'
 
@@ -44,7 +45,7 @@ const VALORES_INICIALES = {
   sobre_texto: '', direccion: '', horario: '', zonas_cobertura: '',
   mostrar_contacto: true, mostrar_redes: true, mostrar_sobre: true,
   mostrar_ubicacion: true, mostrar_productos: true,
-  mostrar_noticias: true, mostrar_testimonios: true, mostrar_faq: true,
+  mostrar_noticias: true, mostrar_testimonios: true, mostrar_faq: true, mostrar_pasos: true,
   plantilla: 'C',
 }
 
@@ -508,6 +509,21 @@ export default function TarjetaEditor() {
             }
           >
             <GestionFaqs tarjetaId={id} />
+          </Seccion>
+        )}
+
+        {esPro && (
+          <Seccion
+            titulo="Cómo funciona (Pro)"
+            extra={
+              <Interruptor
+                label="Mostrar"
+                checked={campos.mostrar_pasos}
+                onChange={(v) => actualizar('mostrar_pasos', v)}
+              />
+            }
+          >
+            <GestionPasos tarjetaId={id} />
           </Seccion>
         )}
 

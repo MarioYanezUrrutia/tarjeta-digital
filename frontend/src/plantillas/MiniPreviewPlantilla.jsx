@@ -89,6 +89,39 @@ const TEMAS = {
     cargoClassName: 'text-gray-500',
     botonClassName: 'rounded-none border border-black bg-white text-black',
   },
+  // Pro 2.0, tanda 1 — paletas de plantillas/pro/tanda1.css.
+  serena: {
+    fontFamily: "'Playfair Display', ui-serif, Georgia, serif",
+    contenedorClassName: 'bg-[#fdfaf7] text-[#3b2f2c] border border-[#e5d9d3]',
+    avatarClassName: 'border border-[#b89778] bg-[#f6e6e1] text-[#b89778]',
+    nombreClassName: 'text-[#3b2f2c] italic',
+    cargoClassName: 'text-[#8b7f7a]',
+    botonClassName: 'rounded-full bg-[#3b2f2c] text-[#fdfaf7]',
+  },
+  confianza: {
+    fontFamily: "'Inter', ui-sans-serif, system-ui, sans-serif",
+    contenedorClassName: 'bg-white text-[#0b2545] border border-[#dde1ea]',
+    avatarClassName: 'rounded-[8px] bg-[#f27121] text-white',
+    nombreClassName: 'text-[#0b2545] font-extrabold',
+    cargoClassName: 'text-[#5a6478]',
+    botonClassName: 'rounded-[8px] bg-[#f27121] text-white',
+  },
+  vacio: {
+    fontFamily: "'Space Grotesk', ui-sans-serif, system-ui, sans-serif",
+    contenedorClassName: 'bg-[#0a0a0a] text-[#fafafa] border border-[#222]',
+    avatarClassName: 'border border-[#ff2e88] bg-[#141414] text-[#ff2e88]',
+    nombreClassName: 'text-[#fafafa]',
+    cargoClassName: 'text-[#8a8a8a]',
+    botonClassName: 'rounded-[2px] border border-[#ff2e88] bg-transparent text-[#ff2e88]',
+  },
+  revista: {
+    fontFamily: "'Fraunces', ui-serif, Georgia, serif",
+    contenedorClassName: 'bg-[#f3efe5] text-[#1a1a1a] border border-[#d5cdbe]',
+    avatarClassName: 'border border-[#c44536] bg-[#fffef9] text-[#c44536]',
+    nombreClassName: 'text-[#1a1a1a] font-black',
+    cargoClassName: 'text-[#6b6459]',
+    botonClassName: 'rounded-none border border-[#1a1a1a] bg-[#fffef9] text-[#1a1a1a]',
+  },
 }
 
 /** Miniatura representativa (~140px) de una plantilla, con datos de

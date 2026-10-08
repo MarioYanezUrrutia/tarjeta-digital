@@ -55,6 +55,11 @@ class Tarjeta(models.Model):
         ('pro_calido', 'Pro — Cálida'),
         ('pro_dark', 'Pro — Oscura Premium'),
         ('pro_editorial', 'Pro — Editorial'),
+        # Pro 2.0, tanda 1 — plantillas con layout propio (un componente cada una).
+        ('serena', 'Pro — Serena (belleza)'),
+        ('confianza', 'Pro — Confianza (oficios)'),
+        ('vacio', 'Pro — Vacío (moderna oscura)'),
+        ('revista', 'Pro — Revista (editorial)'),
     ]
 
     cliente = models.ForeignKey('Cliente', on_delete=models.CASCADE, related_name='tarjetas')

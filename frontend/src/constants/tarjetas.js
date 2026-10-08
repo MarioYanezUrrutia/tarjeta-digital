@@ -9,6 +9,10 @@ export const PLANTILLA_LABEL = {
   pro_calido: 'Pro — Cálida',
   pro_dark: 'Pro — Oscura Premium',
   pro_editorial: 'Pro — Editorial',
+  serena: 'Pro — Serena',
+  confianza: 'Pro — Confianza',
+  vacio: 'Pro — Vacío',
+  revista: 'Pro — Revista',
 }
 
 export const ESTADO_LABEL = {
@@ -64,4 +68,8 @@ export const PLANTILLAS_PRO_DISPONIBLES = [
   { valor: 'pro_calido', nombre: 'Cálida', descripcion: 'Tonos tierra y texturas suaves — cercana y hogareña.' },
   { valor: 'pro_dark', nombre: 'Oscura Premium', descripcion: 'Fondo oscuro con acentos dorados — elegante y exclusiva.' },
   { valor: 'pro_editorial', nombre: 'Editorial', descripcion: 'Tipografía grande tipo revista — enfocada en contenido.' },
+  { valor: 'serena', nombre: 'Serena', descripcion: 'Belleza: tonos rosados y tipografía con serif, arco en el hero.' },
+  { valor: 'confianza', nombre: 'Confianza', descripcion: 'Oficios: WhatsApp directo, zonas que cubres y trabajos con precio.' },
+  { valor: 'vacio', nombre: 'Vacío', descripcion: 'Moderna oscura: tipografía enorme y acento rosa.' },
+  { valor: 'revista', nombre: 'Revista', descripcion: 'Editorial: titular grande, texto en columnas y cita final.' },
 ]

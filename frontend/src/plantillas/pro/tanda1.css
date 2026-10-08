@@ -1,0 +1,269 @@
+/* Plantillas Pro — tanda 1 (Serena, Confianza, Vacío, Revista).
+   Portado de la referencia visual aprobada; cada plantilla va acotada a su
+   clase raíz. Las fuentes se cargan una sola vez en src/index.css.
+   Tailwind (preflight) ya resetea márgenes: acá todo margen es explícito. */
+
+.pro-t1 { box-sizing: border-box; min-height: 100vh; overflow-x: hidden; -webkit-font-smoothing: antialiased; }
+.pro-t1 *, .pro-t1 *::before, .pro-t1 *::after { box-sizing: border-box; }
+.pro-t1 a { color: inherit; text-decoration: none; }
+.pro-t1 img { max-width: 100%; display: block; }
+.pro-t1 p, .pro-t1 h1, .pro-t1 h2, .pro-t1 h3, .pro-t1 blockquote, .pro-t1 figure { margin: 0; }
+
+@keyframes t1-pulse { 0%, 100% { opacity: 1; } 50% { opacity: .4; } }
+@keyframes t1-blink { 0%, 100% { opacity: 1; } 50% { opacity: .3; } }
+@media (prefers-reduced-motion: reduce) {
+  .pro-t1 *, .pro-t1 *::before, .pro-t1 *::after { animation: none !important; transition: none !important; }
+}
+
+/* ---------- Secciones comunes (noticias, testimonios, faq) ---------- */
+.pro-t1 .t1-extra { padding: 48px 24px; border-top: 1px solid var(--hair); }
+.pro-t1 .t1-extra > h2 {
+  font-family: var(--font-head); font-size: clamp(1.5rem, 4vw, 2rem);
+  letter-spacing: -0.015em; margin-bottom: 24px; font-weight: var(--head-weight, 600);
+}
+.pro-t1 .t1-grid { display: grid; gap: 16px; grid-template-columns: 1fr; max-width: 820px; }
+@media (min-width: 640px) { .pro-t1 .t1-grid { grid-template-columns: repeat(2, 1fr); } }
+.pro-t1 .t1-card {
+  background: var(--card); border: 1px solid var(--hair); border-radius: var(--radius, 12px); padding: 20px;
+}
+.pro-t1 .t1-card img { width: 100%; height: 150px; object-fit: cover; border-radius: 8px; margin-bottom: 12px; }
+.pro-t1 .t1-card .t1-fecha { font-size: 11px; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); margin-bottom: 6px; }
+.pro-t1 .t1-card h3 { font-family: var(--font-head); font-size: 18px; font-weight: var(--head-weight, 600); margin-bottom: 6px; }
+.pro-t1 .t1-card p { font-size: 14px; color: var(--muted); line-height: 1.6; }
+.pro-t1 .t1-card .t1-mas { display: inline-block; margin-top: 10px; font-size: 13px; font-weight: 600; color: var(--accent); }
+.pro-t1 .t1-estrellas { color: var(--accent); font-size: 14px; letter-spacing: 2px; margin-bottom: 8px; }
+.pro-t1 .t1-cita { font-size: 15px; line-height: 1.6; color: var(--ink); }
+.pro-t1 .t1-autor { margin-top: 14px; font-size: 13px; font-weight: 600; }
+.pro-t1 .t1-autor span { display: block; font-weight: 400; color: var(--muted); font-size: 12px; }
+.pro-t1 .t1-faq { max-width: 720px; border: 1px solid var(--hair); border-radius: var(--radius, 12px); background: var(--card); }
+.pro-t1 .t1-faq details + details { border-top: 1px solid var(--hair); }
+.pro-t1 .t1-faq summary {
+  display: flex; justify-content: space-between; gap: 12px; align-items: center;
+  cursor: pointer; list-style: none; padding: 16px 18px; font-weight: 600; font-size: 15px;
+}
+.pro-t1 .t1-faq summary::-webkit-details-marker { display: none; }
+.pro-t1 .t1-faq summary::after { content: "+"; color: var(--accent); font-size: 20px; line-height: 1; }
+.pro-t1 .t1-faq details[open] summary::after { content: "–"; }
+.pro-t1 .t1-faq details p { padding: 0 18px 16px; font-size: 14px; line-height: 1.65; color: var(--muted); }
+.pro-t1 .t1-sign { display: inline-block; margin-top: 18px; font-size: 11px; letter-spacing: .12em; text-transform: uppercase; opacity: .6; }
+.pro-t1 .t1-sign:hover { opacity: 1; text-decoration: underline; text-underline-offset: 3px; }
+
+/* ============ SERENA · Belleza ============ */
+.serena {
+  --bg: #FDFAF7; --ink: #3B2F2C; --muted: #8B7F7A; --accent: #B89778;
+  --soft: #F6E6E1; --hair: #E5D9D3; --paper: #FFFFFF; --card: #FFFFFF;
+  --font-head: "Playfair Display", "Times New Roman", serif; --head-weight: 500; --radius: 20px;
+  background: var(--bg); color: var(--ink);
+  font-family: "Inter", sans-serif; font-size: 15px; line-height: 1.6;
+}
+.serena .mono { font-family: "JetBrains Mono", monospace; font-size: 11px; letter-spacing: .18em; text-transform: uppercase; color: var(--muted); }
+.serena .hero { padding: 44px 24px 56px; text-align: center; }
+.serena .hero .eyebrow { display: block; margin-bottom: 14px; }
+.serena .hero h1 {
+  font-family: "Playfair Display", serif; font-weight: 500;
+  font-size: clamp(2.2rem, 9vw, 3.6rem); line-height: 1.08;
+  letter-spacing: -0.01em; margin-bottom: 18px; text-wrap: balance; font-style: italic;
+  overflow-wrap: anywhere;
+}
+.serena .hero h1 .ink { font-style: normal; color: var(--ink); display: block; margin-top: 4px; font-size: .62em; }
+.serena .cta {
+  display: inline-flex; align-items: center; gap: 8px; padding: 12px 22px;
+  border-radius: 999px; background: var(--ink); color: var(--bg) !important;
+  font-weight: 500; letter-spacing: .02em; font-size: 14px;
+}
+.serena .hero-img {
+  margin: 32px auto 0; aspect-ratio: 4/5; max-width: 320px;
+  border-radius: 180px 180px 24px 24px;
+  background: linear-gradient(160deg, #E8CFC6 0%, #D4A896 60%, #B89778 100%);
+  position: relative; overflow: hidden;
+}
+.serena .hero-img img { width: 100%; height: 100%; object-fit: cover; }
+.serena .hero-img.deco::after {
+  content: ""; position: absolute; inset: 0;
+  background: radial-gradient(circle at 70% 25%, rgba(255,255,255,.55), transparent 55%);
+}
+.serena .section { padding: 48px 24px; border-top: 1px solid var(--hair); }
+.serena .section-head { text-align: center; margin-bottom: 32px; }
+.serena .section-head h2 {
+  font-family: "Playfair Display", serif; font-weight: 500;
+  font-size: clamp(1.6rem, 4vw, 2.2rem); margin: 10px 0 8px; letter-spacing: -0.01em;
+}
+.serena .section-head p { max-width: 50ch; margin: 0 auto; color: var(--muted); }
+.serena .about { background: var(--soft); display: grid; gap: 24px; grid-template-columns: 1fr; padding: 56px 24px; }
+@media (min-width: 720px) { .serena .about { grid-template-columns: 1fr 1fr; align-items: center; padding: 72px 48px; gap: 48px; } }
+.serena .about-img {
+  aspect-ratio: 1/1; border-radius: 16px; width: 100%;
+  background: linear-gradient(135deg, rgba(255,255,255,.1), transparent 40%), linear-gradient(45deg, #C9A89A 0%, #A17864 100%);
+  max-width: 300px; margin-inline: auto;
+}
+.serena .about-text .mono { margin-bottom: 10px; display: inline-block; }
+.serena .about-text p { color: var(--ink); font-size: 16px; max-width: 42ch; line-height: 1.7; white-space: pre-line; }
+.serena .about-text .sign { font-family: "Playfair Display", serif; font-style: italic; font-size: 24px; margin-top: 20px; color: var(--accent); }
+.serena .services { display: grid; gap: 16px; grid-template-columns: 1fr; max-width: 720px; margin-inline: auto; }
+@media (min-width: 640px) { .serena .services.n3 { grid-template-columns: repeat(3, 1fr); } .serena .services.n2 { grid-template-columns: repeat(2, 1fr); } }
+.serena .svc { background: var(--paper); border: 1px solid var(--hair); border-radius: 20px; padding: 24px 20px; text-align: center; transition: transform .2s ease; }
+.serena .svc:hover { transform: translateY(-4px); }
+.serena .svc .svc-icon {
+  width: 48px; height: 48px; border-radius: 50%; margin: 0 auto 16px; background: var(--soft);
+  display: grid; place-items: center; font-family: "Playfair Display", serif; font-style: italic; color: var(--accent); font-size: 22px;
+}
+.serena .svc h3 { font-family: "Playfair Display", serif; font-weight: 500; font-size: 20px; margin-bottom: 8px; }
+.serena .svc .svc-desc { font-size: 14px; color: var(--muted); margin-bottom: 12px; }
+.serena .svc .svc-price { font-weight: 600; color: var(--ink); font-size: 15px; }
+.serena .footer { background: var(--ink); color: var(--bg); padding: 40px 24px; text-align: center; }
+.serena .footer .name { font-family: "Playfair Display", serif; font-weight: 500; font-size: 24px; margin-bottom: 10px; color: var(--bg); }
+.serena .footer p { color: rgba(253,250,247,.65); font-size: 13px; }
+.serena .footer .foot-mono { font-family: "JetBrains Mono", monospace; letter-spacing: .1em; font-size: 11px; margin-top: 16px; overflow-wrap: anywhere; }
+
+/* ============ CONFIANZA · Oficios ============ */
+.confianza {
+  --bg: #FFFFFF; --ink: #0B2545; --panel: #F2F4F7; --hair: #DDE1EA;
+  --accent: #F27121; --muted: #5A6478; --card: #FFFFFF;
+  --font-head: "Inter", sans-serif; --head-weight: 800; --radius: 12px;
+  background: var(--bg); color: var(--ink);
+  font-family: "Inter", sans-serif; font-size: 15px; line-height: 1.55; position: relative;
+}
+.confianza .hero { padding: 32px 20px 24px; display: grid; gap: 20px; }
+.confianza .brand { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.confianza .brand .logo { display: inline-flex; align-items: center; gap: 8px; font-weight: 900; font-size: 18px; letter-spacing: -0.01em; min-width: 0; }
+.confianza .brand .logo span:last-child { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.confianza .brand .logo-mark {
+  width: 32px; height: 32px; flex: none; border-radius: 8px; background: var(--accent); color: #fff;
+  display: grid; place-items: center; font-weight: 900; font-size: 14px;
+}
+.confianza .brand .call {
+  display: inline-flex; align-items: center; gap: 6px; background: #E8F6EE; color: #0F6A3C !important;
+  padding: 6px 10px; border-radius: 999px; font-size: 12px; font-weight: 600; flex: none;
+}
+.confianza .brand .call::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: #10B981; animation: t1-pulse 1.5s infinite; }
+.confianza .hero-grid { display: grid; gap: 20px; grid-template-columns: 1fr; }
+@media (min-width: 720px) { .confianza .hero-grid.con-visual { grid-template-columns: 1.3fr 1fr; align-items: center; } }
+.confianza h1 { font-size: clamp(2rem, 8vw, 3.2rem); font-weight: 900; line-height: 1.05; letter-spacing: -0.025em; margin-bottom: 14px; text-wrap: balance; overflow-wrap: anywhere; }
+.confianza h1 .mark { color: var(--accent); }
+.confianza .lead { font-size: 17px; color: var(--muted); margin-bottom: 20px; max-width: 42ch; }
+.confianza .cta-row { display: flex; flex-wrap: wrap; gap: 10px; }
+.confianza .btn { display: inline-flex; align-items: center; gap: 8px; padding: 14px 22px; border-radius: 12px; font-weight: 700; font-size: 15px; }
+.confianza .btn-primary { background: var(--accent); color: #fff !important; }
+.confianza .btn-secondary { background: var(--panel); color: var(--ink) !important; }
+.confianza .hero-visual {
+  aspect-ratio: 1/1; border-radius: 20px; width: 100%;
+  background: linear-gradient(135deg, #0B2545 0%, #163B6B 100%);
+  position: relative; overflow: hidden; max-width: 320px; margin-inline: auto;
+}
+.confianza .hero-visual img { width: 100%; height: 100%; object-fit: cover; position: relative; }
+.confianza .hero-visual::before {
+  content: ""; position: absolute; inset: 0;
+  background: repeating-linear-gradient(45deg, transparent, transparent 20px, rgba(242,113,33,.08) 20px, rgba(242,113,33,.08) 22px);
+}
+.confianza .hero-visual .inicial {
+  position: absolute; inset: 0; display: grid; place-items: center;
+  font-size: 96px; font-weight: 900; color: #fff; letter-spacing: -0.03em;
+}
+.confianza .zones { background: var(--panel); padding: 24px 20px; display: flex; flex-wrap: wrap; gap: 8px; align-items: center; justify-content: center; }
+.confianza .zones .label { font-size: 12px; font-weight: 700; color: var(--muted); letter-spacing: .08em; text-transform: uppercase; margin-right: 6px; }
+.confianza .zones .chip { background: #fff; padding: 6px 12px; border-radius: 999px; font-size: 13px; font-weight: 600; border: 1px solid var(--hair); }
+.confianza .section { padding: 48px 20px; }
+.confianza .section h2 { font-size: clamp(1.6rem, 4vw, 2rem); font-weight: 800; margin-bottom: 24px; letter-spacing: -0.015em; }
+.confianza .about-p { font-size: 16px; line-height: 1.7; color: var(--muted); max-width: 60ch; white-space: pre-line; }
+.confianza .svc-grid { display: grid; gap: 12px; grid-template-columns: 1fr; }
+@media (min-width: 640px) { .confianza .svc-grid { grid-template-columns: repeat(2, 1fr); } }
+.confianza .svc { display: grid; grid-template-columns: 48px 1fr auto; gap: 14px; align-items: center; padding: 18px; border: 1px solid var(--hair); border-radius: 12px; background: #fff; }
+.confianza .svc .ico { width: 48px; height: 48px; border-radius: 10px; background: #FFE8DC; color: var(--accent); display: grid; place-items: center; font-size: 20px; font-weight: 900; }
+.confianza .svc h3 { font-size: 16px; font-weight: 700; }
+.confianza .svc .desc { font-size: 13px; color: var(--muted); margin-top: 2px; }
+.confianza .svc .price { font-weight: 800; color: var(--accent); font-size: 15px; white-space: nowrap; }
+.confianza .trust { background: var(--ink); color: #fff; padding: 40px 20px; text-align: center; }
+.confianza .trust .big { font-size: clamp(1.3rem, 4vw, 1.8rem); font-weight: 800; line-height: 1.3; margin: 0 auto 12px; max-width: 34ch; letter-spacing: -0.01em; }
+.confianza .trust .sub { opacity: .75; font-size: 14px; }
+.confianza .trust .t1-estrellas { font-size: 20px; margin-bottom: 12px; }
+.confianza .footer { background: var(--panel); text-align: center; padding: 28px 20px 96px; color: var(--muted); font-size: 13px; }
+.confianza .footer b { display: block; color: var(--ink); font-size: 16px; margin-bottom: 4px; }
+.confianza .sticky-bar {
+  position: sticky; bottom: 16px; margin: 0 16px 16px; padding: 14px 18px; background: #10B981; color: #fff !important; border-radius: 14px;
+  display: flex; justify-content: space-between; align-items: center; gap: 12px; font-weight: 700; z-index: 5;
+  box-shadow: 0 6px 20px rgba(16,185,129,.3);
+}
+.confianza .sticky-bar::after { content: "→"; font-size: 22px; }
+
+/* ============ VACÍO · Oscura ============ */
+.vacio {
+  --bg: #0A0A0A; --ink: #FAFAFA; --muted: #8A8A8A; --accent: #FF2E88; --panel: #141414; --hair: #222; --card: #141414;
+  --font-head: "Space Grotesk", sans-serif; --head-weight: 500; --radius: 4px;
+  background: var(--bg); color: var(--ink);
+  font-family: "Space Grotesk", sans-serif; font-size: 15px; line-height: 1.55;
+}
+.vacio .mono { font-family: "JetBrains Mono", monospace; }
+.vacio .hero { padding: 40px 24px 56px; }
+.vacio .nav-top { display: flex; justify-content: space-between; gap: 12px; align-items: center; padding-bottom: 32px; border-bottom: 1px solid var(--hair); }
+.vacio .nav-top .tag { font-family: "JetBrains Mono", monospace; font-size: 11px; letter-spacing: .14em; color: var(--muted); text-transform: uppercase; }
+.vacio .hero h1 { margin-top: 48px; font-size: clamp(2.4rem, 12vw, 7rem); font-weight: 700; letter-spacing: -0.05em; line-height: .98; overflow-wrap: anywhere; }
+.vacio .hero h1 .accent { color: var(--accent); }
+.vacio .hero h1::after { content: "▮"; color: var(--accent); animation: t1-blink 1s infinite; margin-left: 8px; }
+.vacio .hero .lead { margin-top: 32px; font-size: 18px; max-width: 48ch; color: var(--muted); line-height: 1.5; }
+.vacio .hero .lead strong { color: var(--ink); font-weight: 500; }
+.vacio .section { padding: 56px 24px; border-top: 1px solid var(--hair); }
+.vacio .section .lbl { font-family: "JetBrains Mono", monospace; font-size: 11px; letter-spacing: .18em; color: var(--muted); text-transform: uppercase; display: block; margin-bottom: 16px; }
+.vacio .about-text { font-size: 17px; color: var(--ink); opacity: .85; max-width: 54ch; line-height: 1.65; white-space: pre-line; }
+.vacio .work { display: grid; gap: 1px; background: var(--hair); grid-template-columns: 1fr; border: 1px solid var(--hair); }
+@media (min-width: 640px) { .vacio .work { grid-template-columns: repeat(2, 1fr); } }
+.vacio .work-item { background: var(--bg); padding: 32px 24px; transition: background .2s ease; display: grid; gap: 12px; align-content: space-between; min-height: 200px; }
+.vacio .work-item:hover { background: var(--panel); }
+.vacio .work-item .meta { font-family: "JetBrains Mono", monospace; font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: .1em; display: flex; justify-content: space-between; gap: 8px; }
+.vacio .work-item .meta span:last-child { color: var(--accent); }
+.vacio .work-item h3 { font-size: 24px; font-weight: 500; letter-spacing: -0.015em; }
+.vacio .work-item p { font-size: 14px; color: var(--muted); margin-top: 6px; }
+.vacio .cta-section { padding: 64px 24px; border-top: 1px solid var(--hair); display: grid; gap: 20px; align-items: start; }
+.vacio .cta-section h2 { font-size: clamp(2rem, 8vw, 3rem); font-weight: 500; letter-spacing: -0.03em; }
+.vacio .cta-section h2 .accent { color: var(--accent); }
+.vacio .cta-section .mail {
+  font-family: "JetBrains Mono", monospace; font-size: clamp(14px, 4.4vw, 20px); color: var(--accent);
+  padding: 16px 20px; border: 1px solid var(--accent); border-radius: 4px;
+  display: inline-flex; align-items: center; gap: 10px; justify-self: start; max-width: 100%; overflow-wrap: anywhere;
+}
+.vacio .redes { display: flex; flex-wrap: wrap; gap: 20px; font-family: "JetBrains Mono", monospace; font-size: 12px; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); }
+.vacio .redes a:hover { color: var(--accent); }
+.vacio .footer { padding: 32px 24px 40px; border-top: 1px solid var(--hair); font-family: "JetBrains Mono", monospace; font-size: 11px; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); }
+.vacio .footer .t1-sign { margin-top: 0; }
+
+/* ============ REVISTA · Editorial ============ */
+.revista {
+  --bg: #F3EFE5; --paper: #FFFEF9; --ink: #1A1A1A; --accent: #C44536; --muted: #6B6459; --hair: #D5CDBE; --card: #FFFEF9;
+  --font-head: "Fraunces", "Times New Roman", serif; --head-weight: 700; --radius: 2px;
+  background: var(--bg); color: var(--ink);
+  font-family: "IBM Plex Sans", sans-serif; font-size: 15px; line-height: 1.6;
+}
+.revista .mono { font-family: "JetBrains Mono", monospace; font-size: 10px; letter-spacing: .22em; text-transform: uppercase; color: var(--muted); }
+.revista .masthead { padding: 24px 24px 20px; border-bottom: 2px solid var(--ink); display: flex; justify-content: space-between; align-items: baseline; gap: 12px; }
+.revista .masthead .brand { font-family: "Fraunces", serif; font-weight: 900; font-size: 22px; letter-spacing: -0.02em; text-transform: uppercase; overflow-wrap: anywhere; }
+.revista .masthead .date { font-family: "JetBrains Mono", monospace; font-size: 11px; color: var(--muted); letter-spacing: .1em; white-space: nowrap; }
+.revista .masthead-rule { height: 6px; background: linear-gradient(to right, var(--ink) 0 25%, transparent 25% 26%, var(--ink) 26% 100%); margin-top: 4px; }
+.revista .hero { padding: 56px 24px 48px; display: grid; gap: 32px; grid-template-columns: 1fr; }
+@media (min-width: 820px) { .revista .hero.con-retrato { grid-template-columns: 1.2fr 1fr; align-items: start; padding: 64px 48px; } }
+.revista .hero .issue { display: block; margin-bottom: 20px; }
+.revista .hero h1 { font-family: "Fraunces", serif; font-weight: 900; font-size: clamp(2.2rem, 10vw, 4.8rem); line-height: .98; letter-spacing: -0.03em; margin-bottom: 18px; overflow-wrap: anywhere; }
+.revista .hero h1 em { font-style: italic; color: var(--accent); font-weight: 500; }
+.revista .byline { font-family: "JetBrains Mono", monospace; font-size: 11px; color: var(--muted); letter-spacing: .08em; text-transform: uppercase; }
+.revista .byline .name { color: var(--ink); font-weight: 600; }
+.revista .portrait { aspect-ratio: 4/5; max-width: 320px; width: 100%; margin-inline: auto; background: linear-gradient(170deg, #D4A89A 0%, #8B5E52 70%, #4A2E27 100%); border-radius: 2px; position: relative; overflow: hidden; }
+.revista .portrait img { width: 100%; height: 100%; object-fit: cover; }
+.revista .section { padding: 56px 24px; border-top: 1px solid var(--hair); }
+.revista .section-title { display: grid; grid-template-columns: auto 1fr; gap: 16px; align-items: baseline; padding-bottom: 20px; margin-bottom: 32px; border-bottom: 1px solid var(--hair); }
+.revista .section-title h2 { font-family: "Fraunces", serif; font-weight: 700; font-size: clamp(1.8rem, 4.5vw, 2.6rem); letter-spacing: -0.02em; }
+.revista .section-title .num { font-family: "Fraunces", serif; font-style: italic; font-weight: 400; font-size: 1.4em; color: var(--accent); }
+.revista .columns { columns: 1; column-gap: 40px; max-width: 760px; }
+@media (min-width: 720px) { .revista .columns { columns: 2; } }
+.revista .columns p { margin: 0 0 16px; font-size: 16px; line-height: 1.7; }
+.revista .columns p:first-child::first-letter { font-family: "Fraunces", serif; font-weight: 900; font-size: 4.2em; float: left; line-height: .85; padding: 6px 10px 0 0; color: var(--accent); }
+.revista .programs { display: grid; gap: 1px; background: var(--hair); grid-template-columns: 1fr; border: 1px solid var(--hair); }
+@media (min-width: 720px) { .revista .programs { grid-template-columns: repeat(3, 1fr); } }
+.revista .program { background: var(--paper); padding: 28px 20px; display: grid; gap: 10px; align-content: start; }
+.revista .program .no { font-family: "Fraunces", serif; font-weight: 900; font-size: 48px; line-height: 1; color: var(--accent); letter-spacing: -0.03em; }
+.revista .program h3 { font-family: "Fraunces", serif; font-weight: 700; font-size: 22px; }
+.revista .program p { font-size: 14px; color: var(--muted); line-height: 1.6; }
+.revista .program .meta { font-family: "JetBrains Mono", monospace; font-size: 10px; color: var(--ink); letter-spacing: .14em; text-transform: uppercase; padding-top: 10px; border-top: 1px solid var(--hair); margin-top: 6px; }
+.revista .quote { padding: 64px 24px; text-align: center; background: var(--ink); color: var(--bg); }
+.revista .quote blockquote { font-family: "Fraunces", serif; font-weight: 400; font-style: italic; font-size: clamp(1.4rem, 4vw, 2.2rem); line-height: 1.3; margin: 0 auto; max-width: 32ch; }
+.revista .quote cite { display: block; margin-top: 20px; font-family: "JetBrains Mono", monospace; font-size: 11px; letter-spacing: .14em; color: var(--accent); text-transform: uppercase; font-style: normal; }
+.revista .colophon { padding: 32px 24px; text-align: center; border-top: 2px solid var(--ink); }
+.revista .colophon .brand { font-family: "Fraunces", serif; font-weight: 900; font-size: 32px; letter-spacing: -0.02em; overflow-wrap: anywhere; }
+.revista .colophon p { font-family: "Fraunces", serif; font-style: italic; margin-top: 8px; color: var(--muted); font-size: 14px; overflow-wrap: anywhere; }

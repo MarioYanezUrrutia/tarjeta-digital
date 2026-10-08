@@ -35,7 +35,7 @@ CAMPOS_EDITABLES = (
     'nombre_mostrado', 'cargo_rubro', 'profesion', 'empresa', 'eslogan', 'tipo', 'plantilla',
     'telefono', 'whatsapp', 'email_contacto', 'sitio_web',
     'instagram', 'facebook', 'linkedin', 'tiktok', 'youtube', 'x_twitter',
-    'sobre_texto', 'direccion', 'horario',
+    'sobre_texto', 'direccion', 'horario', 'zonas_cobertura',
     'mostrar_contacto', 'mostrar_redes', 'mostrar_sobre', 'mostrar_ubicacion', 'mostrar_productos',
     'mostrar_noticias', 'mostrar_testimonios', 'mostrar_faq',
 )

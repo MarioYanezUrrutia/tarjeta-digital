@@ -1,5 +1,5 @@
 import React from 'react'
-import { FirmaKabymur, SeccionFaq, SeccionNoticias, SeccionTestimonios, partirProducto, sinProtocolo, waLink } from './tanda1Comun'
+import { FirmaKabymur, SeccionFaq, SeccionNoticias, SeccionTestimonios, textosProducto, sinProtocolo, waLink } from './tanda1Comun'
 
 /** Serena (belleza): hero centrado con arco, sobre en panel rosado, hasta 3
  * servicios destacados y pie oscuro. Layout propio; no usa PlantillaProBase. */
@@ -49,7 +49,7 @@ export default function PlantillaSerena({ tarjeta }) {
           </div>
           <div className={`services n${productos.length}`}>
             {productos.map((p) => {
-              const { desc, precio, extra } = partirProducto(p)
+              const { desc, precio, extra } = textosProducto(p)
               return (
                 <div className="svc" key={p.orden + p.nombre}>
                   <div className="svc-icon">{(p.nombre || '?').trim()[0]?.toUpperCase()}</div>

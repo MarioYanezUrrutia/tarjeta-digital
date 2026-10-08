@@ -1,7 +1,20 @@
 from django.db import models
 from django.core.exceptions import ValidationError
+from django.core.validators import MaxValueValidator, MaxLengthValidator, MinValueValidator
 from django.utils import timezone
 from django.utils.text import slugify
+
+
+PRECIO_MAXIMO_CLP = 99_999_999
+ANIO_MINIMO = 1900
+ZONAS_MAX_CARACTERES = 300
+
+
+def validar_anio_producto(valor):
+    """Año entre 1900 y el año actual + 1 (el tope se calcula al validar, no al importar)."""
+    maximo = timezone.now().year + 1
+    if valor < ANIO_MINIMO or valor > maximo:
+        raise ValidationError(f'El año debe estar entre {ANIO_MINIMO} y {maximo}.')
 
 
 class Cliente(models.Model):
@@ -116,6 +129,13 @@ class Tarjeta(models.Model):
     # Bloque Ubicación
     direccion = models.CharField(max_length=255, blank=True, null=True)
     horario = models.CharField(max_length=255, blank=True, null=True)
+    # Zonas o comunas que atiende (landing Pro), separadas por comas.
+    zonas_cobertura = models.TextField(
+        blank=True, null=True,
+        validators=[MaxLengthValidator(
+            ZONAS_MAX_CARACTERES, message=f'Las zonas no pueden superar los {ZONAS_MAX_CARACTERES} caracteres.',
+        )],
+    )
 
     # Control de visibilidad
     mostrar_contacto = models.BooleanField(default=True)
@@ -338,6 +358,17 @@ class Producto(models.Model):
     caracteristicas = models.TextField(null=True, blank=True)
     detalle = models.TextField(null=True, blank=True)
     orden = models.PositiveIntegerField(default=0)
+    # Precio en pesos chilenos (entero). `precio_desde` lo muestra como "Desde $X".
+    precio_clp = models.PositiveIntegerField(
+        null=True, blank=True,
+        validators=[
+            MinValueValidator(1, message='El precio debe ser mayor a 0.'),
+            MaxValueValidator(PRECIO_MAXIMO_CLP, message='El precio no puede superar $99.999.999.'),
+        ],
+    )
+    precio_desde = models.BooleanField(default=False)
+    # Año del trabajo/proyecto (portafolios, plantilla Vacío).
+    anio = models.PositiveSmallIntegerField(null=True, blank=True, validators=[validar_anio_producto])
 
     class Meta:
         ordering = ['orden']

@@ -8,7 +8,7 @@ class ProductoPublicoSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Producto
-        fields = ['nombre', 'imagen', 'caracteristicas', 'detalle', 'orden']
+        fields = ['nombre', 'imagen', 'caracteristicas', 'detalle', 'precio_clp', 'precio_desde', 'anio', 'orden']
 
 
 class NoticiaPublicaSerializer(serializers.ModelSerializer):
@@ -50,7 +50,7 @@ class TarjetaPublicaSerializer(serializers.ModelSerializer):
             # Sobre
             'sobre_texto',
             # Ubicación
-            'direccion', 'horario',
+            'direccion', 'horario', 'zonas_cobertura',
             # Flags de visibilidad
             'mostrar_contacto', 'mostrar_redes', 'mostrar_sobre',
             'mostrar_ubicacion', 'mostrar_productos',
@@ -95,7 +95,7 @@ class ProductoSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Producto
-        fields = ['id', 'imagen', 'nombre', 'caracteristicas', 'detalle', 'orden']
+        fields = ['id', 'imagen', 'nombre', 'caracteristicas', 'detalle', 'precio_clp', 'precio_desde', 'anio', 'orden']
         read_only_fields = ['id', 'imagen', 'orden']
 
 
@@ -163,7 +163,7 @@ class TarjetaPanelSerializer(serializers.ModelSerializer):
             'nombre_mostrado', 'cargo_rubro', 'profesion', 'empresa', 'eslogan',
             'telefono', 'whatsapp', 'email_contacto', 'sitio_web',
             'instagram', 'facebook', 'linkedin', 'tiktok', 'youtube', 'x_twitter',
-            'sobre_texto', 'direccion', 'horario',
+            'sobre_texto', 'direccion', 'horario', 'zonas_cobertura',
             'mostrar_contacto', 'mostrar_redes', 'mostrar_sobre',
             'mostrar_ubicacion', 'mostrar_productos',
             'mostrar_noticias', 'mostrar_testimonios', 'mostrar_faq',

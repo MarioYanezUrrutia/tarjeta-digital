@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react'
 import { IconPin, IconUser, IconMap, IconContactCard } from '../icons'
 import { descargarVCard, iniciales, useDatosTarjeta } from '../useDatosTarjeta'
+import { textoPrecioProducto } from '../../constants/tarjetas'
 
 function IconWhatsApp({ className }) {
   return (
@@ -209,6 +210,9 @@ export default function PlantillaProBase({ tarjeta, tema }) {
                   )}
                   <div className="p-5">
                     <h3 className="font-semibold">{p.nombre}</h3>
+                    {textoPrecioProducto(p) && (
+                      <p className="mt-1 text-sm font-semibold" style={{ color: accent }}>{textoPrecioProducto(p)}</p>
+                    )}
                     {p.caracteristicas && <p className={`mt-1 text-sm ${textMutedClass}`}>{p.caracteristicas}</p>}
                     {p.detalle && <p className={`mt-2 text-sm ${textBodyClass}`}>{p.detalle}</p>}
                   </div>

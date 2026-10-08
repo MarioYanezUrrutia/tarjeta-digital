@@ -1,5 +1,5 @@
 import React from 'react'
-import { FirmaKabymur, SeccionFaq, SeccionNoticias, SeccionTestimonios, partirProducto, telLink, waLink } from './tanda1Comun'
+import { FirmaKabymur, SeccionFaq, SeccionNoticias, SeccionTestimonios, textosProducto, telLink, waLink } from './tanda1Comun'
 
 // "Tu llave rota, resuelta hoy." → destaca lo que viene tras la primera coma.
 function partirEslogan(texto) {
@@ -9,17 +9,17 @@ function partirEslogan(texto) {
 }
 
 /** Confianza (oficios): WhatsApp como acción principal, barra de zonas
- * (solo si la dirección trae comas), trabajos con precio y barra fija. */
+ * (salen de zonas_cobertura; sin zonas se oculta), trabajos con precio y barra fija. */
 export default function PlantillaConfianza({ tarjeta }) {
   const {
-    imagen, nombre_mostrado, cargo_rubro, eslogan, sobre_texto, direccion, horario,
+    imagen, nombre_mostrado, cargo_rubro, eslogan, sobre_texto, direccion, horario, zonas_cobertura,
     whatsapp, telefono, tipo, mostrar_sobre, mostrar_productos, mostrar_ubicacion,
   } = tarjeta
   const wa = waLink(whatsapp)
   const tel = telLink(telefono)
   const productos = mostrar_productos ? tarjeta.productos || [] : []
-  const zonas = mostrar_ubicacion && direccion && direccion.includes(',')
-    ? direccion.split(',').map((z) => z.trim()).filter(Boolean)
+  const zonas = mostrar_ubicacion && zonas_cobertura
+    ? zonas_cobertura.split(',').map((z) => z.trim()).filter(Boolean)
     : []
   const { antes, marca } = eslogan ? partirEslogan(eslogan) : { antes: cargo_rubro || nombre_mostrado, marca: '' }
   const bajada = eslogan ? cargo_rubro : ''
@@ -71,7 +71,7 @@ export default function PlantillaConfianza({ tarjeta }) {
           <h2>Trabajos que hago</h2>
           <div className="svc-grid">
             {productos.map((p) => {
-              const { desc, precio, extra } = partirProducto(p)
+              const { desc, precio, extra } = textosProducto(p)
               return (
                 <div className="svc" key={p.orden + p.nombre}>
                   <div className="ico" aria-hidden="true">{(p.nombre || '?').trim()[0]?.toUpperCase()}</div>
@@ -104,7 +104,7 @@ export default function PlantillaConfianza({ tarjeta }) {
 
       <footer className="footer" id="contacto">
         <b>{nombre_mostrado}</b>
-        {hayLugar && <div>{[zonas.length ? '' : direccion, horario].filter(Boolean).join(' · ')}</div>}
+        {hayLugar && <div>{[direccion, horario].filter(Boolean).join(' · ')}</div>}
         <FirmaKabymur />
       </footer>
 

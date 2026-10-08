@@ -1,5 +1,5 @@
 import React from 'react'
-import { FirmaKabymur, SeccionFaq, SeccionNoticias, SeccionTestimonios, sinProtocolo, waLink } from './tanda1Comun'
+import { FirmaKabymur, SeccionFaq, SeccionNoticias, SeccionTestimonios, sinProtocolo, textosProducto, waLink } from './tanda1Comun'
 
 // Resalta la última palabra del nombre con el acento.
 function NombreConAcento({ nombre }) {
@@ -10,8 +10,8 @@ function NombreConAcento({ nombre }) {
 }
 
 /** Vacío (moderna oscura): tipografía enorme, etiquetas mono numeradas y
- * grilla de trabajos con líneas finas. El producto no tiene año en el
- * modelo, así que cada ítem muestra su número de orden. */
+ * grilla de trabajos con líneas finas. Cada ítem muestra su año
+ * (`anio`) y, si no lo tiene, su número de orden. */
 export default function PlantillaVacio({ tarjeta }) {
   const {
     nombre_mostrado, cargo_rubro, eslogan, sobre_texto, whatsapp, email_contacto, instagram, linkedin, sitio_web,
@@ -54,19 +54,22 @@ export default function PlantillaVacio({ tarjeta }) {
         <section className="section" id="servicios">
           <span className="lbl">{numProductos} · Trabajo seleccionado</span>
           <div className="work">
-            {productos.map((p, i) => (
-              <div className="work-item" key={p.orden + p.nombre}>
-                <div className="meta">
-                  <span>{tipo === 'negocio' ? 'Servicio' : 'Trabajo'}</span>
-                  <span>{String(i + 1).padStart(2, '0')}</span>
+            {productos.map((p, i) => {
+              const { desc, extra, precio } = textosProducto(p)
+              return (
+                <div className="work-item" key={p.orden + p.nombre}>
+                  <div className="meta">
+                    <span>{precio || (tipo === 'negocio' ? 'Servicio' : 'Trabajo')}</span>
+                    <span>{p.anio || String(i + 1).padStart(2, '0')}</span>
+                  </div>
+                  <div>
+                    <h3>{p.nombre}</h3>
+                    {desc && <p>{desc}</p>}
+                    {extra && <p>{extra}</p>}
+                  </div>
                 </div>
-                <div>
-                  <h3>{p.nombre}</h3>
-                  {p.caracteristicas && <p>{p.caracteristicas}</p>}
-                  {p.detalle && <p>{p.detalle}</p>}
-                </div>
-              </div>
-            ))}
+              )
+            })}
           </div>
         </section>
       )}

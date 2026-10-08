@@ -1,4 +1,5 @@
 import React from 'react'
+import { textoPrecioProducto } from '../constants/tarjetas'
 import { IconPin, IconUser, IconMap, IconContactCard } from './icons'
 import { descargarVCard, iniciales, useDatosTarjeta } from './useDatosTarjeta'
 
@@ -118,6 +119,7 @@ export default function PlantillaC({ tarjeta }) {
                 )}
                 <div className="min-w-0">
                   <p className="truncate text-sm font-medium">{p.nombre}</p>
+                  {textoPrecioProducto(p) && <p className="text-xs font-semibold text-white">{textoPrecioProducto(p)}</p>}
                   {p.caracteristicas && (
                     <p className="text-xs text-gray-400">{p.caracteristicas}</p>
                   )}

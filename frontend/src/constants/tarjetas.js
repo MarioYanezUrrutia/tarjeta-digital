@@ -42,6 +42,20 @@ export function formatearCLP(monto) {
   return `$${formatoCLP.format(monto)}`
 }
 
+// Precio de un producto para mostrar: "$25.000" o "Desde $25.000". Cadena
+// vacía si no tiene precio (nunca "$0" ni texto de relleno).
+export function textoPrecioProducto(producto) {
+  const precio = producto && producto.precio_clp
+  if (!precio) return ''
+  return `${producto.precio_desde ? 'Desde ' : ''}${formatearCLP(precio)}`
+}
+
+// Para el input del editor: "25000" -> "25.000" mientras se escribe.
+export function formatearPrecioInput(texto) {
+  const digitos = String(texto ?? '').replace(/\D/g, '').replace(/^0+/, '')
+  return digitos ? formatoCLP.format(Number(digitos)) : ''
+}
+
 // Texto claro para el panel/editor — "Activa hasta 12 mar 2026" en vez de
 // solo "Activa", que no dice cuándo se corta.
 export function descripcionEstado(estado, fechaVencimiento) {

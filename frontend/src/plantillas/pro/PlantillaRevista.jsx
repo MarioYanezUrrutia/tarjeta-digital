@@ -1,5 +1,5 @@
 import React from 'react'
-import { FirmaKabymur, SeccionFaq, SeccionNoticias, partirProducto, sinProtocolo, waLink } from './tanda1Comun'
+import { FirmaKabymur, SeccionFaq, SeccionNoticias, textosProducto, sinProtocolo, waLink } from './tanda1Comun'
 
 // El texto tras la primera coma del titular va en cursiva de acento.
 function Titular({ texto }) {
@@ -74,7 +74,7 @@ export default function PlantillaRevista({ tarjeta }) {
           </div>
           <div className="programs">
             {productos.map((p, i) => {
-              const { desc, precio, extra } = partirProducto(p)
+              const { desc, precio, extra } = textosProducto(p)
               return (
                 <div className="program" key={p.orden + p.nombre}>
                   <div className="no">{String(i + 1).padStart(2, '0')}</div>

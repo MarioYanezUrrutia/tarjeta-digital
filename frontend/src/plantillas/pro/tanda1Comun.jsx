@@ -1,4 +1,5 @@
 import React from 'react'
+import { textoPrecioProducto } from '../../constants/tarjetas'
 import './tanda1.css'
 
 // Piezas compartidas por las 4 plantillas de la tanda 1 (Serena, Confianza,
@@ -21,14 +22,15 @@ export function sinProtocolo(url) {
   return (url || '').replace(/^https?:\/\//i, '').replace(/\/+$/, '')
 }
 
-// El modelo de producto no tiene precio: `caracteristicas` es la descripción
-// corta y `detalle` el texto libre. Si `detalle` es corto (ej. "$18.000",
-// "Desde $25.000") ocupa el lugar del precio; si es largo, pasa a ser texto.
-export function partirProducto(p) {
-  const desc = (p.caracteristicas || '').trim()
-  const detalle = (p.detalle || '').trim()
-  const corto = detalle.length > 0 && detalle.length <= 24
-  return { desc, precio: corto ? detalle : '', extra: !corto ? detalle : '' }
+// Textos de un producto: `caracteristicas` = descripción corta, `detalle` =
+// texto libre (siempre texto, nunca precio), `precio` sale de precio_clp
+// ("$25.000" / "Desde $25.000"; vacío si no tiene).
+export function textosProducto(p) {
+  return {
+    desc: (p.caracteristicas || '').trim(),
+    extra: (p.detalle || '').trim(),
+    precio: textoPrecioProducto(p),
+  }
 }
 
 export function FirmaKabymur({ className = '' }) {

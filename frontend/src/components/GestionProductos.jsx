@@ -6,18 +6,37 @@ import {
   obtenerProductos,
   reordenarProductos,
 } from '../api/productos'
+import { formatearPrecioInput, textoPrecioProducto } from '../constants/tarjetas'
 
 const TAMANO_MAXIMO_IMAGEN_BYTES = 5 * 1024 * 1024
 export const MAX_PRODUCTOS_BASICO = 10
 export const MAX_PRODUCTOS_PRO = 20
 
-const FORM_VACIO = { nombre: '', caracteristicas: '', detalle: '' }
+const FORM_VACIO = { nombre: '', caracteristicas: '', detalle: '', precio: '', precio_desde: false, anio: '' }
+
+// "25.000" (lo que muestra el input) -> "25000" (lo que espera el backend).
+const precioComoNumero = (texto) => String(texto ?? '').replace(/\D/g, '')
+
+// Cuerpo JSON del producto (sin imagen).
+function cuerpoProducto(campos) {
+  return {
+    nombre: campos.nombre,
+    caracteristicas: campos.caracteristicas,
+    detalle: campos.detalle,
+    precio_clp: precioComoNumero(campos.precio),
+    precio_desde: Boolean(campos.precio_desde),
+    anio: campos.anio ?? '',
+  }
+}
 
 function construirFormDataProducto(campos, archivoImagen) {
   const formData = new FormData()
   formData.append('nombre', campos.nombre ?? '')
   formData.append('caracteristicas', campos.caracteristicas ?? '')
   formData.append('detalle', campos.detalle ?? '')
+  formData.append('precio_clp', precioComoNumero(campos.precio))
+  formData.append('precio_desde', campos.precio_desde ? 'true' : 'false')
+  formData.append('anio', campos.anio ?? '')
   if (archivoImagen) formData.append('imagen', archivoImagen)
   return formData
 }
@@ -135,6 +154,9 @@ export default function GestionProductos({ tarjetaId, esPro }) {
       nombre: producto.nombre || '',
       caracteristicas: producto.caracteristicas || '',
       detalle: producto.detalle || '',
+      precio: producto.precio_clp ? formatearPrecioInput(producto.precio_clp) : '',
+      precio_desde: Boolean(producto.precio_desde),
+      anio: producto.anio ?? '',
     })
     setImagenArchivo(null)
     setImagenPreview(null)
@@ -171,7 +193,7 @@ export default function GestionProductos({ tarjetaId, esPro }) {
     setErrorGuardar(null)
     setGuardando(true)
     const esEdicion = formularioAbierto !== 'nuevo'
-    const cuerpo = imagenArchivo ? construirFormDataProducto(form, imagenArchivo) : form
+    const cuerpo = imagenArchivo ? construirFormDataProducto(form, imagenArchivo) : cuerpoProducto(form)
     const { status, datos } = esEdicion
       ? await actualizarProducto(formularioAbierto.id, cuerpo)
       : await crearProducto(tarjetaId, cuerpo)
@@ -253,6 +275,9 @@ export default function GestionProductos({ tarjetaId, esPro }) {
                 {producto.caracteristicas && (
                   <p className="truncate text-xs text-gray-500">{producto.caracteristicas}</p>
                 )}
+                {textoPrecioProducto(producto) && (
+                  <p className="text-xs font-medium text-gray-700">{textoPrecioProducto(producto)}</p>
+                )}
               </div>
             </div>
             <div className="flex items-center justify-end gap-1.5">
@@ -330,6 +355,40 @@ export default function GestionProductos({ tarjetaId, esPro }) {
               className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-gray-500 focus:outline-none"
             />
           </div>
+
+          <div>
+            <label className="mb-1 block text-sm font-medium text-gray-700">Precio (opcional)</label>
+            <div className="flex items-center gap-2">
+              <span className="text-sm text-gray-500">$</span>
+              <input
+                value={form.precio}
+                onChange={(e) => setForm((prev) => ({ ...prev, precio: formatearPrecioInput(e.target.value) }))}
+                inputMode="numeric"
+                maxLength={11}
+                className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-gray-500 focus:outline-none"
+              />
+            </div>
+            <label className="mt-2 flex cursor-pointer items-center gap-2 text-sm text-gray-700">
+              <input
+                type="checkbox"
+                checked={form.precio_desde}
+                onChange={(e) => setForm((prev) => ({ ...prev, precio_desde: e.target.checked }))}
+              />
+              Mostrar como "Desde"
+            </label>
+          </div>
+          {esPro && (
+            <div>
+              <label className="mb-1 block text-sm font-medium text-gray-700">Año (opcional)</label>
+              <input
+                value={form.anio}
+                onChange={(e) => setForm((prev) => ({ ...prev, anio: e.target.value.replace(/\D/g, '').slice(0, 4) }))}
+                inputMode="numeric"
+                className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-gray-500 focus:outline-none"
+              />
+              <p className="mt-1 text-xs text-gray-500">Útil para mostrar trabajos o proyectos</p>
+            </div>
+          )}
 
           {errorGuardar && <p className="text-sm text-red-600">{errorGuardar}</p>}
 

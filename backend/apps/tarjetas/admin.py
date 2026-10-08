@@ -31,7 +31,7 @@ class ClienteAdmin(admin.ModelAdmin):
 class ProductoInline(admin.TabularInline):
     model = Producto
     extra = 0
-    fields = ('nombre', 'orden', 'caracteristicas')
+    fields = ('nombre', 'orden', 'caracteristicas', 'precio_clp', 'precio_desde', 'anio')
 
 
 @admin.register(Tarjeta)

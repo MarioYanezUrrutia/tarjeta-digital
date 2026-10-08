@@ -41,7 +41,7 @@ const VALORES_INICIALES = {
   nombre_mostrado: '', cargo_rubro: '', profesion: '', empresa: '', eslogan: '', tipo: 'persona',
   telefono: '', whatsapp: '', email_contacto: '', sitio_web: '',
   instagram: '', facebook: '', linkedin: '', tiktok: '', youtube: '', x_twitter: '',
-  sobre_texto: '', direccion: '', horario: '',
+  sobre_texto: '', direccion: '', horario: '', zonas_cobertura: '',
   mostrar_contacto: true, mostrar_redes: true, mostrar_sobre: true,
   mostrar_ubicacion: true, mostrar_productos: true,
   mostrar_noticias: true, mostrar_testimonios: true, mostrar_faq: true,
@@ -439,6 +439,14 @@ export default function TarjetaEditor() {
         >
           <Campo label="Dirección" value={campos.direccion} onChange={(v) => actualizar('direccion', v)} />
           <Campo label="Horario" value={campos.horario} onChange={(v) => actualizar('horario', v)} />
+          {esPro && (
+            <Campo
+              label="Zonas o comunas que atiendes"
+              ayuda="Sepáralas con comas. Ej.: Las Condes, Vitacura, Ñuñoa"
+              value={campos.zonas_cobertura}
+              onChange={(v) => actualizar('zonas_cobertura', v.slice(0, 300))}
+            />
+          )}
         </Seccion>
 
         <Seccion

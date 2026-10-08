@@ -7,6 +7,7 @@ Django; un producto es "del usuario" si la tarjeta a la que pertenece lo es.
 Un producto de otra persona (o de una tarjeta que no existe) siempre da 404,
 sin distinguir los dos casos — mismo criterio que el resto del panel.
 """
+from django.core.exceptions import ValidationError
 from django.core.files.base import ContentFile
 from django.db.models import Max
 from rest_framework import status
@@ -17,7 +18,7 @@ from rest_framework.response import Response
 from apps.cuentas.auth import resolver_perfil_banexa
 
 from .imagenes import MAX_TAMANO_IMAGEN_BYTES, procesar_imagen_tarjeta
-from .models import Cliente, Producto
+from .models import PRECIO_MAXIMO_CLP, Cliente, Producto, validar_anio_producto
 from .panel_views import _obtener_tarjeta_del_cliente
 from .serializers import ProductoSerializer
 
@@ -63,6 +64,57 @@ def _obtener_producto_o_404(request, producto_id):
     return producto, None
 
 
+def _entero_o_none(valor, etiqueta):
+    """(entero | None, error). Vacío/None = sin dato. Acepta int o string de dígitos
+    (un multipart manda todo como string); rechaza decimales, texto y booleanos."""
+    if valor is None or (isinstance(valor, str) and not valor.strip()):
+        return None, None
+    if isinstance(valor, bool):
+        return None, f'{etiqueta} debe ser un número entero.'
+    if isinstance(valor, int):
+        return valor, None
+    if isinstance(valor, str):
+        texto = valor.strip()
+        if texto.lstrip('-').isdigit():
+            return int(texto), None
+    return None, f'{etiqueta} debe ser un número entero.'
+
+
+def _leer_precio_y_anio(data):
+    """Valida precio_clp / precio_desde / anio del body (solo los que vengan).
+    Devuelve ({campo: valor}, None) o (None, mensaje_de_error_en_español)."""
+    campos = {}
+    if 'precio_clp' in data:
+        precio, error = _entero_o_none(data['precio_clp'], 'El precio')
+        if error:
+            return None, error
+        if precio is not None and precio < 1:
+            return None, 'El precio debe ser mayor a 0.'
+        if precio is not None and precio > PRECIO_MAXIMO_CLP:
+            return None, 'El precio no puede superar $99.999.999.'
+        campos['precio_clp'] = precio
+    if 'precio_desde' in data:
+        valor = data['precio_desde']
+        if isinstance(valor, str):
+            valor = valor.strip().lower() in ('true', '1', 't')
+        campos['precio_desde'] = bool(valor)
+    if 'anio' in data:
+        anio, error = _entero_o_none(data['anio'], 'El año')
+        if error:
+            return None, error
+        if anio is not None:
+            try:
+                validar_anio_producto(anio)
+            except ValidationError as exc:
+                return None, exc.messages[0]
+        campos['anio'] = anio
+    if campos.get('precio_clp') is None:
+        # Sin precio no tiene sentido el "Desde".
+        if 'precio_clp' in campos:
+            campos['precio_desde'] = False
+    return campos, None
+
+
 def _procesar_imagen_producto(archivo):
     """(contenido_jpg, None) o (None, Response 400) — mismas reglas que la
     imagen de la tarjeta (Panel-2): <=5MB de entrada, recorte cuadrado
@@ -104,6 +156,10 @@ def productos_lista(request, tarjeta_id):
     if not nombre:
         return Response({'ok': False, 'error': 'El nombre es obligatorio.'}, status=status.HTTP_400_BAD_REQUEST)
 
+    extras, mensaje = _leer_precio_y_anio(request.data)
+    if mensaje:
+        return Response({'ok': False, 'error': mensaje}, status=status.HTTP_400_BAD_REQUEST)
+
     archivo_imagen = request.FILES.get('imagen')
     contenido_jpg = None
     if archivo_imagen is not None:
@@ -118,6 +174,7 @@ def productos_lista(request, tarjeta_id):
         caracteristicas=request.data.get('caracteristicas') or None,
         detalle=request.data.get('detalle') or None,
         orden=(orden_maximo or 0) + 1,
+        **extras,
     )
     if contenido_jpg is not None:
         producto.imagen.save(f'producto_{producto.id}.jpg', ContentFile(contenido_jpg), save=True)
@@ -130,7 +187,7 @@ def productos_lista(request, tarjeta_id):
 @api_view(['PATCH', 'DELETE'])
 @permission_classes([AllowAny])
 def producto_detalle(request, producto_id):
-    """PATCH /api/productos/<id>/ — edita nombre/caracteristicas/detalle y/o
+    """PATCH /api/productos/<id>/ — edita nombre/caracteristicas/detalle/precio/año y/o
     reemplaza la imagen (multipart). DELETE — borra el producto y su archivo
     de imagen físico, si tenía."""
     producto, error = _obtener_producto_o_404(request, producto_id)
@@ -144,6 +201,10 @@ def producto_detalle(request, producto_id):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
     # PATCH.
+    extras, mensaje = _leer_precio_y_anio(request.data)
+    if mensaje:
+        return Response({'ok': False, 'error': mensaje}, status=status.HTTP_400_BAD_REQUEST)
+
     archivo_imagen = request.FILES.get('imagen')
     if archivo_imagen is not None:
         contenido_jpg, error = _procesar_imagen_producto(archivo_imagen)
@@ -156,6 +217,8 @@ def producto_detalle(request, producto_id):
     for campo in ('nombre', 'caracteristicas', 'detalle'):
         if campo in request.data:
             setattr(producto, campo, request.data[campo])
+    for campo, valor in extras.items():
+        setattr(producto, campo, valor)
 
     producto.save()
     return Response(ProductoSerializer(producto, context={'request': request}).data)

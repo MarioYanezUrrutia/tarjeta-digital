@@ -47,8 +47,9 @@ function Estrellas({ n }) {
   return <div className="t1-estrellas" aria-label={`${llenas} de 5`}>{'★'.repeat(llenas)}{'☆'.repeat(5 - llenas)}</div>
 }
 
-export function SeccionNoticias({ tarjeta }) {
-  const { mostrar_noticias, noticias = [] } = tarjeta
+export function SeccionNoticias({ tarjeta, desde = 0 }) {
+  const { mostrar_noticias } = tarjeta
+  const noticias = (tarjeta.noticias || []).slice(desde)
   if (!mostrar_noticias || noticias.length === 0) return null
   return (
     <section className="t1-extra" id="noticias">

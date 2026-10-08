@@ -155,6 +155,39 @@ const TEMAS = {
     cargoClassName: 'text-[#4b4b4b]',
     botonClassName: 'rounded-[8px] border-2 border-[#121212] bg-[#b9a6ff] text-[#121212]',
   },
+  // Pro 2.0, tanda 3 — paletas de plantillas/pro/tanda3.css.
+  balance: {
+    fontFamily: "'Hanken Grotesk', ui-sans-serif, system-ui, sans-serif",
+    contenedorClassName: 'bg-[#f5f6f2] text-[#0f1a16] border border-[#d6dcd6]',
+    avatarClassName: 'rounded-[4px] border-2 border-[#0f6b4f] bg-white text-[#0f6b4f]',
+    nombreClassName: 'text-[#0f1a16] font-extrabold',
+    cargoClassName: 'text-[#56615b]',
+    botonClassName: 'rounded-[6px] bg-[#0f6b4f] text-white',
+  },
+  miga: {
+    fontFamily: "'Caprasimo', ui-serif, Georgia, serif",
+    contenedorClassName: 'bg-[#fff3e2] text-[#3a2315] border border-[#ebd9c2]',
+    avatarClassName: 'bg-[#f4d27e] text-[#c7385b]',
+    nombreClassName: 'text-[#c7385b]',
+    cargoClassName: 'text-[#765a48]',
+    botonClassName: 'rounded-full bg-[#c7385b] text-white',
+  },
+  forma: {
+    fontFamily: "'League Spartan', ui-sans-serif, system-ui, sans-serif",
+    contenedorClassName: 'bg-[#f2ebdd] text-[#161616] border-2 border-[#161616]',
+    avatarClassName: 'rounded-full bg-[#d7392b] text-white',
+    nombreClassName: 'text-[#161616] font-extrabold lowercase',
+    cargoClassName: 'text-[#57534c]',
+    botonClassName: 'rounded-none bg-[#161616] text-[#fffdf8]',
+  },
+  tinta: {
+    fontFamily: "'Big Shoulders Display', Impact, ui-sans-serif, sans-serif",
+    contenedorClassName: 'bg-[#f3eee3] text-[#1c1a2e] border border-[#1c1a2e]',
+    avatarClassName: 'bg-[#ff48b0] text-[#2f4bff]',
+    nombreClassName: 'text-[#2f4bff] font-black uppercase',
+    cargoClassName: 'text-[#55526a]',
+    botonClassName: 'rounded-none border border-[#1c1a2e] bg-[#ff48b0] text-[#1c1a2e]',
+  },
 }
 
 /** Miniatura representativa (~140px) de una plantilla, con datos de

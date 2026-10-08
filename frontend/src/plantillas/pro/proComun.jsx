@@ -88,3 +88,14 @@ export function Estrellas({ n }) {
   if (!llenas) return null
   return <span aria-label={`${llenas} de 5`}>{'★'.repeat(llenas)}</span>
 }
+
+const MESES = ['ENE', 'FEB', 'MAR', 'ABR', 'MAY', 'JUN', 'JUL', 'AGO', 'SEP', 'OCT', 'NOV', 'DIC']
+
+// "2026-11-12" -> { dia: '12', mes: 'NOV' }. Se lee del texto, sin pasar por Date,
+// para que la zona horaria no corra el día. null si no hay fecha válida.
+export function partesFecha(fecha) {
+  const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(fecha || '')
+  if (!m) return null
+  const mes = MESES[Number(m[2]) - 1]
+  return mes ? { dia: m[3], mes } : null
+}

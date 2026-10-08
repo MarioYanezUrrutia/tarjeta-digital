@@ -17,6 +17,10 @@ export const PLANTILLA_LABEL = {
   huella: 'Pro — Huella',
   lustre: 'Pro — Lustre',
   mosaico: 'Pro — Mosaico',
+  balance: 'Pro — Balance',
+  miga: 'Pro — Miga',
+  forma: 'Pro — Forma',
+  tinta: 'Pro — Tinta',
 }
 
 export const ESTADO_LABEL = {
@@ -94,4 +98,8 @@ export const PLANTILLAS_PRO_DISPONIBLES = [
   { valor: 'huella', nombre: 'Huella', descripcion: 'Mascotas: colores alegres, servicios como tickets y reseñas en fichas.' },
   { valor: 'lustre', nombre: 'Lustre', descripcion: 'Lujo metálico: fondo oscuro, dorado y carta con puntos guía.' },
   { valor: 'mosaico', nombre: 'Mosaico', descripcion: 'Bento: cada dato en su propia tarjeta de colores.' },
+  { valor: 'balance', nombre: 'Balance', descripcion: 'Consultoría: verde esmeralda, resumen de planes tipo libro contable.' },
+  { valor: 'miga', nombre: 'Miga', descripcion: 'Comida por encargo: precios por porción o tamaño y pasos para encargar.' },
+  { valor: 'forma', nombre: 'Forma', descripcion: 'Talleres: círculo, cuadrado y triángulo en rojo, azul y amarillo.' },
+  { valor: 'tinta', nombre: 'Tinta', descripcion: 'Eventos y música: dos tintas superpuestas, trama y grano de papel.' },
 ]

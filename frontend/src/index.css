@@ -1,9 +1,11 @@
 /* Fuentes de las pieles Pro (Fase 6, Tanda 2: plantillas/pro/temas.js) y de
-   las plantillas de las tandas 1 y 2 (Space Grotesk, JetBrains Mono, Fraunces
+   las plantillas de las tandas 1 a 3 (Space Grotesk, JetBrains Mono, Fraunces
    itálica/900, Playfair itálica, Instrument Serif, Figtree, Gabarito, Bodoni
-   Moda, Jost, Unbounded, Schibsted Grotesk, DM Mono; solo los pesos usados). Un solo @import combinado para no repetir
+   Moda, Jost, Unbounded, Schibsted Grotesk, DM Mono, Hanken Grotesk, IBM Plex Mono,
+   Caprasimo, Albert Sans, Caveat, League Spartan, Lexend, Big Shoulders
+   Display, Archivo, Space Mono; solo los pesos usados). Un solo @import combinado para no repetir
    handshakes con fonts.googleapis.com. */
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Poppins:wght@400;500;600;700&family=IBM+Plex+Sans:wght@300;400;500;600;700&family=Fraunces:ital,opsz,wght@0,9..144,400..900;1,9..144,400..900&family=Nunito:wght@400;600;700&family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,500&family=Libre+Baskerville:wght@400;700&family=Space+Grotesk:wght@400;500;700&family=JetBrains+Mono:wght@400;500;600&family=Instrument+Serif:ital@0;1&family=Figtree:wght@400;500;600;700&family=Gabarito:wght@800;900&family=Bodoni+Moda:ital,wght@0,400;0,600;1,400;1,500&family=Jost:wght@300;400;500&family=Unbounded:wght@700;800&family=Schibsted+Grotesk:wght@400;600;700&family=DM+Mono:wght@400&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Poppins:wght@400;500;600;700&family=IBM+Plex+Sans:wght@300;400;500;600;700&family=Fraunces:ital,opsz,wght@0,9..144,400..900;1,9..144,400..900&family=Nunito:wght@400;600;700&family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,500&family=Libre+Baskerville:wght@400;700&family=Space+Grotesk:wght@400;500;700&family=JetBrains+Mono:wght@400;500;600&family=Instrument+Serif:ital@0;1&family=Figtree:wght@400;500;600;700&family=Gabarito:wght@800;900&family=Bodoni+Moda:ital,wght@0,400;0,600;1,400;1,500&family=Jost:wght@300;400;500&family=Unbounded:wght@700;800&family=Schibsted+Grotesk:wght@400;600;700&family=DM+Mono:wght@400&family=Hanken+Grotesk:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500&family=Caprasimo&family=Albert+Sans:wght@400;600;700&family=Caveat:wght@700&family=League+Spartan:wght@700;800;900&family=Lexend:wght@400;500;600&family=Big+Shoulders+Display:wght@800;900&family=Archivo:wght@400;600;700&family=Space+Mono:wght@400;700&display=swap');
 
 @import "tailwindcss";
 

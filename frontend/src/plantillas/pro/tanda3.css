@@ -1,0 +1,281 @@
+/* Plantillas Pro — tanda 3 (Balance, Miga, Forma, Tinta).
+   Portado de la referencia visual aprobada (frontend/.referencia-tanda3.html).
+   Las fuentes se cargan una sola vez en src/index.css. Las reglas genéricas
+   (.t1-extra, .t1-sign, reset .pro-t1) vienen de tanda1.css; las filas de
+   producto (.t1-filas) y .grainy, de tanda2.css. */
+
+/* ============ BALANCE · Consultoría y servicios para pymes ============ */
+.balance {
+  --paper: #F5F6F2; --white: #FFFFFF; --ink: #0F1A16; --muted: #56615B;
+  --emerald: #0F6B4F; --mint: #E1F0E8; --line: #D6DCD6;
+  background: var(--paper); color: var(--ink);
+  font-family: "Hanken Grotesk", system-ui, sans-serif; font-size: 15.5px; line-height: 1.55;
+}
+.balance .b-top { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; padding: 18px 24px; border-bottom: 1px solid var(--line); background: var(--white); }
+.balance .b-brand { display: inline-flex; align-items: center; gap: 10px; font-weight: 800; font-size: 20px; letter-spacing: -0.01em; }
+.balance .b-mark { width: 22px; height: 22px; border: 2px solid var(--emerald); border-radius: 4px; position: relative; flex-shrink: 0; }
+.balance .b-mark::before, .balance .b-mark::after { content: ""; position: absolute; left: 3px; right: 3px; height: 2px; background: var(--emerald); }
+.balance .b-mark::before { top: 5px; }
+.balance .b-mark::after { top: 11px; }
+.balance .b-nav { display: flex; gap: 18px; font-size: 14px; color: var(--muted); }
+.balance .b-nav a { color: inherit; }
+@media (max-width: 560px) { .balance .b-nav { display: none; } }
+.balance .b-hero { display: grid; gap: 32px; grid-template-columns: 1fr; padding: 44px 24px 52px; align-items: center; }
+@media (min-width: 780px) { .balance .b-hero { grid-template-columns: 1.15fr 1fr; padding: 56px 40px 64px; } }
+.balance .b-eyebrow { font-family: "IBM Plex Mono", monospace; font-size: 12px; letter-spacing: .08em; text-transform: uppercase; color: var(--emerald); display: inline-block; margin-bottom: 16px; }
+.balance h1 { font-weight: 800; font-size: clamp(2.2rem, 6vw, 3.5rem); line-height: 1.02; letter-spacing: -0.03em; margin: 0 0 18px; text-wrap: balance; }
+.balance .b-em { color: var(--emerald); }
+.balance .b-lead { font-size: 17px; color: var(--muted); max-width: 46ch; margin: 0 0 26px; }
+.balance .b-actions { display: flex; flex-wrap: wrap; gap: 16px; align-items: center; margin-bottom: 22px; }
+.balance .b-btn { background: var(--emerald); color: #fff; text-decoration: none; font-weight: 600; padding: 14px 22px; border-radius: 8px; }
+.balance .b-link { color: var(--ink); text-decoration: none; font-weight: 600; }
+.balance .b-fine { margin: 0; font-size: 13px; color: var(--muted); padding-top: 16px; border-top: 1px solid var(--line); max-width: 46ch; }
+.balance .b-ledger { margin: 0; background: var(--white); border: 1px solid var(--line); border-radius: 12px; padding: 22px 22px 18px; box-shadow: 0 18px 40px rgba(15, 26, 22, .08); font-family: "IBM Plex Mono", monospace; }
+.balance .b-ledger figcaption { display: flex; justify-content: space-between; gap: 10px; flex-wrap: wrap; font-size: 11.5px; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); padding-bottom: 12px; border-bottom: 1px solid var(--line); margin-bottom: 6px; }
+.balance .b-ledger dl { margin: 0; }
+.balance .b-ledger dl div { display: flex; justify-content: space-between; gap: 12px; padding: 10px 0; border-bottom: 1px dashed var(--line); font-size: 14px; }
+.balance .b-ledger dt { color: var(--muted); }
+.balance .b-ledger dt { overflow-wrap: anywhere; }
+.balance .b-ledger dd { margin: 0; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.balance .b-ledger .b-total { border-bottom: none; padding-top: 14px; }
+.balance .b-ledger .b-total dt { color: var(--ink); font-weight: 500; }
+.balance .b-ledger .b-total dd { font-weight: 600; color: var(--emerald); border-bottom: 4px double var(--emerald); padding-bottom: 2px; }
+.balance .b-ledger-note { margin: 12px 0 0; font-size: 12px; color: var(--emerald); background: var(--mint); padding: 8px 10px; border-radius: 6px; }
+.balance .b-plans, .balance .b-steps, .balance .b-faq { padding: 48px 24px; border-top: 1px solid var(--line); }
+@media (min-width: 780px) { .balance .b-plans, .balance .b-steps, .balance .b-faq { padding-inline: 40px; } }
+.balance h2 { font-weight: 800; font-size: clamp(1.8rem, 4.5vw, 2.4rem); letter-spacing: -0.025em; margin: 0 0 8px; line-height: 1.1; }
+.balance .b-sub { margin: 0 0 24px; color: var(--muted); }
+.balance .b-plan-grid { display: grid; gap: 14px; grid-template-columns: 1fr; }
+@media (min-width: 720px) { .balance .b-plan-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+.balance .b-plan { background: var(--white); border: 1px solid var(--line); border-radius: 12px; padding: 22px; display: grid; gap: 10px; align-content: start; }
+.balance .b-plan h3 { margin: 0; font-size: 18px; font-weight: 700; }
+.balance .b-price { margin: 0; font-family: "IBM Plex Mono", monospace; font-size: 24px; font-weight: 500; font-variant-numeric: tabular-nums; }
+.balance .b-price span { font-family: "Hanken Grotesk", sans-serif; font-size: 13px; color: var(--muted); display: block; font-weight: 500; }
+.balance .b-price small { font-size: 13px; color: var(--muted); font-family: "Hanken Grotesk", sans-serif; margin-left: 4px; }
+.balance .b-plan .t1-filas { list-style: none; margin: 6px 0 0; padding: 12px 0 0; border-top: 1px solid var(--line); display: grid; gap: 8px; font-size: 14.5px; }
+.balance .b-plan .t1-filas li { justify-content: flex-start; gap: 8px; }
+.balance .b-plan .t1-filas li b { margin-left: auto; font-family: "IBM Plex Mono", monospace; font-weight: 500; }
+.balance .b-plan .b-text { margin: 0; color: var(--muted); font-size: 14px; }
+.balance .b-plan ul { list-style: none; margin: 6px 0 0; padding: 12px 0 0; border-top: 1px solid var(--line); display: grid; gap: 8px; font-size: 14.5px; }
+.balance .b-plan li { display: grid; grid-template-columns: 18px minmax(0, 1fr); gap: 8px; align-items: start; }
+.balance .b-plan li::before { content: ""; width: 11px; height: 6px; margin-top: 6px; border-left: 2px solid var(--emerald); border-bottom: 2px solid var(--emerald); transform: rotate(-45deg); }
+.balance .b-steps ol { list-style: none; margin: 24px 0 0; padding: 0; counter-reset: paso; display: grid; grid-template-columns: 1fr; border-top: 2px solid var(--ink); }
+@media (min-width: 720px) { .balance .b-steps ol.n2 { grid-template-columns: repeat(2, minmax(0, 1fr)); } .balance .b-steps ol.n3 { grid-template-columns: repeat(3, minmax(0, 1fr)); } .balance .b-steps ol.n4 { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+.balance .b-steps li { counter-increment: paso; padding: 18px 0; border-bottom: 1px solid var(--line); }
+@media (min-width: 720px) {
+  .balance .b-steps li { border-bottom: none; border-right: 1px solid var(--line); padding: 20px 20px 4px; }
+  .balance .b-steps li:first-child { padding-left: 0; }
+  .balance .b-steps li:last-child { border-right: none; }
+}
+.balance .b-steps li::before { content: "0" counter(paso); font-family: "IBM Plex Mono", monospace; font-size: 13px; color: var(--emerald); display: block; margin-bottom: 10px; }
+.balance .b-steps h3 { margin: 0 0 6px; font-size: 18px; }
+.balance .b-steps p { margin: 0; color: var(--muted); font-size: 14.5px; }
+.balance .b-faq h2 { margin-bottom: 12px; }
+.balance .b-faq details { border-bottom: 1px solid var(--line); padding: 16px 0; }
+.balance .b-faq summary { cursor: pointer; font-weight: 600; font-size: 17px; list-style: none; display: flex; justify-content: space-between; gap: 12px; }
+.balance .b-faq summary::-webkit-details-marker { display: none; }
+.balance .b-faq summary::after { content: "+"; font-family: "IBM Plex Mono", monospace; color: var(--emerald); font-size: 20px; line-height: 1; }
+.balance .b-faq details[open] summary::after { content: "−"; }
+.balance .b-faq summary:focus-visible { outline: 2px solid var(--emerald); outline-offset: 4px; }
+.balance .b-faq details p { margin: 10px 0 0; color: var(--muted); max-width: 60ch; }
+.balance .b-quote { background: var(--emerald); color: #fff; padding: 52px 24px; }
+@media (min-width: 780px) { .balance .b-quote { padding-inline: 40px; } }
+.balance .b-quote blockquote { margin: 0 0 14px; font-weight: 600; font-size: clamp(1.5rem, 4vw, 2.1rem); line-height: 1.25; letter-spacing: -0.015em; max-width: 30ch; }
+.balance .b-quote p { margin: 0; font-family: "IBM Plex Mono", monospace; font-size: 12.5px; opacity: .85; }
+.balance .b-foot { background: var(--ink); color: var(--paper); padding: 36px 24px 26px; }
+.balance .b-foot-big { overflow-wrap: anywhere; font-weight: 800; font-size: clamp(4rem, 18vw, 8.5rem); line-height: .85; letter-spacing: -0.05em; margin-bottom: 20px; }
+.balance .b-foot-grid { display: grid; gap: 4px; font-size: 14px; opacity: .8; }
+@media (min-width: 680px) { .balance .b-foot-grid { grid-template-columns: repeat(3, auto); justify-content: start; gap: 28px; } }
+.balance .b-foot-grid p { margin: 0; }
+.balance .b-sign { margin: 20px 0 0; font-family: "IBM Plex Mono", monospace; font-size: 11.5px; opacity: .55; }
+
+/* ============ MIGA · Comida por encargo ============ */
+.miga {
+  --cream: #FFF3E2; --paper: #FFFBF5; --cocoa: #3A2315; --muted: #765A48;
+  --berry: #C7385B; --butter: #F4D27E; --leaf: #8FA96E; --line: #EBD9C2;
+  background: var(--cream); color: var(--cocoa);
+  font-family: "Albert Sans", system-ui, sans-serif; font-size: 15.5px; line-height: 1.55;
+}
+.miga .g-top { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; padding: 20px 24px 0; }
+.miga .g-brand { font-family: "Caprasimo", Georgia, serif; font-size: 32px; line-height: 1; color: var(--berry); }
+.miga .g-chip { font-size: 12.5px; font-weight: 600; background: var(--paper); border: 1.5px solid var(--line); border-radius: 999px; padding: 5px 12px; }
+.miga .g-hero { display: grid; gap: 24px; grid-template-columns: 1fr; padding: 28px 24px 60px; align-items: center; }
+@media (min-width: 780px) { .miga .g-hero { grid-template-columns: 1.15fr 1fr; padding: 36px 40px 68px; } }
+.miga h1 { font-family: "Caprasimo", Georgia, serif; font-weight: 400; font-size: clamp(2.3rem, 6.5vw, 3.8rem); line-height: 1.03; margin: 0 0 16px; text-wrap: balance; }
+.miga .g-em { color: var(--berry); }
+.miga .g-lead { font-size: 17px; color: var(--muted); max-width: 44ch; margin: 0 0 24px; }
+.miga .g-btn { display: inline-block; background: var(--berry); color: #fff; text-decoration: none; font-weight: 700; padding: 15px 26px; border-radius: 999px; box-shadow: 0 4px 0 #8F2340; transition: transform .1s ease, box-shadow .1s ease; }
+.miga .g-btn:active { transform: translateY(3px); box-shadow: 0 1px 0 #8F2340; }
+.miga .g-visual { position: relative; justify-self: center; width: min(100%, 320px); }
+.miga .g-cake { width: 100%; height: auto; display: block; }
+.miga .g-photo { width: 100%; aspect-ratio: 1; border-radius: 50%; overflow: hidden; border: 2px solid var(--line); box-shadow: 0 0 0 10px #fff, 0 0 0 12px var(--line); }
+.miga .g-photo img { width: 100%; height: 100%; object-fit: cover; }
+.miga .g-note { position: absolute; right: 0; bottom: 6px; margin: 0; font-family: "Caveat", cursive; font-size: 24px; font-weight: 700; line-height: 1.1; color: var(--cocoa); transform: rotate(-6deg); background: var(--butter); padding: 4px 12px; border-radius: 6px; max-width: 80%; }
+.miga .g-scallop {
+  -webkit-mask: radial-gradient(circle 12px at 12px 0, transparent 11.5px, #000 12px) 0 0 / 24px 100% repeat-x;
+          mask: radial-gradient(circle 12px at 12px 0, transparent 11.5px, #000 12px) 0 0 / 24px 100% repeat-x;
+}
+.miga .g-menu { background: var(--paper); padding: 48px 24px 48px; }
+.miga h2 { font-family: "Caprasimo", Georgia, serif; font-weight: 400; font-size: clamp(1.9rem, 5vw, 2.6rem); margin: 0 0 22px; line-height: 1.05; }
+.miga .g-cards { display: grid; gap: 16px; grid-template-columns: 1fr; }
+@media (min-width: 720px) { .miga .g-cards { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+.miga .g-card { background: var(--cream); border-radius: 20px; padding: 20px; display: grid; gap: 10px; align-content: start; border: 1.5px solid var(--line); }
+.miga .g-card h3 { margin: 0; font-family: "Caprasimo", Georgia, serif; font-weight: 400; font-size: 23px; }
+.miga .g-card > p { margin: 0; color: var(--muted); font-size: 14.5px; }
+.miga .g-rows { list-style: none; margin: 4px 0 0; padding: 0; display: grid; }
+.miga .g-rows li { display: flex; justify-content: space-between; gap: 10px; padding: 7px 0; border-bottom: 1px dotted #D9C2A4; font-size: 14px; font-variant-numeric: tabular-nums; }
+.miga .g-rows li b { font-weight: 600; white-space: nowrap; }
+.miga .g-from small { font-weight: 500; font-size: 13px; color: var(--muted); margin-left: 6px; }
+.miga .g-from { margin: 2px 0 0; font-weight: 800; color: var(--berry); font-size: 18px; }
+.miga .g-steps { padding: 44px 24px; background: var(--butter); }
+.miga .g-steps ol { list-style: none; margin: 0; padding: 0; display: grid; gap: 14px; grid-template-columns: 1fr; }
+@media (min-width: 720px) { .miga .g-steps ol { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+.miga .g-steps li { background: var(--paper); border-radius: 20px; padding: 18px; display: grid; gap: 6px; }
+.miga .g-steps li span { width: 36px; height: 36px; border-radius: 50%; background: var(--berry); color: #fff; display: grid; place-items: center; font-family: "Caprasimo", Georgia, serif; font-size: 18px; }
+.miga .g-steps h3 { margin: 0; font-size: 18px; font-weight: 700; }
+.miga .g-steps p { margin: 0; color: var(--muted); font-size: 14.5px; }
+.miga .g-info { display: grid; gap: 20px; grid-template-columns: 1fr; padding: 32px 24px; background: var(--paper); }
+@media (min-width: 720px) { .miga .g-info { grid-template-columns: 1fr 2fr; } }
+.miga .g-lbl { display: block; font-size: 12px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--berry); margin-bottom: 6px; }
+.miga .g-info p { margin: 0; font-weight: 600; font-size: 17px; }
+.miga .g-zones { display: flex; flex-wrap: wrap; gap: 8px; }
+.miga .g-zones span { background: var(--cream); border: 1.5px solid var(--line); border-radius: 999px; padding: 4px 12px; font-weight: 600; font-size: 14px; }
+.miga .g-quote { padding: 52px 24px; text-align: center; }
+.miga .g-quote blockquote { margin: 0 auto 12px; font-family: "Caprasimo", Georgia, serif; font-size: clamp(1.6rem, 4.5vw, 2.3rem); line-height: 1.15; max-width: 22ch; }
+.miga .g-quote p { margin: 0; color: var(--muted); font-size: 14px; }
+.miga .g-foot { background: var(--cocoa); color: var(--cream); padding: 36px 24px 26px; }
+.miga .g-foot-big { overflow-wrap: anywhere; font-family: "Caprasimo", Georgia, serif; font-size: clamp(4.5rem, 20vw, 9rem); line-height: .85; color: var(--butter); margin-bottom: 16px; }
+.miga .g-foot p { margin: 0; font-size: 14px; opacity: .85; }
+.miga .g-sign { margin-top: 16px !important; font-size: 12px !important; opacity: .55 !important; }
+
+/* ============ FORMA · Academias y talleres (Bauhaus) ============ */
+.forma {
+  --paper: #F2EBDD; --white: #FFFDF8; --ink: #161616; --muted: #57534C;
+  --red: #D7392B; --blue: #1F4E9C; --yellow: #F2B630;
+  background: var(--paper); color: var(--ink);
+  font-family: "Lexend", system-ui, sans-serif; font-size: 15px; line-height: 1.6;
+}
+.forma .f-top { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 18px 24px; border-bottom: 3px solid var(--ink); }
+.forma .f-brand { display: inline-flex; align-items: center; gap: 10px; font-family: "League Spartan", sans-serif; font-weight: 800; font-size: 21px; letter-spacing: -0.01em; text-transform: lowercase; }
+.forma .f-dot { width: 16px; height: 16px; border-radius: 50%; background: var(--red); display: inline-block; }
+.forma .f-tag { font-size: 13px; font-weight: 500; }
+.forma .f-hero { display: grid; gap: 28px; grid-template-columns: 1fr; padding: 32px 24px 48px; align-items: center; }
+@media (min-width: 780px) { .forma .f-hero { grid-template-columns: 1fr 1.1fr; padding: 44px 40px 56px; } }
+.forma .f-poster { position: relative; width: min(100%, 340px); aspect-ratio: 1; justify-self: center; background: var(--white); border: 3px solid var(--ink); overflow: hidden; }
+.forma .f-poster span { position: absolute; display: block; }
+.forma .f-circle { width: 62%; height: 62%; border-radius: 50%; background: var(--red); left: 7%; top: 7%; mix-blend-mode: multiply; }
+.forma .f-quarter { width: 58%; height: 58%; background: var(--blue); right: 0; bottom: 0; border-top-left-radius: 100%; mix-blend-mode: multiply; }
+.forma .f-tri { width: 42%; height: 38%; background: var(--yellow); right: 9%; top: 9%; clip-path: polygon(50% 0, 100% 100%, 0 100%); mix-blend-mode: multiply; }
+.forma .f-bar { height: 7%; width: 72%; background: var(--ink); left: 0; top: 64%; }
+.forma .f-square { width: 16%; height: 16%; border: 3px solid var(--ink); left: 12%; bottom: 8%; }
+.forma .f-eyebrow { display: inline-block; font-size: 12px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--blue); margin-bottom: 14px; }
+.forma h1 em { font-style: normal; color: var(--red); }
+.forma h1 { font-family: "League Spartan", sans-serif; font-weight: 800; font-size: clamp(2.3rem, 6.5vw, 3.8rem); line-height: .98; letter-spacing: -0.025em; margin: 0 0 16px; text-wrap: balance; }
+.forma .f-lead { font-size: 16.5px; color: var(--muted); margin: 0 0 24px; max-width: 44ch; }
+.forma .f-btn { display: inline-block; background: var(--ink); color: var(--white); text-decoration: none; font-weight: 600; padding: 14px 22px; box-shadow: 5px 5px 0 var(--red); transition: transform .1s ease, box-shadow .1s ease; }
+.forma .f-btn:active { transform: translate(5px, 5px); box-shadow: 0 0 0 var(--red); }
+.forma h2 { font-family: "League Spartan", sans-serif; font-weight: 800; font-size: clamp(2rem, 5vw, 2.8rem); letter-spacing: -0.02em; margin: 0 0 22px; text-transform: lowercase; line-height: 1; }
+.forma .f-courses { padding: 44px 24px; border-top: 3px solid var(--ink); }
+.forma .f-grid { display: grid; grid-template-columns: 1fr; border-top: 3px solid var(--ink); border-left: 3px solid var(--ink); }
+@media (min-width: 720px) { .forma .f-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } .forma .f-grid.n2 { grid-template-columns: repeat(2, minmax(0, 1fr)); } .forma .f-grid.n1 { grid-template-columns: minmax(0, 1fr); } }
+.forma .f-course { background: var(--white); padding: 22px 20px; display: grid; gap: 10px; align-content: start; border-right: 3px solid var(--ink); border-bottom: 3px solid var(--ink); }
+.forma .f-shape { width: 44px; height: 44px; display: block; }
+.forma .f-shape.circle { border-radius: 50%; background: var(--red); }
+.forma .f-shape.square { background: var(--blue); }
+.forma .f-shape.tri { background: var(--yellow); clip-path: polygon(50% 0, 100% 100%, 0 100%); }
+.forma .f-course h3 { margin: 0; font-family: "League Spartan", sans-serif; font-weight: 700; font-size: 22px; letter-spacing: -0.01em; line-height: 1.1; }
+.forma .f-course .t1-filas { color: var(--muted); font-size: 14.5px; gap: 2px; }
+.forma .f-course .f-text { margin: 0; color: var(--muted); font-size: 14.5px; }
+.forma .f-price { margin: 6px 0 0; font-family: "League Spartan", sans-serif; font-weight: 800; font-size: 24px; font-variant-numeric: tabular-nums; }
+.forma .f-price small { font-family: "Lexend", sans-serif; font-weight: 400; font-size: 13px; color: var(--muted); }
+.forma .f-news { margin: 0 24px 44px; background: var(--blue); color: var(--white); padding: 24px 22px; display: grid; gap: 6px; position: relative; overflow: hidden; }
+.forma .f-news::after { content: ""; position: absolute; right: -36px; top: -36px; width: 130px; height: 130px; border-radius: 50%; background: var(--yellow); }
+.forma .f-news .f-eyebrow { color: var(--yellow); margin-bottom: 0; position: relative; z-index: 1; }
+.forma .f-news h3 { margin: 0; font-family: "League Spartan", sans-serif; font-weight: 800; font-size: 26px; position: relative; z-index: 1; max-width: 70%; line-height: 1.05; }
+.forma .f-news p { margin: 0; max-width: 46ch; position: relative; z-index: 1; }
+.forma .f-quote { padding: 44px 24px; border-top: 3px solid var(--ink); display: grid; gap: 10px; }
+.forma .f-quote blockquote { margin: 0; font-family: "League Spartan", sans-serif; font-weight: 700; font-size: clamp(1.7rem, 4.5vw, 2.4rem); line-height: 1.1; letter-spacing: -0.015em; max-width: 22ch; }
+.forma .f-quote p { margin: 0; color: var(--muted); font-size: 14px; }
+.forma .f-foot { background: var(--ink); color: var(--white); padding: 32px 24px 24px; }
+.forma .f-foot-shapes { display: flex; gap: 10px; margin-bottom: 14px; }
+.forma .f-foot-shapes i { width: 24px; height: 24px; display: block; }
+.forma .f-foot-shapes i:nth-child(1) { border-radius: 50%; background: var(--red); }
+.forma .f-foot-shapes i:nth-child(2) { background: var(--blue); }
+.forma .f-foot-shapes i:nth-child(3) { background: var(--yellow); clip-path: polygon(50% 0, 100% 100%, 0 100%); }
+.forma .f-foot-big { overflow-wrap: anywhere; font-family: "League Spartan", sans-serif; font-weight: 900; font-size: clamp(4rem, 19vw, 9rem); line-height: .85; letter-spacing: -0.04em; text-transform: lowercase; margin-bottom: 14px; }
+.forma .f-foot p { margin: 0; font-size: 14px; opacity: .85; }
+.forma .f-sign { margin-top: 14px !important; font-size: 12px !important; opacity: .55 !important; }
+
+/* ============ TINTA · Eventos y música (estética risográfica) ============ */
+.tinta {
+  --paper: #F3EEE3; --white: #FFFDF8; --ink: #1C1A2E; --muted: #55526A;
+  --blue: #2F4BFF; --pink: #FF48B0; --yellow: #FFE14D;
+  background: var(--paper); color: var(--ink);
+  font-family: "Archivo", system-ui, sans-serif; font-size: 15.5px; line-height: 1.55;
+  overflow: hidden;
+}
+.tinta > * { position: relative; z-index: 1; }
+.tinta .t-top { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; padding: 18px 24px; }
+.tinta .t-brand { overflow-wrap: anywhere; font-family: "Big Shoulders Display", Impact, sans-serif; font-weight: 900; font-size: 28px; text-transform: uppercase; color: var(--blue); text-shadow: 2px 2px 0 rgba(255, 72, 176, .8); }
+.tinta .t-tag { font-family: "Space Mono", monospace; font-size: 12px; text-transform: uppercase; letter-spacing: .06em; }
+.tinta .t-hero { padding: 24px 24px 56px; display: grid; gap: 20px; }
+.tinta .t-art { position: absolute; right: -84px; top: 84px; width: 230px; height: 230px; pointer-events: none; z-index: 0; }
+@media (min-width: 780px) { .tinta .t-art { right: 30px; top: 10px; width: 340px; height: 340px; } }
+.tinta .t-art span { position: absolute; display: block; mix-blend-mode: multiply; }
+.tinta .t-halftone { inset: 0; border-radius: 50%; background: radial-gradient(circle, var(--pink) 34%, transparent 37%) 0 0 / 9px 9px; }
+.tinta .t-rect { width: 55%; height: 70%; left: -6%; top: 20%; background: var(--yellow); transform: rotate(-12deg); }
+.tinta .t-ring { width: 42%; height: 42%; right: 2%; bottom: -4%; border-radius: 50%; border: 8px solid var(--blue); opacity: .85; }
+.tinta h1 { position: relative; z-index: 1; margin: 0; font-family: "Big Shoulders Display", Impact, sans-serif; font-weight: 900; font-size: clamp(3.4rem, 13vw, 7.2rem); line-height: .86; text-transform: uppercase; color: var(--blue); text-shadow: 4px 3px 0 rgba(255, 72, 176, .85); }
+.tinta h1 span { display: block; }
+.tinta h1 .t-hl { color: var(--pink); text-shadow: 4px 3px 0 rgba(47, 75, 255, .75); }
+.tinta .t-lead { position: relative; z-index: 1; margin: 0; font-size: 17px; max-width: 44ch; }
+.tinta .t-lead mark { background: rgba(243, 238, 227, .9); color: inherit; box-decoration-break: clone; -webkit-box-decoration-break: clone; padding: 2px 4px; }
+.tinta .t-btn { position: relative; z-index: 1; justify-self: start; font-family: "Space Mono", monospace; font-weight: 700; text-transform: uppercase; font-size: 14px; letter-spacing: .04em; background: var(--pink); color: var(--ink); text-decoration: none; padding: 14px 20px; border: 2px solid var(--ink); box-shadow: 4px 4px 0 var(--blue); transition: transform .1s ease, box-shadow .1s ease; }
+.tinta .t-btn:active { transform: translate(4px, 4px); box-shadow: 0 0 0 var(--blue); }
+.tinta h2 { font-family: "Big Shoulders Display", Impact, sans-serif; font-weight: 900; font-size: clamp(2.6rem, 9vw, 4.2rem); line-height: .9; text-transform: uppercase; margin: 0 0 20px; color: var(--pink); text-shadow: 3px 2px 0 rgba(47, 75, 255, .75); }
+.tinta .t-packs, .tinta .t-dates { padding: 40px 24px; border-top: 2px solid var(--ink); }
+.tinta .t-pack-list { display: grid; border-top: 2px solid var(--ink); }
+.tinta .t-pack { padding: 18px 0; border-bottom: 2px solid var(--ink); display: grid; gap: 6px; }
+.tinta .t-pack-head { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; flex-wrap: wrap; }
+.tinta .t-pack h3 { margin: 0; font-family: "Big Shoulders Display", Impact, sans-serif; font-weight: 800; font-size: 32px; line-height: 1; text-transform: uppercase; color: var(--blue); }
+.tinta .t-price { margin: 0; font-family: "Space Mono", monospace; font-weight: 700; font-size: 15px; background: var(--yellow); padding: 2px 8px; white-space: nowrap; }
+.tinta .t-pack p { margin: 0; color: var(--muted); max-width: 60ch; }
+.tinta .t-pack .t1-filas { color: var(--muted); max-width: 60ch; }
+.tinta .t-pack .t1-filas li b { color: var(--ink); }
+.tinta .t-gigs { list-style: none; margin: 0; padding: 0; display: grid; gap: 12px; }
+.tinta .t-gigs li { display: grid; grid-template-columns: 64px minmax(0, 1fr); gap: 14px; align-items: center; background: var(--white); border: 2px solid var(--ink); padding: 10px 14px 10px 8px; box-shadow: 3px 3px 0 var(--pink); }
+.tinta .t-date { font-family: "Space Mono", monospace; font-size: 12px; text-align: center; line-height: 1.1; color: var(--blue); }
+.tinta .t-date b { display: block; font-family: "Big Shoulders Display", Impact, sans-serif; font-weight: 900; font-size: 36px; line-height: 1; }
+.tinta .t-gigs li.sin-fecha { grid-template-columns: minmax(0, 1fr); padding-left: 14px; }
+.tinta .t-gigs h3 { margin: 0; font-size: 17px; font-weight: 700; }
+.tinta .t-gigs p { margin: 2px 0 0; color: var(--muted); font-size: 14px; }
+.tinta .t-quote { padding: 48px 24px; border-top: 2px solid var(--ink); background: var(--blue); color: var(--paper); }
+.tinta .t-quote blockquote { margin: 0 0 12px; font-family: "Big Shoulders Display", Impact, sans-serif; font-weight: 800; font-size: clamp(2.4rem, 8vw, 3.8rem); line-height: .95; text-transform: uppercase; text-shadow: 3px 2px 0 rgba(255, 72, 176, .9); }
+.tinta .t-quote p { margin: 0; font-family: "Space Mono", monospace; font-size: 12.5px; }
+.tinta .t-foot { padding: 32px 24px 24px; background: var(--pink); color: var(--ink); }
+.tinta .t-foot-big { overflow-wrap: anywhere; font-family: "Big Shoulders Display", Impact, sans-serif; font-weight: 900; font-size: clamp(3.6rem, 16vw, 8rem); line-height: .85; text-transform: uppercase; color: var(--blue); mix-blend-mode: multiply; margin-bottom: 12px; }
+.tinta .t-foot p { margin: 0; font-size: 14px; }
+.tinta .t-sign { margin-top: 14px !important; font-family: "Space Mono", monospace; font-size: 11.5px !important; opacity: .75; }
+.tinta.grainy::before { opacity: .14; z-index: 2; }
+
+/* Variables para las secciones comunes (.t1-extra). */
+.balance { --hair: var(--line); --card: var(--white); --accent: var(--emerald); --font-head: "Hanken Grotesk", sans-serif; --head-weight: 800; --radius: 12px; }
+.miga { --hair: var(--line); --card: var(--paper); --accent: var(--berry); --font-head: "Caprasimo", Georgia, serif; --head-weight: 400; --radius: 20px; }
+.forma { --hair: var(--ink); --card: var(--white); --accent: var(--red); --font-head: "League Spartan", sans-serif; --head-weight: 800; --radius: 0; }
+.tinta { --hair: var(--ink); --card: var(--white); --accent: var(--pink); --font-head: "Big Shoulders Display", Impact, sans-serif; --head-weight: 900; --radius: 0; }
+.balance .t1-extra, .miga .t1-extra, .forma .t1-extra, .tinta .t1-extra { padding-inline: 24px; }
+.forma .t1-extra > h2, .tinta .t1-extra > h2 { text-transform: uppercase; }
+
+/* La firma comparte estilo con el texto que la rodea en cada pie. */
+.balance.pro-t1 .t1-sign, .miga.pro-t1 .t1-sign, .forma.pro-t1 .t1-sign, .tinta.pro-t1 .t1-sign {
+  margin: 0; font-size: inherit; letter-spacing: inherit; text-transform: none; opacity: 1; display: inline;
+}
+
+/* Balance: las filas de plan usan el check de la referencia (sin el "✓" genérico)
+   y el valor de la derecha queda en la misma línea. */
+.balance .b-plan .t1-filas.check li { display: flex; align-items: baseline; gap: 8px; }
+.balance .b-plan .t1-filas.check li::before {
+  content: ""; flex: none; width: 11px; height: 6px; margin-top: 0; font-size: 0;
+  border-left: 2px solid var(--emerald); border-bottom: 2px solid var(--emerald); transform: translateY(-3px) rotate(-45deg);
+}
+.balance .b-steps h3 { font-weight: 700; }

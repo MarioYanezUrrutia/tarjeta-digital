@@ -4,19 +4,6 @@ import { obtenerCuposFundador } from '../api/tarjetas'
 import { formatearCLP } from '../constants/tarjetas'
 import MiniPreviewPlantilla from '../plantillas/MiniPreviewPlantilla'
 
-// Montos de la oferta Fundador. El servidor solo entrega cupos y el
-// equivalente mensual (/cupos-fundador/); el resto vive acá, en un único
-// lugar. Deben coincidir con ConfiguracionTarjetas (admin).
-const OFERTA = {
-  pagoUnico: 9000,
-  meses: 6,
-  equivalenteMensual: 1500,
-  cuposTotal: 100,
-  renovacionMensual: 3500,
-  renovacionMeses: 24,
-  precioNormal: 5000,
-}
-
 const PASOS = [
   { titulo: 'Elige tu plantilla', texto: 'Doce estilos pensados para distintos rubros.' },
   { titulo: 'Arma tu página gratis', texto: 'Súbela con tus productos, fotos y datos desde el celular. Mientras no la publiques, solo tú la ves.' },
@@ -41,44 +28,64 @@ const PLANTILLAS = [
 const BOTON =
   'inline-flex w-full items-center justify-center rounded-lg bg-teal-600 px-6 py-3.5 text-base font-semibold text-white shadow transition hover:bg-teal-700 sm:w-auto'
 
-function BloquePlan({ cupos }) {
-  // Sin respuesta del servidor (o 0 cupos) se muestra el plan mensual normal.
-  const hayCupos = cupos && cupos.cupos_restantes > 0
-  if (!hayCupos) {
+// Todos los montos vienen de /cupos-fundador/ (se cambian desde el admin).
+// Sin respuesta del servidor no se muestra ningún monto.
+function oferta(cupos) {
+  if (!cupos || typeof cupos.fundador_precio_clp !== 'number') return null
+  const { fundador_precio_clp: pago, fundador_meses: meses } = cupos
+  const mensual = pago > 0 && meses > 0 ? Math.round(pago / meses) : cupos.equivalente_mensual
+  return {
+    pago,
+    meses,
+    mensual,
+    total: cupos.cupos_total,
+    restantes: cupos.cupos_restantes,
+    renovacion: cupos.renovacion_precio_clp,
+    renovacionMeses: cupos.renovacion_meses,
+    normal: cupos.precio_normal_clp,
+  }
+}
+
+function BloquePlan({ o }) {
+  if (!o) return null
+  if (!(o.restantes > 0)) {
+    if (!(o.normal > 0)) return null
     return (
       <section className="px-4 py-10">
         <div className="mx-auto max-w-xl rounded-2xl border border-gray-200 bg-white p-6 text-center shadow-sm">
           <p className="text-sm font-semibold uppercase tracking-wide text-teal-800">Plan mensual</p>
-          <p className="mt-2 text-2xl font-bold text-gray-900">{formatearCLP(OFERTA.precioNormal)} al mes</p>
+          <p className="mt-2 text-2xl font-bold text-gray-900">{formatearCLP(o.normal)} al mes</p>
           <p className="mt-3 text-sm text-gray-600">Armas tu página gratis y pagas solo cuando la publiques.</p>
         </div>
       </section>
     )
   }
-  const mensual = cupos.equivalente_mensual || OFERTA.equivalenteMensual
-  const total = cupos.cupos_total || OFERTA.cuposTotal
   return (
     <section className="px-4 py-10">
       <div className="mx-auto max-w-xl rounded-2xl border border-amber-300 bg-amber-50 p-6 text-center shadow-sm">
         <p className="text-sm font-semibold uppercase tracking-wide text-amber-800">Plan Fundador</p>
-        <p className="mt-2 text-2xl font-bold text-gray-900">
-          Precio Fundador: {formatearCLP(mensual)} al mes
-        </p>
+        <p className="mt-2 text-2xl font-bold text-gray-900">Precio Fundador: {formatearCLP(o.mensual)} al mes</p>
         <p className="mt-1 text-base font-medium text-amber-900">
-          Quedan {cupos.cupos_restantes} de {total} cupos
+          Quedan {o.restantes} de {o.total} cupos
         </p>
         <p className="mt-4 text-sm leading-relaxed text-gray-600">
-          Pago único de {formatearCLP(OFERTA.pagoUnico)} por {OFERTA.meses} meses, solo para los primeros {total}.
-          Después, {formatearCLP(OFERTA.renovacionMensual)} al mes por {OFERTA.renovacionMeses} meses si renuevas a
-          tiempo (precio normal {formatearCLP(OFERTA.precioNormal)}).
+          Pago único de {formatearCLP(o.pago)} por {o.meses} meses, solo para los primeros {o.total}.
+          {o.renovacion > 0 &&
+            ` Después, ${formatearCLP(o.renovacion)} al mes por ${o.renovacionMeses} meses si renuevas a tiempo${
+              o.normal > 0 ? ` (precio normal ${formatearCLP(o.normal)})` : ''
+            }.`}
         </p>
       </div>
     </section>
   )
 }
 
-function preguntas(cupos) {
-  const hayCupos = cupos && cupos.cupos_restantes > 0
+// Solo se escriben las respuestas cuyos montos entrega el servidor.
+function preguntas(o) {
+  const hayCupos = o && o.restantes > 0
+  const costo = []
+  if (hayCupos) costo.push(`el plan Fundador es un pago único de ${formatearCLP(o.pago)} por ${o.meses} meses, mientras queden cupos`)
+  if (o && o.normal > 0) costo.push(`${hayCupos ? 'después rige' : 'el plan mensual cuesta'} ${formatearCLP(o.normal)} al mes`)
   return [
     {
       p: '¿Necesito saber programar?',
@@ -86,22 +93,19 @@ function preguntas(cupos) {
     },
     {
       p: '¿Cuánto cuesta?',
-      r: hayCupos
-        ? `Armarla es gratis. Para publicarla, el plan Fundador es un pago único de ${formatearCLP(OFERTA.pagoUnico)} por ${OFERTA.meses} meses, mientras queden cupos. Después rige el precio mensual normal de ${formatearCLP(OFERTA.precioNormal)}.`
-        : `Armarla es gratis. Para publicarla, el plan mensual cuesta ${formatearCLP(OFERTA.precioNormal)} al mes.`,
+      r: `Armarla es gratis.${costo.length ? ` Para publicarla, ${costo.join('; ')}.` : ' Solo pagas cuando la publicas.'}`,
     },
-    ...(hayCupos
+    ...(hayCupos && o.renovacion > 0
       ? [
           {
-            p: '¿Qué pasa después de los 6 meses?',
-            r: `Si renuevas a tiempo, pagas ${formatearCLP(OFERTA.renovacionMensual)} al mes durante ${OFERTA.renovacionMeses} meses, en vez de ${formatearCLP(OFERTA.precioNormal)}. Si no renuevas a tiempo, se aplica el precio normal.`,
+            p: `¿Qué pasa después de los ${o.meses} meses?`,
+            r: `Si renuevas a tiempo, pagas ${formatearCLP(o.renovacion)} al mes durante ${o.renovacionMeses} meses${
+              o.normal > 0 ? `, en vez de ${formatearCLP(o.normal)}` : ''
+            }. Si no renuevas a tiempo, se aplica el precio normal.`,
           },
         ]
       : []),
-    {
-      p: '¿Cómo pago?',
-      r: 'Con Mercado Pago, desde tu panel, cuando decidas publicar.',
-    },
+    { p: '¿Cómo pago?', r: 'Con Mercado Pago, desde tu panel, cuando decidas publicar.' },
     {
       p: '¿Qué dirección tendrá mi página?',
       r: 'Tendrá la forma tarjeta.kabymur.com/t/nombre-de-tu-negocio, armada con el nombre que le pongas.',
@@ -115,6 +119,7 @@ function preguntas(cupos) {
 
 export default function Portada() {
   const [cupos, setCupos] = useState(null)
+  const datosOferta = oferta(cupos)
 
   useEffect(() => {
     let activo = true
@@ -146,7 +151,7 @@ export default function Portada() {
         </div>
       </section>
 
-      <BloquePlan cupos={cupos} />
+      <BloquePlan o={datosOferta} />
 
       <section className="px-4 py-10">
         <h2 className="text-center text-2xl font-bold">Cómo funciona</h2>
@@ -184,7 +189,7 @@ export default function Portada() {
       <section className="px-4 py-10">
         <h2 className="text-center text-2xl font-bold">Preguntas frecuentes</h2>
         <div className="mx-auto mt-6 flex max-w-2xl flex-col gap-3">
-          {preguntas(cupos).map((f) => (
+          {preguntas(datosOferta).map((f) => (
             <details key={f.p} className="rounded-xl border border-gray-200 bg-white p-4">
               <summary className="cursor-pointer font-medium">{f.p}</summary>
               <p className="mt-2 text-sm text-gray-600">{f.r}</p>

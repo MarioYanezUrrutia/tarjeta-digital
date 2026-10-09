@@ -253,6 +253,12 @@ def cupos_fundador(request):
         'cupos_total': config.fundador_cupos,
         'cupos_restantes': pl.cupos_fundador_restantes(config),
         'equivalente_mensual': equivalente,
+        # Montos de la oferta (solo lectura, de Configuración de tarjetas).
+        'fundador_precio_clp': config.fundador_precio_clp,
+        'fundador_meses': meses,
+        'renovacion_precio_clp': config.fundador_renovacion_precio_clp,
+        'renovacion_meses': config.fundador_renovacion_meses,
+        'precio_normal_clp': config.precio_pro_clp,
     })
 
 

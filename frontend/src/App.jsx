@@ -1,9 +1,10 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import { Navigate, Route, Routes } from 'react-router-dom'
 import RutaProtegida from './components/RutaProtegida'
 import { AuthProvider, useAuth } from './context/AuthContext'
 import Login from './pages/Login'
 import Panel from './pages/Panel'
+import Portada from './pages/Portada'
 import PagoMercadoPagoRetorno from './pages/PagoMercadoPagoRetorno'
 import Registro from './pages/Registro'
 import TarjetaEditor from './pages/TarjetaEditor'
@@ -11,6 +12,8 @@ import TarjetaPublica from './pages/TarjetaPublica'
 
 function RedireccionRaiz() {
   const { user, cargando } = useAuth()
+
+  useEffect(guardarOrigen, [])
 
   if (cargando) {
     return (
@@ -20,7 +23,19 @@ function RedireccionRaiz() {
     )
   }
 
-  return <Navigate to={user ? '/panel' : '/login'} replace />
+  return user ? <Navigate to="/panel" replace /> : <Portada />
+}
+
+// ?o=<canal>: se guarda solo la primera vez (aún no se envía a ningún lado).
+function guardarOrigen() {
+  try {
+    const canal = new URLSearchParams(window.location.search).get('o')
+    if (canal && !localStorage.getItem('kby_origen')) {
+      localStorage.setItem('kby_origen', JSON.stringify({ origen: canal, fecha: new Date().toISOString() }))
+    }
+  } catch {
+    // localStorage puede no estar disponible (modo privado): se ignora.
+  }
 }
 
 export default function App() {

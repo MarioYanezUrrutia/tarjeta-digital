@@ -1,4 +1,5 @@
 import React from 'react'
+import { ContactoPro } from './compartidos'
 import { FirmaKabymur, SeccionFaq, SeccionTestimonios, waLink } from './tanda1Comun'
 import { FilasProducto, analizarProducto, fuenteGrande, partesFecha, partirTitular, redSocial } from './proComun'
 import './tanda3.css'
@@ -8,7 +9,7 @@ import './tanda3.css'
  * las fechas, noticias con su día y mes. */
 export default function PlantillaTinta({ tarjeta }) {
   const {
-    nombre_mostrado, cargo_rubro, eslogan, sobre_texto, direccion, telefono, whatsapp, instagram,
+    imagen, nombre_mostrado, cargo_rubro, eslogan, sobre_texto, direccion, telefono, whatsapp, instagram,
     mostrar_sobre, mostrar_productos, mostrar_ubicacion, mostrar_contacto, mostrar_redes,
   } = tarjeta
   const wa = waLink(whatsapp)
@@ -30,6 +31,7 @@ export default function PlantillaTinta({ tarjeta }) {
       <section className="t-hero">
         <h1><span>{antes}</span>{marca && <span className="t-hl">{marca}</span>}</h1>
         {mostrar_sobre && sobre_texto && <p className="t-lead"><mark style={{ whiteSpace: 'pre-line' }}>{sobre_texto}</mark></p>}
+        {imagen && <img data-cp={tarjeta.plantilla} className="pro-hero-img" src={imagen} alt={nombre_mostrado || ''} />}
         {wa && <a href={wa} target="_blank" rel="noreferrer" className="t-btn">Cotizar por WhatsApp</a>}
       </section>
 
@@ -41,6 +43,7 @@ export default function PlantillaTinta({ tarjeta }) {
               const { descripcion, filas, corto, extra, precio } = analizarProducto(p)
               return (
                 <article className="t-pack" key={p.orden + p.nombre}>
+                  {p.imagen && <img className="pro-img fila" src={p.imagen} alt={p.nombre} loading="lazy" />}
                   <div className="t-pack-head">
                     <h3>{p.nombre}</h3>
                     {(precio || corto) && <p className="t-price">{[precio, corto].filter(Boolean).join(' · ')}</p>}
@@ -65,8 +68,10 @@ export default function PlantillaTinta({ tarjeta }) {
                 <li key={i} className={f ? undefined : 'sin-fecha'}>
                   {f && <span className="t-date"><b>{f.dia}</b>{f.mes}</span>}
                   <div>
+                    {n.imagen && <img className="pro-img fila" src={n.imagen} alt={n.titulo || ''} loading="lazy" />}
                     <h3>{n.titulo}</h3>
                     {n.resumen && <p>{n.resumen}</p>}
+                    {n.enlace && <a href={n.enlace} target="_blank" rel="noreferrer">Ver más →</a>}
                   </div>
                 </li>
               )
@@ -85,7 +90,9 @@ export default function PlantillaTinta({ tarjeta }) {
       <SeccionTestimonios tarjeta={tarjeta} desde={1} />
       <SeccionFaq tarjeta={tarjeta} />
 
-      <footer className="t-foot" id="contacto">
+      <ContactoPro tarjeta={tarjeta} />
+
+      <footer className="t-foot">
         <div className="t-foot-big" style={fuenteGrande(nombre_mostrado, 16, 8, 2.2)}>{nombre_mostrado}</div>
         {(pie || ig) && (
           <p>

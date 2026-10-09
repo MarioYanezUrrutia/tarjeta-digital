@@ -1,4 +1,5 @@
 import React from 'react'
+import { ContactoPro } from './compartidos'
 import { FirmaKabymur, SeccionFaq, SeccionNoticias, SeccionTestimonios, waLink } from './tanda1Comun'
 import { FilasProducto, analizarProducto, fuenteGrande, listaZonas, partirTitular } from './proComun'
 import './tanda3.css'
@@ -9,7 +10,7 @@ const FORMAS = ['circle', 'square', 'tri']
  * azul y amarillo. El póster es decorativo; los cursos alternan formas. */
 export default function PlantillaForma({ tarjeta }) {
   const {
-    nombre_mostrado, cargo_rubro, eslogan, sobre_texto, direccion, telefono, whatsapp,
+    imagen, nombre_mostrado, cargo_rubro, eslogan, sobre_texto, direccion, telefono, whatsapp,
     mostrar_sobre, mostrar_productos, mostrar_ubicacion, mostrar_contacto,
   } = tarjeta
   const wa = waLink(whatsapp)
@@ -29,9 +30,13 @@ export default function PlantillaForma({ tarjeta }) {
       </header>
 
       <section className="f-hero">
-        <div className="f-poster" aria-hidden="true">
-          <span className="f-circle" /><span className="f-quarter" /><span className="f-tri" /><span className="f-bar" /><span className="f-square" />
-        </div>
+        {imagen
+          ? <img data-cp={tarjeta.plantilla} className="pro-hero-img" src={imagen} alt={nombre_mostrado || ''} />
+          : (
+            <div className="f-poster" aria-hidden="true">
+              <span className="f-circle" /><span className="f-quarter" /><span className="f-tri" /><span className="f-bar" /><span className="f-square" />
+            </div>
+          )}
         <div>
           {cargo_rubro && <span className="f-eyebrow">{cargo_rubro}</span>}
           <h1>{antes}{marca && <> <em>{marca}</em></>}</h1>
@@ -49,7 +54,9 @@ export default function PlantillaForma({ tarjeta }) {
               const items = filas.length > 0 ? filas : descripcion ? [{ texto: descripcion, derecha: '' }] : []
               return (
                 <article className="f-course" key={p.orden + p.nombre}>
-                  <span className={`f-shape ${FORMAS[i % FORMAS.length]}`} aria-hidden="true" />
+                  {p.imagen
+                    ? <img className="pro-img" src={p.imagen} alt={p.nombre} loading="lazy" />
+                    : <span className={`f-shape ${FORMAS[i % FORMAS.length]}`} aria-hidden="true" />}
                   <h3>{p.nombre}</h3>
                   <FilasProducto filas={items} />
                   {extra && <p className="f-text">{extra}</p>}
@@ -63,6 +70,7 @@ export default function PlantillaForma({ tarjeta }) {
 
       {proximo && (
         <section className="f-news">
+          {proximo.imagen && <img className="pro-img" src={proximo.imagen} alt={proximo.titulo || ''} loading="lazy" />}
           <span className="f-eyebrow">Próximo</span>
           <h3>{proximo.titulo}</h3>
           {proximo.resumen && <p>{proximo.resumen}</p>}
@@ -80,7 +88,9 @@ export default function PlantillaForma({ tarjeta }) {
       <SeccionNoticias tarjeta={tarjeta} desde={1} />
       <SeccionFaq tarjeta={tarjeta} />
 
-      <footer className="f-foot" id="contacto">
+      <ContactoPro tarjeta={tarjeta} />
+
+      <footer className="f-foot">
         <div className="f-foot-shapes" aria-hidden="true"><i /><i /><i /></div>
         <div className="f-foot-big" style={fuenteGrande(nombre_mostrado, 19, 9, 2.2)}>{(nombre_mostrado || '').toLowerCase()}</div>
         {pie && <p>{pie}</p>}

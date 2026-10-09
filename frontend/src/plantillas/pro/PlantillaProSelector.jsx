@@ -1,5 +1,6 @@
 import React from 'react'
 import PlantillaProBase from './PlantillaProBase'
+import { ExtrasPro } from './compartidos'
 import { TEMAS_PRO } from './temas'
 import PlantillaSerena from './PlantillaSerena'
 import PlantillaConfianza from './PlantillaConfianza'
@@ -39,7 +40,14 @@ const TEMA_POR_DEFECTO = 'pro_min'
  * `pro_min` como piel Pro por defecto. */
 export default function PlantillaProSelector({ tarjeta }) {
   const Propia = tarjeta && PLANTILLAS_PROPIAS[tarjeta.plantilla]
-  if (Propia) return <Propia tarjeta={tarjeta} />
+  if (Propia) {
+    return (
+      <>
+        <Propia tarjeta={tarjeta} />
+        <ExtrasPro tarjeta={tarjeta} />
+      </>
+    )
+  }
   const clave = tarjeta && TEMAS_PRO[tarjeta.plantilla] ? tarjeta.plantilla : TEMA_POR_DEFECTO
   return <PlantillaProBase tarjeta={tarjeta} tema={TEMAS_PRO[clave]} />
 }

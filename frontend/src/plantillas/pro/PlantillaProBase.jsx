@@ -2,14 +2,7 @@ import React, { useEffect } from 'react'
 import { IconPin, IconUser, IconMap, IconContactCard } from '../icons'
 import { descargarVCard, iniciales, useDatosTarjeta } from '../useDatosTarjeta'
 import { textoPrecioProducto } from '../../constants/tarjetas'
-
-function IconWhatsApp({ className }) {
-  return (
-    <svg viewBox="0 0 24 24" className={className} fill="currentColor" aria-hidden="true">
-      <path d="M17.5 14.4c-.3-.2-1.7-.9-2-1-.3-.1-.5-.1-.7.2-.2.3-.7 1-.9 1.1-.2.2-.3.2-.6.1-.3-.2-1.2-.5-2.3-1.4-.9-.8-1.4-1.7-1.6-2-.2-.3 0-.5.1-.6.1-.1.3-.3.4-.5.1-.2.2-.3.3-.5.1-.2 0-.4 0-.5 0-.1-.7-1.6-.9-2.2-.2-.6-.5-.5-.7-.5h-.6c-.2 0-.5.1-.8.4-.3.3-1 1-1 2.5s1.1 2.9 1.2 3.1c.2.2 2.1 3.3 5.1 4.6.7.3 1.3.5 1.7.6.7.2 1.4.2 1.9.1.6-.1 1.7-.7 2-1.4.2-.7.2-1.3.2-1.4-.1-.1-.3-.2-.6-.3zM12 2a10 10 0 00-8.5 15.2L2 22l4.9-1.3A10 10 0 1012 2z"/>
-    </svg>
-  )
-}
+import { BotonWhatsAppFlotante, IconWhatsApp, hrefWhatsApp, useFormularioContacto } from './compartidos'
 
 function Estrellas({ n, accent }) {
   const total = 5
@@ -48,41 +41,9 @@ export default function PlantillaProBase({ tarjeta, tema }) {
   const { contactos, redes, mostrarUbicacionSeccion, mostrarProductosSeccion } = useDatosTarjeta(tarjeta)
   const productos = tarjeta.productos || []
 
-  const [form, setForm] = React.useState({ nombre: '', email: '', mensaje: '', website: '' })
-  const [envio, setEnvio] = React.useState({ estado: 'idle', error: '' })
-  // estado: 'idle' | 'enviando' | 'ok' | 'error'
+  const { form, setForm, envio, enviarContacto } = useFormularioContacto(tarjeta)
+  // estado del envio: 'idle' | 'enviando' | 'ok' | 'error'
   const [menuAbierto, setMenuAbierto] = React.useState(false)
-
-  const enviarContacto = async () => {
-    if (!form.nombre.trim() || !form.mensaje.trim()) {
-      setEnvio({ estado: 'error', error: 'Escribe tu nombre y un mensaje.' })
-      return
-    }
-    setEnvio({ estado: 'enviando', error: '' })
-    try {
-      const resp = await fetch(`${import.meta.env.VITE_API_BASE}/t/${tarjeta.slug}/contacto/`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          nombre: form.nombre,
-          email: form.email,
-          mensaje: form.mensaje,
-          website: form.website, // honeypot
-        }),
-      })
-      const datos = await resp.json().catch(() => ({}))
-      if (resp.ok && datos.ok) {
-        setEnvio({ estado: 'ok', error: '' })
-        setForm({ nombre: '', email: '', mensaje: '', website: '' })
-      } else if (resp.status === 429) {
-        setEnvio({ estado: 'error', error: 'Demasiados envíos. Intenta más tarde.' })
-      } else {
-        setEnvio({ estado: 'error', error: datos.error || 'No se pudo enviar el mensaje.' })
-      }
-    } catch {
-      setEnvio({ estado: 'error', error: 'No se pudo enviar el mensaje.' })
-    }
-  }
 
   const hayNoticias = mostrar_noticias && noticias.length > 0
   const hayTestimonios = mostrar_testimonios && testimonios.length > 0
@@ -101,7 +62,7 @@ export default function PlantillaProBase({ tarjeta, tema }) {
     { id: 'contacto', label: 'Contacto' },
   ].filter(Boolean)
 
-  const waHref = whatsapp ? `https://wa.me/${whatsapp.replace(/[^0-9]/g, '')}` : null
+  const waHref = hrefWhatsApp(whatsapp)
 
   return (
     <div className={`min-h-screen ${bgClass}`} style={{ fontFamily }}>
@@ -378,13 +339,7 @@ export default function PlantillaProBase({ tarjeta, tema }) {
         </p>
       </footer>
 
-      {waHref && (
-        <a href={waHref} target="_blank" rel="noreferrer" aria-label="WhatsApp"
-           className="fixed bottom-5 right-5 z-50 flex h-14 w-14 items-center justify-center rounded-full text-white shadow-lg transition hover:scale-105"
-           style={{ backgroundColor: '#25D366' }}>
-          <IconWhatsApp className="h-7 w-7" />
-        </a>
-      )}
+      <BotonWhatsAppFlotante href={waHref} />
     </div>
   )
 }

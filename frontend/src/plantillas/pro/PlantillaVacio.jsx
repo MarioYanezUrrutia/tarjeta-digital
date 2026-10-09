@@ -1,4 +1,5 @@
 import React from 'react'
+import { ContactoPro } from './compartidos'
 import { FirmaKabymur, SeccionFaq, SeccionNoticias, SeccionTestimonios, sinProtocolo, textosProducto, waLink } from './tanda1Comun'
 
 // Resalta la última palabra del nombre con el acento.
@@ -14,7 +15,7 @@ function NombreConAcento({ nombre }) {
  * (`anio`) y, si no lo tiene, su número de orden. */
 export default function PlantillaVacio({ tarjeta }) {
   const {
-    nombre_mostrado, cargo_rubro, eslogan, sobre_texto, whatsapp, email_contacto, instagram, linkedin, sitio_web,
+    imagen, nombre_mostrado, cargo_rubro, eslogan, sobre_texto, whatsapp, email_contacto, instagram, linkedin, sitio_web,
     tipo, mostrar_sobre, mostrar_productos, mostrar_contacto, mostrar_redes,
   } = tarjeta
   const productos = mostrar_productos ? tarjeta.productos || [] : []
@@ -41,6 +42,7 @@ export default function PlantillaVacio({ tarjeta }) {
         )}
         <h1><NombreConAcento nombre={nombre_mostrado} /></h1>
         {eslogan && <p className="lead">{eslogan}</p>}
+        {imagen && <img data-cp={tarjeta.plantilla} className="pro-hero-img" src={imagen} alt={nombre_mostrado || ''} />}
       </section>
 
       {haySobre && (
@@ -58,6 +60,7 @@ export default function PlantillaVacio({ tarjeta }) {
               const { desc, extra, precio } = textosProducto(p)
               return (
                 <div className="work-item" key={p.orden + p.nombre}>
+                  {p.imagen && <img className="pro-img" src={p.imagen} alt={p.nombre} loading="lazy" />}
                   <div className="meta">
                     <span>{precio || (tipo === 'negocio' ? 'Servicio' : 'Trabajo')}</span>
                     <span>{p.anio || String(i + 1).padStart(2, '0')}</span>
@@ -79,7 +82,7 @@ export default function PlantillaVacio({ tarjeta }) {
       <SeccionFaq tarjeta={tarjeta} />
 
       {hayContacto && (
-        <section className="cta-section" id="contacto">
+        <section className="cta-section" id="hablemos">
           <span className="lbl" style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 11, letterSpacing: '.18em', color: 'var(--muted)', textTransform: 'uppercase' }}>
             {numContacto} · Contacto
           </span>
@@ -94,6 +97,8 @@ export default function PlantillaVacio({ tarjeta }) {
           )}
         </section>
       )}
+
+      <ContactoPro tarjeta={tarjeta} />
 
       <footer className="footer">
         <FirmaKabymur />

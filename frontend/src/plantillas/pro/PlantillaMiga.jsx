@@ -1,4 +1,5 @@
 import React from 'react'
+import { ContactoPro } from './compartidos'
 import { FirmaKabymur, SeccionFaq, SeccionNoticias, SeccionTestimonios, waLink } from './tanda1Comun'
 import { analizarProducto, fuenteGrande, listaZonas, partirTitular } from './proComun'
 import './tanda3.css'
@@ -72,6 +73,7 @@ export default function PlantillaMiga({ tarjeta }) {
               const { descripcion, filas, corto, extra, precio } = analizarProducto(p)
               return (
                 <article className="g-card" key={p.orden + p.nombre}>
+                  {p.imagen && <img className="pro-img" src={p.imagen} alt={p.nombre} loading="lazy" />}
                   <h3>{p.nombre}</h3>
                   {descripcion && <p>{descripcion}</p>}
                   {filas.length > 0 && (
@@ -119,10 +121,12 @@ export default function PlantillaMiga({ tarjeta }) {
       )}
 
       <SeccionTestimonios tarjeta={tarjeta} desde={1} />
-      <SeccionNoticias tarjeta={tarjeta} desde={1} />
+      <SeccionNoticias tarjeta={tarjeta} />
       <SeccionFaq tarjeta={tarjeta} />
 
-      <footer className="g-foot" id="contacto">
+      <ContactoPro tarjeta={tarjeta} />
+
+      <footer className="g-foot">
         <div className="g-foot-big" style={fuenteGrande(nombre_mostrado, 20, 9, 2.4)}>{nombre_mostrado}</div>
         {pie && <p>{pie}</p>}
         <p className="g-sign"><FirmaKabymur /></p>

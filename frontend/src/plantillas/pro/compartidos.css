@@ -1,0 +1,68 @@
+/* Contacto, menú flotante e imágenes de las 12 plantillas nuevas de la landing
+   Pro. Todo va con prefijo cpro-/pro-img para no chocar con el CSS de cada
+   plantilla; los colores y tipografías salen de las variables --cp-* que se
+   definen abajo por plantilla ([data-cp="<clave>"]). */
+
+[data-cp] {
+  --cp-bg: #fff; --cp-fg: #222; --cp-muted: #666; --cp-line: #ddd; --cp-card: #fff; --cp-soft: #f3f3f3;
+  --cp-accent: #222; --cp-accent-fg: #fff; --cp-radius: 12px; --cp-border: 1px;
+  --cp-font: "Inter", system-ui, sans-serif; --cp-head: var(--cp-font); --cp-head-weight: 700;
+}
+[data-cp="serena"]    { --cp-bg: #FDFAF7; --cp-fg: #3B2F2C; --cp-muted: #8B7F7A; --cp-line: #E5D9D3; --cp-card: #fff; --cp-soft: #F6E6E1; --cp-accent: #3B2F2C; --cp-accent-fg: #FDFAF7; --cp-radius: 20px; --cp-font: "Inter", sans-serif; --cp-head: "Playfair Display", serif; --cp-head-weight: 500; }
+[data-cp="confianza"] { --cp-bg: #F2F4F7; --cp-fg: #0B2545; --cp-muted: #5A6478; --cp-line: #DDE1EA; --cp-card: #fff; --cp-soft: #FDE7D8; --cp-accent: #F27121; --cp-accent-fg: #fff; --cp-radius: 12px; --cp-font: "Inter", sans-serif; --cp-head-weight: 800; }
+[data-cp="vacio"]     { --cp-bg: #0A0A0A; --cp-fg: #FAFAFA; --cp-muted: #8A8A8A; --cp-line: #222; --cp-card: #141414; --cp-soft: #1d1d1d; --cp-accent: #FF2E88; --cp-accent-fg: #fff; --cp-radius: 4px; --cp-font: "Space Grotesk", sans-serif; --cp-head-weight: 500; }
+[data-cp="revista"]   { --cp-bg: #F3EFE5; --cp-fg: #1A1A1A; --cp-muted: #6B6459; --cp-line: #D5CDBE; --cp-card: #FFFEF9; --cp-soft: #ece5d6; --cp-accent: #C44536; --cp-accent-fg: #fff; --cp-radius: 2px; --cp-font: "IBM Plex Sans", sans-serif; --cp-head: "Fraunces", serif; --cp-head-weight: 900; }
+[data-cp="pausa"]     { --cp-bg: #FBF8F3; --cp-fg: #2E2A25; --cp-muted: #6C645A; --cp-line: #E2D9CC; --cp-card: #F3EEE6; --cp-soft: #E8E2D5; --cp-accent: #33423A; --cp-accent-fg: #FBF8F3; --cp-radius: 22px; --cp-font: "Figtree", sans-serif; --cp-head: "Instrument Serif", serif; --cp-head-weight: 400; }
+[data-cp="huella"]    { --cp-bg: #FFF7EA; --cp-fg: #1D2B2C; --cp-muted: #5C696A; --cp-line: #EADFCB; --cp-card: #fff; --cp-soft: #FFE9A8; --cp-accent: #0E5A5E; --cp-accent-fg: #fff; --cp-radius: 20px; --cp-font: "Figtree", sans-serif; --cp-head: "Gabarito", sans-serif; --cp-head-weight: 900; }
+[data-cp="lustre"]    { --cp-bg: #110D0E; --cp-fg: #F3E9DA; --cp-muted: #A89A88; --cp-line: rgba(232,200,120,.28); --cp-card: #1a1315; --cp-soft: #2a1a1f; --cp-accent: #E8C878; --cp-accent-fg: #1A1208; --cp-radius: 3px; --cp-font: "Jost", sans-serif; --cp-head: "Bodoni Moda", serif; --cp-head-weight: 400; }
+[data-cp="mosaico"]   { --cp-bg: #F6F3EE; --cp-fg: #121212; --cp-muted: #4B4B4B; --cp-line: #121212; --cp-card: #fff; --cp-soft: #FF5CA8; --cp-accent: #B9A6FF; --cp-accent-fg: #121212; --cp-radius: 8px; --cp-border: 2px; --cp-font: "Schibsted Grotesk", sans-serif; --cp-head: "Unbounded", sans-serif; --cp-head-weight: 800; }
+[data-cp="balance"]   { --cp-bg: #F5F6F2; --cp-fg: #0F1A16; --cp-muted: #56615B; --cp-line: #D6DCD6; --cp-card: #fff; --cp-soft: #E1F0E8; --cp-accent: #0F6B4F; --cp-accent-fg: #fff; --cp-radius: 6px; --cp-font: "Hanken Grotesk", sans-serif; --cp-head-weight: 800; }
+[data-cp="miga"]      { --cp-bg: #FFF3E2; --cp-fg: #3A2315; --cp-muted: #765A48; --cp-line: #EBD9C2; --cp-card: #fff; --cp-soft: #F4D27E; --cp-accent: #C7385B; --cp-accent-fg: #fff; --cp-radius: 20px; --cp-font: "Albert Sans", sans-serif; --cp-head: "Caprasimo", serif; --cp-head-weight: 400; }
+[data-cp="forma"]     { --cp-bg: #F2EBDD; --cp-fg: #161616; --cp-muted: #57534C; --cp-line: #161616; --cp-card: #FFFDF8; --cp-soft: #F3C629; --cp-accent: #161616; --cp-accent-fg: #FFFDF8; --cp-radius: 0px; --cp-border: 2px; --cp-font: "Lexend", sans-serif; --cp-head: "League Spartan", sans-serif; --cp-head-weight: 800; }
+[data-cp="tinta"]     { --cp-bg: #F3EEE3; --cp-fg: #1C1A2E; --cp-muted: #55526A; --cp-line: #1C1A2E; --cp-card: #FBF8F0; --cp-soft: #FFC4E4; --cp-accent: #FF48B0; --cp-accent-fg: #1C1A2E; --cp-radius: 0px; --cp-font: "Archivo", sans-serif; --cp-head: "Big Shoulders Display", Impact, sans-serif; --cp-head-weight: 900; }
+
+/* ---------- Contacto ---------- */
+.cpro { background: var(--cp-bg); color: var(--cp-fg); font-family: var(--cp-font); padding: 56px 24px; border-top: var(--cp-border) solid var(--cp-line); }
+.cpro-in { max-width: 1000px; margin: 0 auto; }
+.cpro h2 { font-family: var(--cp-head); font-weight: var(--cp-head-weight); font-size: clamp(1.6rem, 4vw, 2.2rem); line-height: 1.1; margin: 0 0 24px; }
+.cpro-grid { display: grid; gap: 20px; grid-template-columns: 1fr; align-items: start; }
+@media (min-width: 820px) { .cpro-grid { grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); } }
+.cpro-lista { display: flex; flex-direction: column; gap: 12px; min-width: 0; }
+.cpro-item { display: flex; align-items: center; gap: 12px; min-width: 0; padding: 12px 16px; background: var(--cp-card); border: var(--cp-border) solid var(--cp-line); border-radius: var(--cp-radius); color: inherit; text-decoration: none; }
+.cpro-item:hover { border-color: var(--cp-accent); }
+.cpro-ico { width: 36px; height: 36px; flex: none; display: grid; place-items: center; border-radius: 50%; background: var(--cp-soft); color: var(--cp-fg); }
+.cpro-ico svg { width: 18px; height: 18px; }
+.cpro-txt { display: flex; flex-direction: column; min-width: 0; text-align: left; }
+.cpro-txt b { font-size: 14px; font-weight: 600; }
+.cpro-txt small { font-size: 12px; color: var(--cp-muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.cpro-card { background: var(--cp-card); border: var(--cp-border) solid var(--cp-line); border-radius: var(--cp-radius); padding: 20px; min-width: 0; }
+.cpro-card h3 { display: flex; align-items: center; gap: 8px; margin: 0 0 12px; font-size: 16px; font-weight: 600; font-family: var(--cp-font); }
+.cpro-card p { margin: 0 0 4px; font-size: 14px; line-height: 1.5; }
+.cpro-card .cpro-muted { color: var(--cp-muted); }
+.cpro-btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; margin-top: 14px; padding: 10px 20px; border: var(--cp-border) solid var(--cp-fg); border-radius: var(--cp-radius); border-color: var(--cp-accent); background: var(--cp-accent); color: var(--cp-accent-fg); font: 600 14px var(--cp-font); text-decoration: none; cursor: pointer; }
+.cpro-btn:disabled { opacity: .6; }
+.cpro-form { display: flex; flex-direction: column; gap: 10px; position: relative; }
+.cpro-form input, .cpro-form textarea { width: 100%; padding: 9px 12px; border: var(--cp-border) solid var(--cp-line); border-radius: var(--cp-radius); background: transparent; color: var(--cp-fg); font: 14px var(--cp-font); outline: none; resize: none; }
+.cpro-form input:focus, .cpro-form textarea:focus { border-color: var(--cp-accent); }
+.cpro-form .cpro-btn { margin-top: 4px; }
+.cpro-error { color: #ef4444; font-size: 12px; }
+.cpro-ok { color: #16a34a; font-size: 12px; }
+
+/* ---------- Menú flotante ---------- */
+.cpro-menu { position: fixed; left: 20px; bottom: 20px; z-index: 50; display: flex; flex-direction: column; align-items: flex-start; gap: 10px; font-family: var(--cp-font); }
+.cpro-menu-btn { width: 56px; height: 56px; display: grid; place-items: center; border: var(--cp-border) solid var(--cp-line); border-radius: 50%; background: var(--cp-accent); color: var(--cp-accent-fg); box-shadow: 0 6px 16px rgba(0,0,0,.25); cursor: pointer; }
+.cpro-menu-panel { display: flex; flex-direction: column; min-width: 190px; padding: 6px; background: var(--cp-bg); color: var(--cp-fg); border: var(--cp-border) solid var(--cp-line); border-radius: var(--cp-radius); box-shadow: 0 10px 28px rgba(0,0,0,.3); }
+.cpro-menu-panel a { padding: 10px 14px; font-size: 14px; font-weight: 500; color: inherit; text-decoration: none; border-radius: calc(var(--cp-radius) / 2); }
+.cpro-menu-panel a:hover { background: var(--cp-soft); }
+
+/* ---------- Imágenes de productos ---------- */
+.pro-img { display: block; width: 100%; height: auto; max-height: 320px; aspect-ratio: 4 / 3; object-fit: cover; border-radius: 10px; margin: 0 0 12px; background: rgba(128,128,128,.12); }
+.pro-img.fila { aspect-ratio: 16 / 9; max-height: 200px; max-width: 360px; }
+
+/* Imagen principal de las plantillas nuevas (la ilustración decorativa de cada
+   plantilla queda solo como respaldo cuando no hay imagen). */
+.pro-hero-img { display: block; width: 100%; max-width: 640px; height: auto; max-height: 460px; aspect-ratio: 4 / 3; object-fit: cover; border-radius: var(--cp-radius); margin: 28px auto 0; border: var(--cp-border) solid var(--cp-line); }
+.pro-hero-img.redonda { aspect-ratio: 1; max-width: 360px; border-radius: 50%; margin: 0 auto; }
+
+/* Imagen de producto en filas compactas (Confianza: reemplaza el ícono de 48 px). */
+.confianza .svc .pro-img { width: 48px; height: 48px; aspect-ratio: 1; margin: 0; border-radius: 10px; }

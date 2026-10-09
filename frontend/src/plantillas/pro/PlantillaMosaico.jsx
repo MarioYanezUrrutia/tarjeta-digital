@@ -1,5 +1,6 @@
 import React from 'react'
-import { FirmaKabymur, SeccionFaq, waLink } from './tanda1Comun'
+import { ContactoPro } from './compartidos'
+import { FirmaKabymur, SeccionFaq, SeccionNoticias, SeccionTestimonios, waLink } from './tanda1Comun'
 import { analizarProducto, fuenteGrande, partirTitular, redSocial } from './proComun'
 import './tanda2.css'
 
@@ -11,11 +12,11 @@ const FORMAS = ['circulo', 'cuadrado', 'arco', 'rombo']
  * se reacomoda sola. Layout propio. */
 export default function PlantillaMosaico({ tarjeta }) {
   const {
-    nombre_mostrado, cargo_rubro, eslogan, sobre_texto, profesion, direccion, horario, instagram, whatsapp,
+    imagen, nombre_mostrado, cargo_rubro, eslogan, sobre_texto, profesion, direccion, horario, instagram, whatsapp,
     tipo, mostrar_sobre, mostrar_productos, mostrar_ubicacion, mostrar_redes,
   } = tarjeta
   const wa = waLink(whatsapp)
-  const productos = (mostrar_productos ? tarjeta.productos || [] : []).slice(0, 4)
+  const productos = mostrar_productos ? tarjeta.productos || [] : []
   const cita = tarjeta.mostrar_testimonios ? (tarjeta.testimonios || [])[0] : null
   const novedad = tarjeta.mostrar_noticias ? (tarjeta.noticias || [])[0] : null
   const ig = mostrar_redes ? redSocial(instagram, 'https://www.instagram.com/') : null
@@ -37,6 +38,7 @@ export default function PlantillaMosaico({ tarjeta }) {
         <section className="m-tile m-hero">
           {profesion && <span className="m-kicker">{profesion}</span>}
           <h1>{antes}{marca && <> <span className="m-hl">{marca}</span></>}</h1>
+          {imagen && <img data-cp={tarjeta.plantilla} className="pro-hero-img" src={imagen} alt={nombre_mostrado || ''} />}
           {wa && <a href={wa} target="_blank" rel="noreferrer" className="m-btn">Escribir por WhatsApp</a>}
         </section>
 
@@ -87,6 +89,7 @@ export default function PlantillaMosaico({ tarjeta }) {
 
         {novedad && (
           <section className="m-tile m-news">
+            {novedad.imagen && <img className="pro-img" src={novedad.imagen} alt={novedad.titulo || ''} loading="lazy" />}
             <span className="m-kicker">Novedad</span>
             <h3>{novedad.titulo}</h3>
             {novedad.resumen && <p>{novedad.resumen}</p>}
@@ -94,7 +97,11 @@ export default function PlantillaMosaico({ tarjeta }) {
         )}
       </div>
 
+      <SeccionTestimonios tarjeta={tarjeta} desde={1} />
+      <SeccionNoticias tarjeta={tarjeta} desde={1} />
       <SeccionFaq tarjeta={tarjeta} />
+
+      <ContactoPro tarjeta={tarjeta} />
 
       <footer className="m-foot">
         <span className="m-foot-big" style={fuenteGrande(nombre_mostrado, 14, 6.5, 2)}>{(nombre_mostrado || '').toUpperCase()}</span>

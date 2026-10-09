@@ -1,4 +1,5 @@
 import React from 'react'
+import { ContactoPro } from './compartidos'
 import { FirmaKabymur, SeccionFaq, SeccionNoticias, SeccionTestimonios, textosProducto, sinProtocolo, waLink } from './tanda1Comun'
 
 /** Serena (belleza): hero centrado con arco, sobre en panel rosado, hasta 3
@@ -10,7 +11,7 @@ export default function PlantillaSerena({ tarjeta }) {
     mostrar_sobre, mostrar_productos, mostrar_ubicacion, mostrar_contacto,
   } = tarjeta
   const wa = waLink(whatsapp)
-  const productos = (mostrar_productos ? tarjeta.productos || [] : []).slice(0, 3)
+  const productos = mostrar_productos ? tarjeta.productos || [] : []
   const plural = tipo === 'negocio'
   const lugar = mostrar_ubicacion ? [direccion, horario].filter(Boolean).join(' · ') : ''
   const contacto = mostrar_contacto ? [sitio_web && sinProtocolo(sitio_web), whatsapp || telefono].filter(Boolean).join(' · ') : ''
@@ -47,12 +48,14 @@ export default function PlantillaSerena({ tarjeta }) {
             <h2>{plural ? 'Lo que ofrecemos' : 'Lo que ofrezco'}</h2>
             {wa && <p>Reserva tu hora por WhatsApp.</p>}
           </div>
-          <div className={`services n${productos.length}`}>
+          <div className={`services n${Math.min(productos.length, 3)}`}>
             {productos.map((p) => {
               const { desc, precio, extra } = textosProducto(p)
               return (
                 <div className="svc" key={p.orden + p.nombre}>
-                  <div className="svc-icon">{(p.nombre || '?').trim()[0]?.toUpperCase()}</div>
+                  {p.imagen
+                    ? <img className="pro-img" src={p.imagen} alt={p.nombre} loading="lazy" />
+                    : <div className="svc-icon">{(p.nombre || '?').trim()[0]?.toUpperCase()}</div>}
                   <h3>{p.nombre}</h3>
                   {desc && <p className="svc-desc">{desc}</p>}
                   {extra && <p className="svc-desc">{extra}</p>}
@@ -68,7 +71,9 @@ export default function PlantillaSerena({ tarjeta }) {
       <SeccionNoticias tarjeta={tarjeta} />
       <SeccionFaq tarjeta={tarjeta} />
 
-      <footer className="footer" id="contacto">
+      <ContactoPro tarjeta={tarjeta} />
+
+      <footer className="footer">
         <div className="name">{nombre_mostrado}</div>
         {lugar && <p>{lugar}</p>}
         {contacto && <div className="foot-mono">{contacto}</div>}

@@ -1,4 +1,5 @@
 import React from 'react'
+import { ContactoPro } from './compartidos'
 import { formatearCLP } from '../../constants/tarjetas'
 import { FirmaKabymur, SeccionNoticias, SeccionTestimonios, telLink, waLink } from './tanda1Comun'
 import { FilasProducto, analizarProducto, fuenteGrande, partirTitular } from './proComun'
@@ -9,7 +10,7 @@ import './tanda3.css'
  * con lista de checks, pasos, preguntas en acordeón y pie oscuro. */
 export default function PlantillaBalance({ tarjeta }) {
   const {
-    nombre_mostrado, cargo_rubro, eslogan, sobre_texto, profesion, direccion, horario, telefono, whatsapp, email_contacto,
+    imagen, nombre_mostrado, cargo_rubro, eslogan, sobre_texto, profesion, direccion, horario, telefono, whatsapp, email_contacto,
     mostrar_sobre, mostrar_productos, mostrar_ubicacion, mostrar_contacto, mostrar_pasos, mostrar_faq,
   } = tarjeta
   const wa = waLink(whatsapp)
@@ -60,6 +61,7 @@ export default function PlantillaBalance({ tarjeta }) {
             </div>
           )}
           {profesion && <p className="b-fine">{profesion}</p>}
+          {imagen && <img data-cp={tarjeta.plantilla} className="pro-hero-img" src={imagen} alt={nombre_mostrado || ''} />}
         </div>
         {resumen.length > 0 && (
           <figure className="b-ledger" aria-label="Resumen de planes">
@@ -83,6 +85,7 @@ export default function PlantillaBalance({ tarjeta }) {
               const items = filas.length > 0 ? filas : descripcion ? [{ texto: descripcion, derecha: '' }] : []
               return (
                 <article className="b-plan" key={p.orden + p.nombre}>
+                  {p.imagen && <img className="pro-img" src={p.imagen} alt={p.nombre} loading="lazy" />}
                   <h3>{p.nombre}</h3>
                   {p.precio_clp && (
                     <p className="b-price">
@@ -134,7 +137,9 @@ export default function PlantillaBalance({ tarjeta }) {
       <SeccionTestimonios tarjeta={tarjeta} desde={1} />
       <SeccionNoticias tarjeta={tarjeta} />
 
-      <footer className="b-foot" id="contacto">
+      <ContactoPro tarjeta={tarjeta} />
+
+      <footer className="b-foot">
         <div className="b-foot-big" style={fuenteGrande(nombre_mostrado, 18, 8.5, 2.2)}>{nombre_mostrado}</div>
         {pie.length > 0 && <div className="b-foot-grid">{pie.map((t) => <p key={t}>{t}</p>)}</div>}
         <p className="b-sign"><FirmaKabymur /></p>

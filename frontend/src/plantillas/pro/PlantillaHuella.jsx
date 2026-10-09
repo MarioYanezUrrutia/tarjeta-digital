@@ -1,4 +1,5 @@
 import React from 'react'
+import { ContactoPro } from './compartidos'
 import { FirmaKabymur, SeccionFaq, SeccionNoticias, waLink } from './tanda1Comun'
 import { Estrellas, FilasProducto, analizarProducto, fuenteGrande, inicial, listaZonas, partirTitular } from './proComun'
 import './tanda2.css'
@@ -73,6 +74,7 @@ export default function PlantillaHuella({ tarjeta }) {
                 <article className={`h-ticket${filas.length === 0 && !precio && !corto ? ' sin-pie' : ''}`} key={p.orden + p.nombre}>
                   <h3>{p.nombre}</h3>
                   <div>
+                    {p.imagen && <img className="pro-img fila" src={p.imagen} alt={p.nombre} loading="lazy" />}
                     {descripcion && <p>{descripcion}</p>}
                     {extra && <p>{extra}</p>}
                   </div>
@@ -122,7 +124,9 @@ export default function PlantillaHuella({ tarjeta }) {
       <SeccionNoticias tarjeta={tarjeta} />
       <SeccionFaq tarjeta={tarjeta} />
 
-      <footer className="h-foot" id="contacto">
+      <ContactoPro tarjeta={tarjeta} />
+
+      <footer className="h-foot">
         <div className="h-foot-big" style={fuenteGrande(nombre_mostrado, 16, 7, 2.2)}>{nombre_mostrado}</div>
         {pie && <p>{pie}</p>}
         <p className="h-sign"><FirmaKabymur /></p>

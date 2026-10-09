@@ -1,5 +1,6 @@
 import React from 'react'
-import { FirmaKabymur, SeccionFaq, SeccionNoticias, textosProducto, sinProtocolo, waLink } from './tanda1Comun'
+import { ContactoPro } from './compartidos'
+import { FirmaKabymur, SeccionFaq, SeccionNoticias, SeccionTestimonios, textosProducto, sinProtocolo, waLink } from './tanda1Comun'
 
 // El texto tras la primera coma del titular va en cursiva de acento.
 function Titular({ texto }) {
@@ -77,6 +78,7 @@ export default function PlantillaRevista({ tarjeta }) {
               const { desc, precio, extra } = textosProducto(p)
               return (
                 <div className="program" key={p.orden + p.nombre}>
+                  {p.imagen && <img className="pro-img" src={p.imagen} alt={p.nombre} loading="lazy" />}
                   <div className="no">{String(i + 1).padStart(2, '0')}</div>
                   <h3>{p.nombre}</h3>
                   {desc && <p>{desc}</p>}
@@ -89,6 +91,7 @@ export default function PlantillaRevista({ tarjeta }) {
         </section>
       )}
 
+      <SeccionTestimonios tarjeta={tarjeta} desde={1} />
       <SeccionNoticias tarjeta={tarjeta} />
       <SeccionFaq tarjeta={tarjeta} />
 
@@ -99,7 +102,9 @@ export default function PlantillaRevista({ tarjeta }) {
         </section>
       )}
 
-      <div className="colophon" id="contacto">
+      <ContactoPro tarjeta={tarjeta} />
+
+      <div className="colophon">
         <div className="brand">{nombre_mostrado}</div>
         {pie && <p>{pie}</p>}
         <FirmaKabymur />

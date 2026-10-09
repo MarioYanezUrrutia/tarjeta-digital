@@ -1,4 +1,5 @@
 import React from 'react'
+import { ContactoPro } from './compartidos'
 import { FirmaKabymur, SeccionFaq, SeccionNoticias, SeccionTestimonios, waLink } from './tanda1Comun'
 import { FilasProducto, analizarProducto, fuenteGrande, inicial, partirTitular } from './proComun'
 import './tanda2.css'
@@ -18,7 +19,7 @@ function textoAnillo(productos, cargoRubro) {
  * que gira lento y carta con puntos guía. Layout propio. */
 export default function PlantillaLustre({ tarjeta }) {
   const {
-    nombre_mostrado, cargo_rubro, eslogan, sobre_texto, direccion, horario, whatsapp,
+    imagen, nombre_mostrado, cargo_rubro, eslogan, sobre_texto, direccion, horario, whatsapp,
     mostrar_sobre, mostrar_productos, mostrar_ubicacion, mostrar_contacto,
   } = tarjeta
   const wa = waLink(whatsapp)
@@ -58,7 +59,7 @@ export default function PlantillaLustre({ tarjeta }) {
             )}
           </div>
           <div className="l-medal-wrap">
-            <svg className="l-medal" viewBox="0 0 300 300" role="img" aria-label={`Medallón dorado con la inicial de ${nombre_mostrado || 'la marca'}`}>
+            {imagen ? <img data-cp={tarjeta.plantilla} className="pro-hero-img redonda" src={imagen} alt={nombre_mostrado || ''} /> : <svg className="l-medal" viewBox="0 0 300 300" role="img" aria-label={`Medallón dorado con la inicial de ${nombre_mostrado || 'la marca'}`}>
               <defs>
                 <linearGradient id="lus-gold" x1="0" y1="0" x2="1" y2="1">
                   <stop offset="0" stopColor="#8C6A2F" />
@@ -84,7 +85,7 @@ export default function PlantillaLustre({ tarjeta }) {
               )}
               <circle cx="150" cy="150" r="98" fill="url(#lus-core)" stroke="url(#lus-gold)" strokeWidth="2" />
               <text className="l-mono" x="150" y="186" textAnchor="middle" fill="url(#lus-gold)">{inicial(nombre_mostrado)}</text>
-            </svg>
+            </svg>}
           </div>
         </div>
         {franja.length > 0 && (
@@ -106,6 +107,7 @@ export default function PlantillaLustre({ tarjeta }) {
                 const { descripcion, filas, corto, extra, precio } = analizarProducto(p)
                 return (
                   <li key={p.orden + p.nombre}>
+                    {p.imagen && <img className="pro-img fila" src={p.imagen} alt={p.nombre} loading="lazy" />}
                     <div className="l-line">
                       <span>{p.nombre}</span>
                       {(precio || corto) && <i />}
@@ -135,7 +137,9 @@ export default function PlantillaLustre({ tarjeta }) {
       <SeccionNoticias tarjeta={tarjeta} />
       <SeccionFaq tarjeta={tarjeta} />
 
-      <footer className="l-foot" id="contacto">
+      <ContactoPro tarjeta={tarjeta} />
+
+      <footer className="l-foot">
         <div className="l-foot-big gold" style={fuenteGrande(nombre_mostrado, 21, 10, 2.4)}>{nombre_mostrado}</div>
         {pie && <p>{pie}</p>}
         <p className="l-sign"><FirmaKabymur /></p>

@@ -1,4 +1,5 @@
 import React from 'react'
+import { ContactoPro } from './compartidos'
 import { FirmaKabymur, SeccionFaq, SeccionNoticias, SeccionTestimonios, textosProducto, telLink, waLink } from './tanda1Comun'
 
 // "Tu llave rota, resuelta hoy." → destaca lo que viene tras la primera coma.
@@ -74,7 +75,9 @@ export default function PlantillaConfianza({ tarjeta }) {
               const { desc, precio, extra } = textosProducto(p)
               return (
                 <div className="svc" key={p.orden + p.nombre}>
-                  <div className="ico" aria-hidden="true">{(p.nombre || '?').trim()[0]?.toUpperCase()}</div>
+                  {p.imagen
+                    ? <img className="pro-img" src={p.imagen} alt={p.nombre} loading="lazy" />
+                    : <div className="ico" aria-hidden="true">{(p.nombre || '?').trim()[0]?.toUpperCase()}</div>}
                   <div>
                     <h3>{p.nombre}</h3>
                     {desc && <p className="desc">{desc}</p>}
@@ -102,13 +105,14 @@ export default function PlantillaConfianza({ tarjeta }) {
       <SeccionNoticias tarjeta={tarjeta} />
       <SeccionFaq tarjeta={tarjeta} />
 
-      <footer className="footer" id="contacto">
+      <ContactoPro tarjeta={tarjeta} />
+
+      <footer className="footer">
         <b>{nombre_mostrado}</b>
         {hayLugar && <div>{[direccion, horario].filter(Boolean).join(' · ')}</div>}
         <FirmaKabymur />
       </footer>
 
-      {wa && <a className="sticky-bar" href={wa} target="_blank" rel="noreferrer">¿Necesitas ahora? Escríbeme por WhatsApp</a>}
     </div>
   )
 }

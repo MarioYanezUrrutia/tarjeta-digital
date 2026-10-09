@@ -1,4 +1,5 @@
 import React from 'react'
+import { ContactoPro } from './compartidos'
 import { FirmaKabymur, SeccionFaq, SeccionNoticias, SeccionTestimonios, waLink } from './tanda1Comun'
 import { FilasProducto, analizarProducto, fuenteGrande, partirTitular } from './proComun'
 import './tanda2.css'
@@ -78,6 +79,7 @@ export default function PlantillaPausa({ tarjeta }) {
               return (
                 <div className="p-row" key={p.orden + p.nombre}>
                   <div>
+                    {p.imagen && <img className="pro-img fila" src={p.imagen} alt={p.nombre} loading="lazy" />}
                     <h3>{p.nombre}</h3>
                     {descripcion && <p>{descripcion}</p>}
                     <FilasProducto filas={filas} />
@@ -103,7 +105,9 @@ export default function PlantillaPausa({ tarjeta }) {
       <SeccionNoticias tarjeta={tarjeta} />
       <SeccionFaq tarjeta={tarjeta} />
 
-      <footer className="p-foot" id="contacto">
+      <ContactoPro tarjeta={tarjeta} />
+
+      <footer className="p-foot">
         <div className="p-foot-big" style={fuenteGrande(nombre_mostrado, 20, 9, 2.4)}>{nombre_mostrado}</div>
         {pie.length > 0 && (
           <div className="p-foot-grid">

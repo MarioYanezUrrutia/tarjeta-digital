@@ -50,7 +50,7 @@ export default function PlantillaLustre({ tarjeta }) {
           <div>
             {cargo_rubro && <span className="l-eyebrow">{cargo_rubro}</span>}
             <h1>{antes}{marca && <> <em className="gold">{marca}</em></>}</h1>
-            {mostrar_sobre && sobre_texto && <p className="l-body" style={{ whiteSpace: 'pre-line' }}>{sobre_texto}</p>}
+            {mostrar_sobre && sobre_texto && <p id="sobre" className="l-body" style={{ whiteSpace: 'pre-line' }}>{sobre_texto}</p>}
             {(wa || productos.length > 0) && (
               <div className="l-actions">
                 {wa && <a href={wa} target="_blank" rel="noreferrer" className="l-btn-gold">Reservar por WhatsApp</a>}

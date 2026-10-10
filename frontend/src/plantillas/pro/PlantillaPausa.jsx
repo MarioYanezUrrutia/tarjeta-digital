@@ -34,7 +34,7 @@ export default function PlantillaPausa({ tarjeta }) {
         <div>
           {cargo_rubro && <span className="p-eyebrow">{cargo_rubro}</span>}
           <h1>{antes}{marca && <> <em>{marca}</em></>}</h1>
-          {mostrar_sobre && sobre_texto && <p className="p-lead" style={{ whiteSpace: 'pre-line' }}>{sobre_texto}</p>}
+          {mostrar_sobre && sobre_texto && <p id="sobre" className="p-lead" style={{ whiteSpace: 'pre-line' }}>{sobre_texto}</p>}
           {(wa || productos.length > 0) && (
             <div className="p-actions">
               {wa && <a href={wa} target="_blank" rel="noreferrer" className="p-btn">Reservar hora</a>}

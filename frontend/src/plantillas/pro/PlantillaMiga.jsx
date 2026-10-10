@@ -54,7 +54,7 @@ export default function PlantillaMiga({ tarjeta }) {
       <section className="g-hero">
         <div>
           <h1>{antes}{marca && <> <span className="g-em">{marca}</span></>}</h1>
-          {mostrar_sobre && sobre_texto && <p className="g-lead" style={{ whiteSpace: 'pre-line' }}>{sobre_texto}</p>}
+          {mostrar_sobre && sobre_texto && <p id="sobre" className="g-lead" style={{ whiteSpace: 'pre-line' }}>{sobre_texto}</p>}
           {wa && <a href={wa} target="_blank" rel="noreferrer" className="g-btn">Encargar por WhatsApp</a>}
         </div>
         <div className="g-visual">

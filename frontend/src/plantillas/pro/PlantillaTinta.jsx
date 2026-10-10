@@ -30,7 +30,7 @@ export default function PlantillaTinta({ tarjeta }) {
 
       <section className="t-hero">
         <h1><span>{antes}</span>{marca && <span className="t-hl">{marca}</span>}</h1>
-        {mostrar_sobre && sobre_texto && <p className="t-lead"><mark style={{ whiteSpace: 'pre-line' }}>{sobre_texto}</mark></p>}
+        {mostrar_sobre && sobre_texto && <p id="sobre" className="t-lead"><mark style={{ whiteSpace: 'pre-line' }}>{sobre_texto}</mark></p>}
         {imagen && <img data-cp={tarjeta.plantilla} className="pro-hero-img" src={imagen} alt={nombre_mostrado || ''} />}
         {wa && <a href={wa} target="_blank" rel="noreferrer" className="t-btn">Cotizar por WhatsApp</a>}
       </section>

@@ -143,14 +143,14 @@ export function ContactoPro({ tarjeta }) {
   )
 }
 
-const SECCIONES_MENU = [
-  ['sobre', 'Sobre mí'],
-  ['servicios', 'Servicios'],
-  ['noticias', 'Noticias'],
-  ['testimonios', 'Lo que dicen'],
-  ['faq', 'Preguntas'],
-  ['contacto', 'Contacto'],
-]
+// Ids de sección que puede tener una plantilla y cómo se llaman en el menú.
+const ETIQUETAS_MENU = {
+  sobre: null, // "Nosotros" o "Sobre mí" según el tipo
+  servicios: 'Servicios', atenciones: 'Atenciones', carta: 'Carta', productos: 'Productos',
+  cursos: 'Cursos', packs: 'Packs', planes: 'Planes', pasos: 'Cómo funciona',
+  noticias: 'Noticias', fechas: 'Fechas', testimonios: 'Lo que dicen',
+  faq: 'Preguntas', preguntas: 'Preguntas', contacto: 'Contacto',
+}
 
 /** Menú flotante (abajo a la izquierda): lleva a las secciones que la
  * plantilla tiene en pantalla. Lee los ids del documento al abrirse. */
@@ -158,25 +158,37 @@ export function MenuFlotante({ tarjeta }) {
   const [abierto, setAbierto] = React.useState(false)
   const [items, setItems] = React.useState([])
 
-  // Secciones que la plantilla tiene realmente en pantalla (se leen del documento).
+  // Secciones que la plantilla tiene realmente en pantalla, en el orden del documento.
   React.useEffect(() => {
     const raiz = document.querySelector('.pro-t1')
     if (!raiz) return
-    const hay = (id) => raiz.querySelector(`[id="${id}"]`)
-    const lista = SECCIONES_MENU.filter(([id]) => hay(id)).map(([id, label]) => ({
-      id, label: id === 'sobre' ? (tarjeta.tipo === 'negocio' ? 'Nosotros' : 'Sobre mí') : label,
-    }))
-    // Secciones propias de la plantilla (cursos, packs, planes...) antes de "Contacto".
-    const propias = [...raiz.querySelectorAll('[id]')].map((n) => n.id)
-      .filter((id) => /^(atenciones|carta|productos|cursos|packs|planes|pasos|preguntas|fechas)$/.test(id))
-    propias.forEach((id) => lista.splice(Math.max(lista.length - 1, 0), 0, { id, label: id[0].toUpperCase() + id.slice(1) }))
+    const vistos = new Set()
+    const lista = []
+    raiz.querySelectorAll('[id]').forEach((n) => {
+      if (!(n.id in ETIQUETAS_MENU)) return
+      const etiqueta = n.id === 'sobre' ? (tarjeta.tipo === 'negocio' ? 'Nosotros' : 'Sobre mí') : ETIQUETAS_MENU[n.id]
+      // Una misma etiqueta no se repite (p. ej. "faq" y "preguntas").
+      if (vistos.has(etiqueta)) return
+      vistos.add(etiqueta)
+      lista.push({ id: n.id, label: etiqueta })
+    })
     setItems(lista)
   }, [tarjeta])
+
+  // Al llegar al final de la página el botón se oculta para no tapar el pie.
+  const [alFinal, setAlFinal] = React.useState(false)
+  React.useEffect(() => {
+    const revisar = () => setAlFinal(window.scrollY + window.innerHeight > document.documentElement.scrollHeight - 96)
+    revisar()
+    window.addEventListener('scroll', revisar, { passive: true })
+    window.addEventListener('resize', revisar)
+    return () => { window.removeEventListener('scroll', revisar); window.removeEventListener('resize', revisar) }
+  }, [])
 
   if (items.length === 0) return null
 
   return (
-    <div className="cpro-menu" data-cp={tarjeta.plantilla}>
+    <div className={`cpro-menu${alFinal && !abierto ? ' al-final' : ''}`} data-cp={tarjeta.plantilla}>
       {abierto && (
         <nav className="cpro-menu-panel">
           {items.map((it) => (

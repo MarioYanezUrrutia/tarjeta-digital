@@ -53,7 +53,7 @@ export default function PlantillaBalance({ tarjeta }) {
         <div>
           {cargo_rubro && <span className="b-eyebrow">{cargo_rubro}</span>}
           <h1>{antes}{marca && <> <span className="b-em">{marca}</span></>}</h1>
-          {mostrar_sobre && sobre_texto && <p className="b-lead" style={{ whiteSpace: 'pre-line' }}>{sobre_texto}</p>}
+          {mostrar_sobre && sobre_texto && <p id="sobre" className="b-lead" style={{ whiteSpace: 'pre-line' }}>{sobre_texto}</p>}
           {(wa || enlace2) && (
             <div className="b-actions">
               {wa && <a href={wa} target="_blank" rel="noreferrer" className="b-btn">Escribir por WhatsApp</a>}

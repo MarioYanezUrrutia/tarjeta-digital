@@ -43,7 +43,7 @@ export default function PlantillaMosaico({ tarjeta }) {
         </section>
 
         {mostrar_sobre && sobre_texto && (
-          <section className="m-tile m-about">
+          <section className="m-tile m-about" id="sobre">
             <span className="m-kicker">{tipo === 'negocio' ? 'Nosotros' : 'Sobre mí'}</span>
             <p style={{ whiteSpace: 'pre-line' }}>{sobre_texto}</p>
           </section>

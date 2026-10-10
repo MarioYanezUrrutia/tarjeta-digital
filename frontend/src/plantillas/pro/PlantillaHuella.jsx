@@ -41,7 +41,7 @@ export default function PlantillaHuella({ tarjeta }) {
         <div className="h-grid">
           <div>
             <h1>{antes}{marca && <> <mark>{marca}</mark></>}</h1>
-            {mostrar_sobre && sobre_texto && <p className="h-lead" style={{ whiteSpace: 'pre-line' }}>{sobre_texto}</p>}
+            {mostrar_sobre && sobre_texto && <p id="sobre" className="h-lead" style={{ whiteSpace: 'pre-line' }}>{sobre_texto}</p>}
             {wa && <a href={wa} target="_blank" rel="noreferrer" className="h-btn">Agendar por WhatsApp</a>}
           </div>
           <div className="h-visual" aria-hidden={imagen ? undefined : 'true'}>

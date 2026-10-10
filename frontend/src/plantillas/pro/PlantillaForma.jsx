@@ -40,7 +40,7 @@ export default function PlantillaForma({ tarjeta }) {
         <div>
           {cargo_rubro && <span className="f-eyebrow">{cargo_rubro}</span>}
           <h1>{antes}{marca && <> <em>{marca}</em></>}</h1>
-          {mostrar_sobre && sobre_texto && <p className="f-lead" style={{ whiteSpace: 'pre-line' }}>{sobre_texto}</p>}
+          {mostrar_sobre && sobre_texto && <p id="sobre" className="f-lead" style={{ whiteSpace: 'pre-line' }}>{sobre_texto}</p>}
           {wa && <a href={wa} target="_blank" rel="noreferrer" className="f-btn">Reservar por WhatsApp</a>}
         </div>
       </section>

@@ -50,6 +50,8 @@
 
 /* ---------- Menú flotante ---------- */
 .cpro-menu { position: fixed; left: 20px; bottom: 20px; z-index: 50; display: flex; flex-direction: column; align-items: flex-start; gap: 10px; font-family: var(--cp-font); }
+.cpro-menu { transition: opacity .2s ease; }
+.cpro-menu.al-final { opacity: 0; pointer-events: none; }
 .cpro-menu-btn { width: 56px; height: 56px; display: grid; place-items: center; border: var(--cp-border) solid var(--cp-line); border-radius: 50%; background: var(--cp-accent); color: var(--cp-accent-fg); box-shadow: 0 6px 16px rgba(0,0,0,.25); cursor: pointer; }
 .cpro-menu-panel { display: flex; flex-direction: column; min-width: 190px; padding: 6px; background: var(--cp-bg); color: var(--cp-fg); border: var(--cp-border) solid var(--cp-line); border-radius: var(--cp-radius); box-shadow: 0 10px 28px rgba(0,0,0,.3); }
 .cpro-menu-panel a { padding: 10px 14px; font-size: 14px; font-weight: 500; color: inherit; text-decoration: none; border-radius: calc(var(--cp-radius) / 2); }
@@ -66,3 +68,18 @@
 
 /* Imagen de producto en filas compactas (Confianza: reemplaza el ícono de 48 px). */
 .confianza .svc .pro-img { width: 48px; height: 48px; aspect-ratio: 1; margin: 0; border-radius: 10px; }
+
+/* Las reglas genéricas de .pro-t1 (a { color: inherit }, h2/h3/p { margin: 0 }) tienen
+   la misma especificidad que las de arriba: se refuerzan para que el bloque de contacto
+   se vea igual en las 12 plantillas. */
+.cpro .cpro-in > h2 { margin: 0 0 24px; }
+.cpro .cpro-card h3 { margin: 0 0 12px; }
+.cpro .cpro-card p { margin: 0 0 4px; }
+.cpro a.cpro-btn, .cpro button.cpro-btn { color: var(--cp-accent-fg); }
+.cpro a.cpro-item { color: var(--cp-fg); }
+.cpro .cpro-txt b { margin: 0; }
+.cpro .cpro-txt small { margin: 0; }
+
+/* El último bloque de la plantilla (el pie) deja espacio abajo para que los botones
+   flotantes de WhatsApp y menú no tapen su texto al llegar al final de la página. */
+.pro-t1 > :last-child { padding-bottom: 92px !important; }
